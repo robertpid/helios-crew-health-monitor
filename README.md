@@ -353,3 +353,162 @@ Ejemplo de payload transmitido a Redis en cada ciclo de 2 segundos:
 * **NASA HSRB & npj Microgravity (2017):** Pérdida de densidad mineral ósea de $1.0 - 1.5\%$ por mes en ingravidez.
 * **The Lancet Neurology (2014):** Barger et al., estudio de sueño en $85$ astronautas ($>4,200$ noches). Déficit crónico de sueño en misiones de larga duración.
 * **Eye (2026) / NASA LSAH (N20):** Prevalencia de signos de Síndrome Neuro-ocular (SANS) en el $81\%$ de los astronautas analizados ($52$ de $64$).
+
+---
+
+## 10. H.E.L.I.O.S. Motor de Inferencia Central (`main.py`)
+
+### 10.1 Arquitectura Edge AI Ligera (Sin PyTorch ni Graph Databases)
+
+El módulo central de inferencia (`main.py`) ejecuta un runtime ultra-ligero desarrollado específicamente para computadoras de abordo aeroespaciales tolerantes a radiación (SBCs con recursos limitados de RAM y sin GPU acelerada).
+
+```
+ ┌─────────────────────────────────────────────────────────────────────────────┐
+ │                       REDIS QUEUE / INGESTION ASÍNCRONA                     │
+ │  RPOP 'buzon_telemetria_tierra' (redis.asyncio)                             │
+ └──────────────────────────────────────┬──────────────────────────────────────┘
+                                        │ Payload JSON deserializado
+ ┌──────────────────────────────────────▼──────────────────────────────────────┐
+ │                     INFERENCE ENGINE (Orquestador Central)                  │
+ │                                                                             │
+ │  ┌─────────────────────────┐             ┌───────────────────────────────┐  │
+ │  │ Cerebro 1: Motor Amb.   │             │ Cerebro 2: Motor Biométrico   │  │
+ │  │ Reglas Heurísticas R^3  │             │ Desviación Línea Base R^4     │  │
+ │  │ [CO2, Radiación, Pres.] │             │ [Pulso, Sueño, Hueso, SANS]   │  │
+ │  └────────────┬────────────┘             └───────────────┬───────────────┘  │
+ │               │                                          │                  │
+ │               └──────────────────┬───────────────────────┘                  │
+ │                                  │                                          │
+ │               ┌──────────────────▼───────────────────────┐                  │
+ │               │ Cerebro 3: Grafo y Fusión Espacial       │                  │
+ │               │ Producto Tensorial de Kronecker (np.kron)│                  │
+ │               │ V_kron = v_amb ⊗ v_bio in R^12           │                  │
+ │               │ P = V_kron ⊙ W  =>  k* = argmax(P)       │                  │
+ │               └──────────────────┬───────────────────────┘                  │
+ │                                  │                                          │
+ │               ┌──────────────────▼───────────────────────┐                  │
+ │               │ Cerebro 4: ASTRA Cognitivo Vectorial     │                  │
+ │               │ Similitud Coseno (np.dot / normas)       │                  │
+ │               │ Detección de Incongruencia Cognitiva     │                  │
+ │               └──────────────────┬───────────────────────┘                  │
+ │                                  │                                          │
+ └──────────────────────────────────┼──────────────────────────────────────────┘
+                                    │
+ ┌──────────────────────────────────▼──────────────────────────────────────────┐
+ │                         FASTAPI REST API (Puerto 8000)                      │
+ │  • GET  /api/v1/fusion/resultado (Consolidado de los 4 cerebros)            │
+ │  • GET  /api/v1/alertas          (Evaluaciones preliminares activas)        │
+ │  • POST /api/v1/inferir          (Evaluación directa en < 2 ms)             │
+ └─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 10.2 Modelado de Grafo de Decisiones mediante Producto Tensorial de Kronecker
+
+En lugar de requerir motores de grafos basados en disco como Neo4j, el acoplamiento de interacción entre $3$ estresores ambientales y $4$ biomarcadores fisiológicos se formula algebraicamente:
+
+$$\mathbf{V}_{\text{kron}} = \mathbf{v}_{\text{amb}} \otimes \mathbf{v}_{\text{bio}} \in \mathbb{R}^{12}$$
+
+Donde cada posición $k = 4i + j$ representa una arista sinérgica de decisión ponderada por el vector clínico $\mathbf{W} \in \mathbb{R}^{12}$:
+
+$$\mathbf{P} = \mathbf{V}_{\text{kron}} \odot \mathbf{W}$$
+$$k^* = \arg\max(\mathbf{P})$$
+
+Si $P_{k^*} \ge \text{umbral}$ (ej. $6.5$), el sistema dispara la bandera de **estrés fisiológico severo** e identifica la arista dominante en tiempo $\mathcal{O}(1)$.
+
+### 10.3 Detección de Incongruencia Cognitiva (Cerebro 4 - ASTRA)
+
+ASTRA construye el vector cognitivo normalizado $\mathbf{C}_{\text{norm}} = [\text{latencia} / 200.0, \text{densidad} / 1.0]$ y calcula la **Similitud Coseno** respecto a la línea base $\mathbf{B}_{\text{norm}} = [1.0, 1.0]$:
+
+$$\cos(\theta) = \frac{\mathbf{C}_{\text{norm}} \cdot \mathbf{B}_{\text{norm}}}{\|\mathbf{C}_{\text{norm}}\|_2 \|\mathbf{B}_{\text{norm}}\|_2}$$
+
+* **Regla de Incongruencia:** Si la similitud cae abruptamente (latencia en 600–900 ms) pero las métricas físicas están nominales, o si el cuerpo está en taquicardia ($>95\text{ bpm}$) pero el astronauta formaliza su dicción ($\ge 0.75$), Cerebro 4 dictamina:
+  `{"alerta_astra": "Incongruencia Cognitiva Detectada. Evaluación preliminar: Posible ocultamiento de fatiga."}`
+
+### 10.4 Ejecución del Servidor FastAPI
+
+```bash
+# Iniciar el motor de inferencia central
+python main.py
+
+# Documentación OpenAPI interactiva disponible en:
+# http://127.0.0.1:8000/docs
+```
+
+---
+
+## 11. Frontend Cockpit HUD de Soporte Vital (Arquitectura N-Capas)
+
+Siguiendo los bocetos de cabina de la misión y los estándares de diseño visual HUD aeroespacial, se desarrolló la interfaz interactiva completa con **arquitectura desacoplada en N-Capas** (HTML5 Semántico, CSS3 Cyber-Hologram, SVG interactivo, WebGL/Canvas y Vanilla JavaScript modular):
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 1. CAPA DE PRESENTACIÓN (UI / DOM & Canvas)                                 │
+│    • frontend/index.html: Estructura semántica, SVG anatómico y Hábitat.   │
+│    • frontend/css/hud-theme.css: Paleta espacial (#050811, #00f0ff, #00ff88)│
+│    • frontend/css/animations.css: Barridos láser, pulsos cardíacos (60 FPS) │
+└──────────────────────────────────────┬──────────────────────────────────────┘
+                                       │ Eventos DOM / Rendering
+┌──────────────────────────────────────▼──────────────────────────────────────┐
+│ 2. CAPA DE CONTROLADORES (Orquestación Frontend)                            │
+│    • frontend/js/controllers/hud_controller.js:                              │
+│      Coordina el flujo de datos entre la capa de estado, servicios y DOM.   │
+│      Gestiona tabs (Biomédica vs Ambiental), modal crítico y simulación.    │
+└──────────────────┬──────────────────────────────────────┬───────────────────┘
+                   │ Suscribe cambios                     │ Consume APIs
+┌──────────────────▼──────────────────┐ ┌─────────────────▼───────────────────┐
+│ 3. CAPA DE ESTADO (State Manager)   │ │ 4. CAPA DE SERVICIOS (Services)     │
+│    • state/state_manager.js:        │ │ • services/telemetry_service.js:    │
+│      Patrón Observer reactivo.      │ │   Llamadas REST asíncronas a FastAPI│
+│      Almacena telemetría activa,    │ │ • services/ecg_service.js:          │
+│      modo de crisis y hábitat.      │ │   Osciloscopio P-Q-R-S-T en Canvas. │
+│                                     │ │ • services/hologram_service.js:     │
+│                                     │ │   Partículas cuánticas y SVG nodes. │
+│                                     │ │ • services/sound_service.js:        │
+│                                     │ │   Audio procedural Web Audio API    │
+│                                     │ │   (0 KB peso, sintetizado puro).    │
+└─────────────────────────────────────┘ └─────────────────────────────────────┘
+```
+
+### 11.1 Características de las Ventanas Principales
+
+1. **Ventana 1: Biomédica & Holograma Anatómico:**
+   - **Holograma 3D Futurista:** Representación anatómica en SVG con barrido láser continuo, partículas cuánticas flotantes y nodos interactivos de órganos (Cerebro, Corazón, Pulmones, Riñones, Masa Ósea).
+   - **Osciloscopio ECG a 60 FPS:** Trazo electrocardiográfico continuo de onda médica $P-Q-R-S-T$ sincronizado en tiempo real con la frecuencia cardíaca.
+   - **Tiles de Telemetría Biomédica:** Frecuencia cardíaca, $\text{SpO}_2$, Presión arterial, Temperatura corporal y Desmineralización ósea.
+
+2. **Ventana 2: Ambiente & Hábitat Espacial (3 Hábitats Dinámicos):**
+   - **Selector de 3 Hábitats Dedicados:**
+     * `🛰️ NAVE ESPACIAL` (Orion Deep Space Vehicle): Tránsito interplanetario ($0.00\text{ g}$, $85.0\text{ mSv}$, ECLSS Scrubber, escudo SPE).
+     * `🔴 BASE MARCIANA` (Domo Geodésico de Superficie): Hábitat en Marte ($0.38\text{ g}$, $42.0\text{ mSv}$, Biorreactor MOXIE, blindaje de regolito).
+     * `🛸 ESTACIÓN ESPACIAL` (ISS / Orbital Gateway): Órbita microgravitatoria ($0.00\text{ g}$, $22.5\text{ mSv}$, sistema CDRA, blindaje Whipple).
+   - **Monitores Atmosféricos:** Concentración de $\text{CO}_2$, Radiación acumulada (mSv), Presión de cabina (kPa), Temperatura, Humedad y Evento solar.
+   - **Heatmap de la Matriz de Kronecker ($3 \times 4$):** Visualización interactiva en tiempo real del acoplamiento entre los 3 estresores ambientales y los 4 biomarcadores fisiológicos calculados por el Cerebro 3.
+
+3. **Sistema de Audio Procedural Ultra-Ligero (`SoundService`):**
+   - **0 KB de Descargas:** Sintetizado puramente mediante la **Web Audio API** nativa del navegador (sin archivos MP3/WAV pesados ni lag de red).
+   - **Efectos Táctiles Sci-Fi:** Clicks de interfaz, transiciones de frecuencia armónica al cambiar de hábitat, pulso de alarma en modo crisis y latido cardíaco de baja frecuencia.
+   - **Control de Silenciado:** Botón táctico `🔊 AUDIO: ACTIVO` / `🔇 AUDIO: MUTE` en la barra de control para alternar el sonido al instante.
+
+### 11.2 Modal de Alerta Crítica y Contramedidas de la NASA
+
+Replicando fielmente el diseño del prototipo de cabina, cuando el motor detecta parámetros fuera de rango o estrés severo:
+- Emerge una ventana modal central con brillo holográfico rojo neón (`#ff2255`).
+- Expone el conteo exacto de anomalías detectadas.
+- Prioriza estrictamente un **máximo de 3 contramedidas inmediatas** (`CX-01` a `CX-15`) extraídas de la Matriz de Decisiones de la NASA para no saturar al astronauta en contingencia.
+- Permite abrir el reporte completo de telemetría y contramedidas.
+
+### 11.3 Instrucciones de Ejecución
+
+```bash
+# 1. Ejecutar el servidor central FastAPI
+python main.py
+
+# 2. Abrir en el navegador:
+# http://127.0.0.1:8000/dashboard
+# (o directamente http://127.0.0.1:8000/)
+
+# 3. Alternativa Streamlit interactiva:
+streamlit run dashboard_streamlit.py
+```
+
+

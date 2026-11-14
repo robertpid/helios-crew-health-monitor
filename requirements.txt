@@ -1,4 +1,4 @@
-# Dependencias para el Módulo helios_simulator
+# Dependencias para H.E.L.I.O.S. (Simulador, Inferencia Edge AI y Dashboard Visual)
 # Sistema de Soporte Vital de Espacio Profundo (Space Apps 2026)
 
 pydantic>=2.10.0,<3.0.0
@@ -7,3 +7,7 @@ pytest>=8.0.0
 pandas>=2.2.0
 numpy>=1.26.0
 pyarrow>=15.0.0
+fastapi>=0.115.0
+uvicorn>=0.30.0
+httpx>=0.28.0
+streamlit>=1.35.0

@@ -203,13 +203,51 @@ class TelemetriaOrchestrator:
                 payload = self.producir_muestra()
                 self._publicador.publicar_telemetria(payload)
 
+                # Formateo detallado de telemetría de signos y variables para visualización en vivo
+                logger.info(
+                    "MUESTRA #%d [Día %d - %s] | ENTORNO: CO2=%.2f mmHg | Rad.Acum=%.2f mSv (%.1f%%) | Presión=%.1f kPa | Temp=%.1f°C | Hum=%.1f%% | SPE=%s",
+                    self._ciclo_actual,
+                    payload.dia_mision,
+                    payload.astronauta_id,
+                    payload.entorno.co2_mmHg,
+                    payload.entorno.radiacion_acumulada_mSv,
+                    payload.porcentaje_presupuesto_radiacion_carrera,
+                    payload.entorno.presion_cabina_kpa,
+                    payload.entorno.temperatura_cabina_c,
+                    payload.entorno.humedad_relativa_pct,
+                    "SI" if payload.entorno.evento_solar_activo else "NO",
+                )
+                logger.info(
+                    "             [BIOMETRÍA]: FC=%.1f bpm | SpO2=%.1f%% | PA=%.1f/%.1f | Piel=%.1f°C | Resp=%.1f rpm | HRV=%.1f ms | Sueño=%.1fh | P.Ósea=%.2f%% | Cefalea=%s",
+                    payload.biometria.ritmo_cardiaco_bpm,
+                    payload.biometria.spo2_pct,
+                    payload.biometria.presion_sistolica_mmHg,
+                    payload.biometria.presion_diastolica_mmHg,
+                    payload.biometria.temperatura_piel_c,
+                    payload.biometria.frecuencia_respiratoria_rpm,
+                    payload.biometria.variabilidad_cardiaca_hrv_ms,
+                    payload.biometria.horas_sueno_ultimo_ciclo,
+                    payload.biometria.perdida_osea_pct,
+                    "SI" if payload.biometria.dolor_cabeza_sintoma else "NO",
+                )
+                logger.info(
+                    "             [COGNICIÓN]: Lat.Voz=%.1f ms | Densidad=%.2f | EstrésOculto=%s | SANS(Visión)=%s | Fatiga=%s",
+                    payload.cognicion.latencia_voz_ms,
+                    payload.cognicion.densidad_lexica_score,
+                    "SI" if payload.cognicion.incongruencia_estres_oculto else "NO",
+                    "SI" if payload.cognicion.sans_sintoma_vision else "NO",
+                    "ALERTA" if payload.biometria.alerta_riesgo_fatiga else "NOMINAL",
+                )
+
                 if payload.evaluaciones_preliminares:
-                    codigos_alertas = [alerta.codigo for alerta in payload.evaluaciones_preliminares]
-                    logger.warning(
-                        "Ciclo %d | Evaluaciones preliminares activas: %s",
-                        self._ciclo_actual,
-                        ", ".join(codigos_alertas),
-                    )
+                    for alerta in payload.evaluaciones_preliminares:
+                        logger.warning(
+                            "   >>> [%s] %s: %s (Estándar: %s)",
+                            alerta.nivel.value,
+                            alerta.codigo,
+                            alerta.descripcion,
+                            alerta.estandar_referencia,
+                        )
 
                 if max_ciclos is not None and self._ciclo_actual >= max_ciclos:
                     logger.info("Alcanzado el número máximo de ciclos solicitado (%d). Deteniendo...", max_ciclos)

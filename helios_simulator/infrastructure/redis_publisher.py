@@ -7,6 +7,7 @@ hacia el buzón de telemetría hacia Tierra ('buzon_telemetria_tierra').
 
 from collections import deque
 import logging
+import socket
 import time
 import redis
 from redis.exceptions import ConnectionError as RedisConnectionError
@@ -42,6 +43,17 @@ class RedisTelemetryPublisher(TelemetryPublisherInterface):
         )
         self._ultimo_intento_reconexion: float = 0.0
 
+    def _probar_disponibilidad_puerto(self, timeout_segundos: float = 0.15) -> bool:
+        """Prueba preliminar rápida de apertura del socket para evitar bloqueos TCP en Windows."""
+        try:
+            with socket.create_connection(
+                (self._config.host, self._config.port),
+                timeout=timeout_segundos,
+            ):
+                return True
+        except (OSError, socket.error):
+            return False
+
     def conectar(self) -> bool:
         """
         Inicia la conexión al servidor Redis local y verifica disponibilidad mediante PING.
@@ -49,6 +61,17 @@ class RedisTelemetryPublisher(TelemetryPublisherInterface):
         Returns:
             True si el servidor respondió satisfactoriamente, False si no está accesible.
         """
+        # Verificación preliminar inmediata sin bloqueos de red
+        if not self._probar_disponibilidad_puerto():
+            self._estado = EstadoConexion.DESCONECTADO
+            self._ultimo_intento_reconexion = time.time()
+            logger.info(
+                "Servidor Redis inactivo en %s:%d. Enlace en modo resiliente (Store-and-Forward activo).",
+                self._config.host,
+                self._config.port,
+            )
+            return False
+
         try:
             logger.info(
                 "Intentando establecer enlace con servidor Redis en %s:%d (Buzón: %s)...",

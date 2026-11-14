@@ -1,0 +1,174 @@
+/* ==========================================================================
+   H.E.L.I.O.S. - ANIMATION ENGINE (CAPA DE ANIMACIONES INTERACTIVAS)
+   60 FPS Hardware-Accelerated CSS Keyframes
+   ========================================================================== */
+
+/* 1. Haz de Escaneo Láser Holográfico */
+@keyframes holoScanSweep {
+  0% {
+    top: 2%;
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+    filter: drop-shadow(0 0 12px var(--neon-cyan));
+  }
+  85% {
+    opacity: 1;
+    filter: drop-shadow(0 0 12px var(--neon-cyan));
+  }
+  100% {
+    top: 98%;
+    opacity: 0;
+  }
+}
+
+.holo-scan-beam {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent 0%, var(--neon-cyan) 50%, transparent 100%);
+  box-shadow: 0 0 20px var(--neon-cyan);
+  animation: holoScanSweep 4s infinite cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* 2. Latido Cardíaco Fisiológico Realista */
+@keyframes cardiacBeat {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 4px var(--neon-red));
+  }
+  14% {
+    transform: scale(1.22);
+    filter: drop-shadow(0 0 16px var(--neon-red));
+  }
+  28% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 4px var(--neon-red));
+  }
+  42% {
+    transform: scale(1.12);
+    filter: drop-shadow(0 0 10px var(--neon-red));
+  }
+  56% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 4px var(--neon-red));
+  }
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 4px var(--neon-red));
+  }
+}
+
+.pulse-organ-heart {
+  animation: cardiacBeat 0.9s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+  transform-origin: 162px 162px;
+}
+
+.pulse-organ-heart.fast {
+  animation-duration: 0.45s !important; /* Taquicardia 132 bpm */
+}
+
+/* 3. Onda Expansiva de Nodo Anatómico al Hacer Clic */
+@keyframes nodeRipple {
+  0% {
+    r: 6;
+    opacity: 1;
+    stroke-width: 2;
+  }
+  100% {
+    r: 26;
+    opacity: 0;
+    stroke-width: 0.5;
+  }
+}
+
+.ripple-circle {
+  animation: nodeRipple 1.6s infinite ease-out;
+  fill: none;
+  stroke: var(--neon-cyan);
+  pointer-events: none;
+}
+
+/* 4. Respiración Pulmonar Suave */
+@keyframes lungBreathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 1;
+    filter: drop-shadow(0 0 8px var(--neon-green));
+  }
+}
+
+.pulse-lungs {
+  animation: lungBreathe 4.2s infinite ease-in-out;
+  transform-origin: 160px 155px;
+}
+
+/* 5. Rotación Orbital del Hábitat Espacial */
+@keyframes orbitSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animated-orbit-ring {
+  animation: orbitSpin 28s infinite linear;
+}
+
+/* 6. Animación Pop-In con Rebote del Modal de Alerta Crítica */
+@keyframes popModalCritical {
+  0% {
+    transform: scale(0.8) translateY(-20px);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.03) translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-bounce-in {
+  animation: popModalCritical 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* 7. Alerta Crítica Intermitente */
+@keyframes alarmFlash {
+  0% {
+    border-color: rgba(255, 34, 85, 0.4);
+    box-shadow: 0 0 10px rgba(255, 34, 85, 0.3);
+  }
+  100% {
+    border-color: rgba(255, 34, 85, 1);
+    box-shadow: 0 0 35px rgba(255, 34, 85, 0.85);
+  }
+}
+
+.alarm-flashing {
+  animation: alarmFlash 0.7s infinite alternate ease-in-out;
+}
+
+/* 8. Partículas Cuánticas de Fondo */
+#particlesCanvas,
+#particlesHabitatCanvas {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  pointer-events: none;
+  z-index: 1;
+}
