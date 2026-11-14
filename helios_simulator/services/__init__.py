@@ -12,12 +12,14 @@ from helios_simulator.services.math_noise import (
     generar_ruido_gaussiano,
     redondear_telemetria,
 )
+from helios_simulator.services.multi_habitat_simulator import SimuladorMultihabitat120Dias
 
 __all__ = [
     "GeneradorBiometria",
     "GeneradorCognicion",
     "EvaluadorCorrelacionService",
     "GeneradorEntorno",
+    "SimuladorMultihabitat120Dias",
     "calcular_perdida_osea_acumulada",
     "evaluar_probabilidad_evento",
     "generar_ruido_gaussiano",

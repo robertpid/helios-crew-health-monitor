@@ -12,6 +12,7 @@ import time
 from typing import Any
 
 from helios_simulator.config import LimitesNasaConfig, MisionConfig
+from helios_simulator.domain.enums import EstadoConexion
 from helios_simulator.domain.models import TelemetriaPayload
 from helios_simulator.infrastructure.publisher_interface import TelemetryPublisherInterface
 from helios_simulator.services.biometrics_generator import GeneradorBiometria

@@ -34,6 +34,99 @@ class MisionConfig:
 
 
 @dataclass(frozen=True)
+class PerfilAmbienteMision:
+    """
+    Parámetros específicos para cada uno de los cuatro hábitats operacionales de misión.
+    Sustentado en datos de radiación (RadLab, Curiosity RAD, Chang'e 4 LND) y modelos biomecánicos.
+    """
+
+    nombre_descriptivo: str
+    gravedad_g: float
+    radiacion_diaria_base_msv: float
+    radiacion_desviacion_msv: float
+    probabilidad_tormenta_solar: float
+    presion_cabina_nominal_kpa: float
+    presion_cabina_min_kpa: float
+    presion_cabina_max_kpa: float
+    temperatura_cabina_nominal_c: float
+    latencia_comunicacion_tierra_segundos: float
+    duracion_ciclo_horas: float
+    prevalencia_sans_factor: float
+    factor_estres_aislamiento: float
+
+
+def obtener_perfiles_ambientes() -> dict[str, PerfilAmbienteMision]:
+    """
+    Devuelve los perfiles de configuración aeroespacial para los 4 entornos analizados.
+
+    Returns:
+        Diccionario con las configuraciones de Estación Espacial, Base Lunar, Nave Espacial y Base de Marte.
+    """
+    return {
+        "estacion_espacial": PerfilAmbienteMision(
+            nombre_descriptivo="Estación Espacial Internacional (ISS / LEO)",
+            gravedad_g=0.0,
+            radiacion_diaria_base_msv=0.35,  # 0.2 a 0.5 mSv/día (Simonsen et al., 2025)
+            radiacion_desviacion_msv=0.06,
+            probabilidad_tormenta_solar=0.005,  # Protegida parcialmente por magnetosfera
+            presion_cabina_nominal_kpa=101.3,
+            presion_cabina_min_kpa=95.0,
+            presion_cabina_max_kpa=103.0,
+            temperatura_cabina_nominal_c=21.5,
+            latencia_comunicacion_tierra_segundos=0.5,
+            duracion_ciclo_horas=24.0,
+            prevalencia_sans_factor=1.0,  # 81% prevalencia máxima (LSAH)
+            factor_estres_aislamiento=1.0,
+        ),
+        "base_lunar": PerfilAmbienteMision(
+            nombre_descriptivo="Base Lunar (Artemis Base Camp - Superficie Lunar)",
+            gravedad_g=0.166,  # 1/6 g
+            radiacion_diaria_base_msv=1.35,  # ~60 uSv/h medido por Chang'e 4 LND
+            radiacion_desviacion_msv=0.15,
+            probabilidad_tormenta_solar=0.020,  # Sin magnetosfera protectora
+            presion_cabina_nominal_kpa=70.3,   # Atmósfera de exploración NASA
+            presion_cabina_min_kpa=65.0,
+            presion_cabina_max_kpa=75.0,
+            temperatura_cabina_nominal_c=22.0,
+            latencia_comunicacion_tierra_segundos=1.3,  # ~1.3s ida a la Luna
+            duracion_ciclo_horas=24.0,
+            prevalencia_sans_factor=0.70,  # Gravedad parcial alivia congestión cefálica
+            factor_estres_aislamiento=1.2,
+        ),
+        "nave_espacial": PerfilAmbienteMision(
+            nombre_descriptivo="Nave Espacial de Tránsito (Deep Space Transit a Marte)",
+            gravedad_g=0.0,  # Microgravedad estricta
+            radiacion_diaria_base_msv=1.80,  # Medición Curiosity RAD camino a Marte (Hassler et al., 2013)
+            radiacion_desviacion_msv=0.20,
+            probabilidad_tormenta_solar=0.025,  # Fuera de la magnetosfera terrestre
+            presion_cabina_nominal_kpa=101.3,
+            presion_cabina_min_kpa=95.0,
+            presion_cabina_max_kpa=103.0,
+            temperatura_cabina_nominal_c=20.8,
+            latencia_comunicacion_tierra_segundos=900.0,  # 15 minutos en tránsito medio
+            duracion_ciclo_horas=24.0,
+            prevalencia_sans_factor=1.0,  # 81% prevalencia máxima (LSAH)
+            factor_estres_aislamiento=1.6,  # Confinamiento severo en espacio profundo
+        ),
+        "base_marte": PerfilAmbienteMision(
+            nombre_descriptivo="Base de Superficie de Marte (Hábitat Marciano)",
+            gravedad_g=0.38,  # 3/8 g
+            radiacion_diaria_base_msv=0.67,  # Medición Curiosity RAD en superficie (Hassler et al., 2013)
+            radiacion_desviacion_msv=0.08,
+            probabilidad_tormenta_solar=0.015,
+            presion_cabina_nominal_kpa=101.3,
+            presion_cabina_min_kpa=95.0,
+            presion_cabina_max_kpa=103.0,
+            temperatura_cabina_nominal_c=21.0,
+            latencia_comunicacion_tierra_segundos=1200.0,  # 20+ minutos de retraso (Peligro D)
+            duracion_ciclo_horas=24.65,  # Sol marciano: 24h 39min (desincronización circadiana)
+            prevalencia_sans_factor=0.55,  # Gravedad marciana reduce gradiente de fluidos
+            factor_estres_aislamiento=1.4,
+        ),
+    }
+
+
+@dataclass(frozen=True)
 class LimitesNasaConfig:
     """Límites y umbrales normativos según NASA-STD-3001 y HSRB."""
 

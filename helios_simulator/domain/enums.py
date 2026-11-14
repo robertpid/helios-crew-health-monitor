@@ -26,6 +26,18 @@ class PeligroRidge(str, Enum):
     E_ENTORNO_CERRADO = "E - Ambientes hostiles y cerrados"
 
 
+class EntornoMision(str, Enum):
+    """
+    Tipos de hábitats y entornos operacionales de misión espacial.
+    Define las condiciones gravitatorias, radiológicas y de retardo de enlace.
+    """
+
+    ESTACION_ESPACIAL = "estacion_espacial"
+    BASE_LUNAR = "base_lunar"
+    NAVE_ESPACIAL = "nave_espacial"
+    BASE_MARTE = "base_marte"
+
+
 class EstadoConexion(str, Enum):
     """Estado operativo del enlace de telemetría con la capa de infraestructura."""
 
