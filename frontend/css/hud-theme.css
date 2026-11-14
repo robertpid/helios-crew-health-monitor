@@ -498,3 +498,40 @@ footer.hud-footer {
   color: var(--text-muted);
   margin-top: 40px;
 }
+
+/* ==========================================================================
+   MODAL DE ALERTA CRÍTICA FLOTANTE (ESTILO COCKPIT NASA)
+   ========================================================================== */
+#modalAlerta {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(3, 6, 16, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+#modalAlerta.open {
+  display: flex !important;
+}
+
+.modal-bounce-in {
+  animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modalPop {
+  0% {
+    transform: scale(0.88);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

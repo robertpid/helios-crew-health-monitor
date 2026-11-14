@@ -882,10 +882,10 @@
   <!-- ========================================================================= -->
   <!-- 4. MODAL DE ALERTA CRÍTICA FLOTANTE (RÉPLICA EXACTA DEL BOCETO)            -->
   <!-- ========================================================================= -->
-  <div id="modalAlerta" style="position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(4,7,15,0.85); backdrop-filter:blur(8px); z-index:1000; display:none; align-items:center; justify-content:center;">
+  <div id="modalAlerta" onclick="if(event.target === this) window.hudController.toggleModal();">
     <div class="modal-bounce-in" style="width:90%; max-width:680px; background:#0b1426; border:2px solid var(--neon-red); box-shadow:0 0 50px rgba(255,34,85,0.5), inset 0 0 25px rgba(255,34,85,0.1); border-radius:12px; padding:30px 36px; text-align:center; position:relative;">
       
-      <button onclick="window.hudController.toggleModal()" style="position:absolute; top:14px; right:18px; background:transparent; border:none; color:#94a3b8; font-size:24px; cursor:pointer;">&times;</button>
+      <button onclick="window.hudController.toggleModal()" style="position:absolute; top:14px; right:18px; background:transparent; border:none; color:#94a3b8; font-size:24px; cursor:pointer;" title="Cerrar Alerta Modal">&times;</button>
       
       <div style="font-family:var(--font-hud); font-size:26px; font-weight:900; color:var(--neon-red); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; justify-content:center; gap:12px; text-shadow:0 0 15px var(--neon-red);">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -895,16 +895,16 @@
         </svg>
         ! CRITICAL ALERT
       </div>
-      <div style="font-family:var(--font-data); font-size:14px; color:#cbd5e1; margin-bottom:20px;">
+      <div id="modalAlertSubtitle" style="font-family:var(--font-data); font-size:14px; color:#cbd5e1; margin-bottom:20px;">
         4 parameter(s) detected out of range
       </div>
 
-      <!-- LISTA DE PARÁMETROS DEL BOCETO -->
+      <!-- LISTA DE PARÁMETROS DEL BOCETO (DINÁMICOS) -->
       <div style="text-align:left; background:rgba(0,0,0,0.5); border:1px solid rgba(255,34,85,0.3); border-radius:8px; padding:16px 20px; margin-bottom:22px; font-family:var(--font-data); font-size:13px; line-height:1.8;">
-        <div style="color:#ffd6df;"><strong style="color:var(--neon-red);">[CRITICAL]</strong> HEART RATE 132 bpm – check sensor and rest</div>
-        <div style="color:#ffd6df;"><strong style="color:var(--neon-red);">[CRITICAL]</strong> SpO₂ 88 % – check sensor and oxygen</div>
-        <div style="color:#ffd6df;"><strong style="color:var(--neon-red);">[CRITICAL]</strong> CO₂ 3.8 mmHg (3200 ppm) – increase ventilation</div>
-        <div style="color:#ffd6df;"><strong style="color:var(--neon-red);">[CRITICAL]</strong> TEMPERATURE 38.4 °C – thermal control</div>
+        <div style="color:#ffd6df;"><strong style="color:var(--neon-red);">[CRITICAL]</strong> HEART RATE <span id="modalHrVal">132</span> bpm – check sensor and rest</div>
+        <div style="color:#ffd6df;"><strong style="color:var(--neon-red);">[CRITICAL]</strong> SpO₂ <span id="modalSpo2Val">88</span> % – check sensor and oxygen</div>
+        <div style="color:#ffd6df;"><strong style="color:var(--neon-red);">[CRITICAL]</strong> CO₂ <span id="modalCo2Val">3.8</span> mmHg – increase ventilation</div>
+        <div style="color:#ffd6df;"><strong style="color:var(--neon-red);">[CRITICAL]</strong> TEMPERATURE <span id="modalTempVal">38.4</span> °C – thermal control</div>
       </div>
 
       <!-- CONTRAMEDIDAS PRIORITARIAS (MÁXIMO 3 - REGLA MARTINA) -->

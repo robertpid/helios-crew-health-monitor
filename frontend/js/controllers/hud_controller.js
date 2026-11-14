@@ -324,20 +324,30 @@ class HudController {
     if (!modalBackdrop) return;
 
     if (state.modalAlertaAbierto) {
+      modalBackdrop.style.setProperty("display", "flex", "important");
+      modalBackdrop.classList.add("open");
       if (!this._ultimoEstadoModal && this._sound) {
         this._sound.iniciarAlarmaEmergencia();
       }
-      modalBackdrop.classList.add("open");
     } else {
+      modalBackdrop.style.setProperty("display", "none", "important");
       modalBackdrop.classList.remove("open");
     }
     this._ultimoEstadoModal = !!state.modalAlertaAbierto;
+
+    // Actualizar valores numéricos dinámicos de los parámetros de alerta
+    const fis = state.telemetria.fisiologia;
+    const amb = state.telemetria.ambiente;
+    this._actualizarElementoTexto("modalHrVal", Math.round(fis.ritmo_cardiaco_bpm));
+    this._actualizarElementoTexto("modalSpo2Val", Math.round(fis.spo2_pct));
+    this._actualizarElementoTexto("modalCo2Val", amb.co2_mmHg.toFixed(1));
+    this._actualizarElementoTexto("modalTempVal", fis.temperatura_corporal_c.toFixed(1));
 
     const cmContainer = document.getElementById("modalCountermeasures");
     if (cmContainer && state.telemetria.contramedidas_priorizadas) {
       cmContainer.innerHTML = state.telemetria.contramedidas_priorizadas
         .slice(0, 3)
-        .map((cm, idx) => `<div class="countermeasure-item">${idx + 1}. ${cm}</div>`)
+        .map((cm, idx) => `<div class="countermeasure-item" style="margin-bottom:4px;"><strong>${idx + 1}.</strong> ${cm}</div>`)
         .join("");
     }
   }
