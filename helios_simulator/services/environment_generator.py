@@ -130,11 +130,20 @@ class GeneradorEntorno:
             limite_superior=26.0,
         )
 
+        # 5. Humedad relativa de cabina (NASA OSDR N22: 40-60%)
+        humedad_val = generar_ruido_gaussiano(
+            valor_medio=46.0,
+            desviacion_estandar=3.0,
+            limite_inferior=35.0,
+            limite_superior=65.0,
+        )
+
         return EntornoModel(
             co2_mmHg=redondear_telemetria(co2_val, 2),
             radiacion_acumulada_mSv=redondear_telemetria(self._radiacion_acumulada_msv, 2),
             radiacion_tasa_diaria_mSv=redondear_telemetria(tasa_diaria_val, 3),
             presion_cabina_kpa=redondear_telemetria(presion_val, 2),
             temperatura_cabina_c=redondear_telemetria(temperatura_val, 2),
+            humedad_relativa_pct=redondear_telemetria(humedad_val, 1),
             evento_solar_activo=self._tormenta_solar_activa,
         )

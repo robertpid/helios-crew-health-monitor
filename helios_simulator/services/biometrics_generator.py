@@ -124,6 +124,16 @@ class GeneradorBiometria:
 
         spo2 = generar_ruido_gaussiano(98.2, 0.6, 94.0, 100.0)
 
+        # 5. Sensores de la prenda inteligente Bio-Monitor / Astroskin (CSA)
+        temp_piel = generar_ruido_gaussiano(34.8 + (0.5 if estres_ambiental else 0.0), 0.3, 33.0, 37.0)
+        resp_rate = generar_ruido_gaussiano(14.0 + (3.5 if estres_ambiental else 0.0), 1.2, 10.0, 26.0)
+        # HRV (variabilidad cardíaca): disminuye fisiológicamente bajo estrés
+        hrv_ms = generar_ruido_gaussiano(42.0 - (15.0 if estres_ambiental or ritmo_val > 90 else 0.0), 4.0, 15.0, 75.0)
+
+        dolor_cabeza = estres_ambiental and evaluar_probabilidad_evento(0.40)
+        actividad_fisica = generar_ruido_gaussiano(120.0, 15.0, 45.0, 150.0)
+        escala_estres = min(10, max(1, int(3 + (4 if estres_ambiental else 0) + (2 if alerta_fatiga else 0))))
+
         return BiometriaModel(
             ritmo_cardiaco_bpm=redondear_telemetria(ritmo_val, 1),
             horas_sueno_ultimo_ciclo=redondear_telemetria(self._horas_sueno_actual, 2),
@@ -133,4 +143,10 @@ class GeneradorBiometria:
             presion_sistolica_mmHg=redondear_telemetria(sistolica, 1),
             presion_diastolica_mmHg=redondear_telemetria(diastolica, 1),
             spo2_pct=redondear_telemetria(spo2, 1),
+            temperatura_piel_c=redondear_telemetria(temp_piel, 2),
+            frecuencia_respiratoria_rpm=redondear_telemetria(resp_rate, 1),
+            variabilidad_cardiaca_hrv_ms=redondear_telemetria(hrv_ms, 1),
+            dolor_cabeza_sintoma=dolor_cabeza,
+            actividad_fisica_minutos=redondear_telemetria(actividad_fisica, 1),
+            escala_estres_autorreporte=escala_estres,
         )

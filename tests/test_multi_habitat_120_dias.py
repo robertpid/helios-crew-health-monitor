@@ -48,9 +48,12 @@ def test_generacion_consolidada_cuatro_habitats(simulador: SimuladorMultihabitat
     columnas_mandatorias = [
         "dia_mision", "entorno_mision", "gravedad_g",
         "co2_mmHg", "radiacion_tasa_diaria_mSv", "radiacion_acumulada_mSv",
-        "presion_cabina_kpa", "ritmo_cardiaco_bpm", "horas_sueno",
-        "alerta_riesgo_fatiga", "perdida_osea_pct", "latencia_voz_ms",
-        "densidad_lexica_score", "incongruencia_estres_oculto", "sans_sintoma_vision",
+        "presion_cabina_kpa", "temperatura_cabina_c", "humedad_relativa_pct",
+        "ritmo_cardiaco_bpm", "variabilidad_cardiaca_hrv_ms", "frecuencia_respiratoria_rpm",
+        "temperatura_piel_c", "horas_sueno", "alerta_riesgo_fatiga", "perdida_osea_pct",
+        "presion_sistolica_mmHg", "presion_diastolica_mmHg", "spo2_pct",
+        "dolor_cabeza_sintoma", "actividad_fisica_minutos", "escala_estres_autorreporte",
+        "latencia_voz_ms", "densidad_lexica_score", "incongruencia_estres_oculto", "sans_sintoma_vision",
         "total_alertas_activas", "porcentaje_presupuesto_radiacion_carrera",
     ]
     for col in columnas_mandatorias:

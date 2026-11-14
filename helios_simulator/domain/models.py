@@ -40,6 +40,12 @@ class EntornoModel(BaseModel):
         ...,
         description="Temperatura ambiental interna en grados Celsius."
     )
+    humedad_relativa_pct: float = Field(
+        default=45.0,
+        ge=0.0,
+        le=100.0,
+        description="Sensor de humedad relativa de cabina (NASA OSDR N22: 40-60%)."
+    )
     evento_solar_activo: bool = Field(
         default=False,
         description="Indicador de anomalía por Tormenta Solar o Evento de Partículas Solares (SPE)."
@@ -89,6 +95,32 @@ class BiometriaModel(BaseModel):
         ge=0.0,
         le=100.0,
         description="Saturación periférica de oxígeno en sangre."
+    )
+    temperatura_piel_c: float = Field(
+        default=34.8,
+        description="Sensor térmico cutáneo del Bio-Monitor Astroskin en grados Celsius."
+    )
+    frecuencia_respiratoria_rpm: float = Field(
+        default=14.0,
+        description="Sensor torácico de frecuencia respiratoria en respiraciones por minuto (Bio-Monitor Astroskin)."
+    )
+    variabilidad_cardiaca_hrv_ms: float = Field(
+        default=42.0,
+        description="Variabilidad de la frecuencia cardíaca HRV en milisegundos (Frontiers in Physiology 2024 / E13)."
+    )
+    dolor_cabeza_sintoma: bool = Field(
+        default=False,
+        description="Registro sintomático de cefalea asociado a elevación de CO2 o desplazamiento de fluidos."
+    )
+    actividad_fisica_minutos: float = Field(
+        default=120.0,
+        description="Tiempo diario de ejercicio de resistencia física como contramedida de masa ósea (NASA HSRB)."
+    )
+    escala_estres_autorreporte: int = Field(
+        default=3,
+        ge=1,
+        le=10,
+        description="Autorreporte subjetivo de fatiga y estrés psicofisiológico en escala de 1 a 10."
     )
 
 

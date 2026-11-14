@@ -136,6 +136,9 @@ class SimuladorMultihabitat120Dias:
             size=total_dias,
         ).round(2)
 
+        humedad_relativa_pct = np.random.normal(46.0, 2.5, size=total_dias)
+        humedad_relativa_pct = np.clip(humedad_relativa_pct, 35.0, 65.0).round(1)
+
         # -----------------------------------------------------------------------------------------
         # CEREBRO 2: BIOMETRÍA FISIOLÓGICA (Vectorizado)
         # -----------------------------------------------------------------------------------------
@@ -185,10 +188,35 @@ class SimuladorMultihabitat120Dias:
         )
         ritmo_cardiaco_bpm = np.clip(ritmo_cardiaco_bpm, 52.0, 135.0).round(1)
 
+        mascara_taquicardia = ritmo_cardiaco_bpm > self._config_limites.ritmo_cardiaco_umbral_estres_alto_bpm
+
         # Presión arterial y SpO2 vectorizados
         presion_sistolica = (118.0 + (ritmo_cardiaco_bpm - 65.0) * 0.45 + np.random.normal(0, 2.5, size=total_dias)).round(1)
         presion_diastolica = (presion_sistolica * 0.65 + np.random.normal(0, 1.8, size=total_dias)).round(1)
         spo2_pct = np.clip(np.random.normal(98.1, 0.5, size=total_dias), 93.0, 99.8).round(1)
+
+        # Sensores de la prenda inteligente Bio-Monitor / Astroskin (CSA)
+        temperatura_piel_c = (34.8 + np.where(estres_elevado_ambiental, 0.5, 0.0) + np.random.normal(0, 0.25, size=total_dias)).round(2)
+        temperatura_piel_c = np.clip(temperatura_piel_c, 33.2, 37.2)
+
+        frecuencia_respiratoria_rpm = (14.0 + np.where(estres_elevado_ambiental, 3.5, 0.0) + np.random.normal(0, 1.0, size=total_dias)).round(1)
+        frecuencia_respiratoria_rpm = np.clip(frecuencia_respiratoria_rpm, 10.0, 28.0)
+
+        # Variabilidad de frecuencia cardíaca (HRV ms): disminuye ante sobrecarga hemodinámica
+        variabilidad_cardiaca_hrv_ms = (44.0 - np.where(estres_elevado_ambiental | mascara_taquicardia, 16.0, 0.0) + np.random.normal(0, 3.5, size=total_dias)).round(1)
+        variabilidad_cardiaca_hrv_ms = np.clip(variabilidad_cardiaca_hrv_ms, 14.0, 75.0)
+
+        # Cefalea (dolor de cabeza) y autorreporte de estrés
+        probabilidad_cefalea = np.where(estres_elevado_ambiental, 0.45, 0.04)
+        dolor_cabeza_sintoma = np.random.uniform(0.0, 1.0, size=total_dias) < probabilidad_cefalea
+
+        actividad_fisica_minutos = np.clip(np.random.normal(120.0, 12.0, size=total_dias), 45.0, 150.0).round(1)
+
+        escala_estres_autorreporte = np.clip(
+            3 + np.where(estres_elevado_ambiental, 4, 0) + np.where(alerta_fatiga_serie.to_numpy(), 2, 0) + np.random.randint(-1, 2, size=total_dias),
+            1,
+            10,
+        ).astype(int)
 
         # -----------------------------------------------------------------------------------------
         # CEREBRO 4: PSICOLOGÍA Y COGNICIÓN - ASTRA (Vectorizado)
@@ -275,8 +303,12 @@ class SimuladorMultihabitat120Dias:
                 "evento_solar_activo": mascara_tormenta_solar,
                 "presion_cabina_kpa": presion_cabina_kpa,
                 "temperatura_cabina_c": temperatura_cabina_c,
+                "humedad_relativa_pct": humedad_relativa_pct,
                 # Biometría Fisiológica (Cerebro 2)
                 "ritmo_cardiaco_bpm": ritmo_cardiaco_bpm,
+                "variabilidad_cardiaca_hrv_ms": variabilidad_cardiaca_hrv_ms,
+                "frecuencia_respiratoria_rpm": frecuencia_respiratoria_rpm,
+                "temperatura_piel_c": temperatura_piel_c,
                 "horas_sueno": horas_sueno,
                 "ciclos_sueno_insuficiente_consecutivos": contador_consecutivos,
                 "alerta_riesgo_fatiga": alerta_fatiga,
@@ -284,6 +316,9 @@ class SimuladorMultihabitat120Dias:
                 "presion_sistolica_mmHg": presion_sistolica,
                 "presion_diastolica_mmHg": presion_diastolica,
                 "spo2_pct": spo2_pct,
+                "dolor_cabeza_sintoma": dolor_cabeza_sintoma,
+                "actividad_fisica_minutos": actividad_fisica_minutos,
+                "escala_estres_autorreporte": escala_estres_autorreporte,
                 # Cognición y Psicología (Cerebro 4 - ASTRA)
                 "latencia_voz_ms": latencia_voz_ms,
                 "densidad_lexica_score": densidad_lexica_score,
