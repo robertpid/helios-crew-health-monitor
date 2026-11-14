@@ -1,0 +1,6 @@
+# Dependencias para el Módulo helios_simulator
+# Sistema de Soporte Vital de Espacio Profundo (Space Apps 2026)
+
+pydantic>=2.10.0,<3.0.0
+redis>=5.2.0,<9.0.0
+pytest>=8.0.0
