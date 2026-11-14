@@ -1,19 +1,36 @@
 /**
  * SoundService - Sistema de Audio Sintetizado Procedural (Web Audio API)
  * 
- * Genera efectos de sonido futuristas y de retroalimentación táctil-auditiva en tiempo real
- * sin descargar archivos pesados (0 KB de descargas externas, latencia < 2 ms).
- * Cumple con las restricciones de reproducción automática de los navegadores modernos.
+ * Genera efectos sonoros futuristas y sirena de alarma de emergencia en tiempo real
+ * sin descargar archivos externos (0 KB de descargas, latencia < 2 ms).
+ * Cumple con el estándar de alarma Master Alarm de misiones tripuladas de espacio profundo.
  */
 class SoundService {
   constructor() {
     this._audioCtx = null;
     this._muted = false;
-    this._volumenGeneral = 0.08; // Volumen sutil y no invasivo
+    this._volumenGeneral = 0.09; // Nivel calibrado para ser claro pero no ensordecedor
+    this._alarmaActiva = false;
+    this._alarmaLoopId = null;
+
+    // Desbloquear AudioContext en la primera interacción del usuario con el DOM
+    this._vincularDesbloqueoPorInteraccion();
+  }
+
+  _vincularDesbloqueoPorInteraccion() {
+    const desbloquear = () => {
+      this._obtenerContexto();
+      window.removeEventListener("click", desbloquear);
+      window.removeEventListener("keydown", desbloquear);
+      window.removeEventListener("touchstart", desbloquear);
+    };
+    window.addEventListener("click", desbloquear, { once: true });
+    window.addEventListener("keydown", desbloquear, { once: true });
+    window.addEventListener("touchstart", desbloquear, { once: true });
   }
 
   /**
-   * Inicializa o reanuda el AudioContext tras la primera interacción del usuario.
+   * Obtiene o reanuda el AudioContext activo.
    */
   _obtenerContexto() {
     if (this._muted) return null;
@@ -35,11 +52,92 @@ class SoundService {
    */
   toggleSilencio() {
     this._muted = !this._muted;
+    if (this._muted && this._audioCtx && this._audioCtx.state === "running") {
+      this._audioCtx.suspend();
+    } else if (!this._muted && this._audioCtx && this._audioCtx.state === "suspended") {
+      this._audioCtx.resume();
+    }
     return this._muted;
   }
 
   estaSilenciado() {
     return this._muted;
+  }
+
+  estaAlarmaActiva() {
+    return this._alarmaActiva;
+  }
+
+  /**
+   * Inicia la sirena de alarma de emergencia cíclica en bucle.
+   * Continúa sonando rítmicamente hasta que la emergencia se resuelve o el usuario silencia el audio.
+   */
+  iniciarAlarmaEmergencia() {
+    if (this._alarmaActiva) return;
+    this._alarmaActiva = true;
+
+    // Ejecutar inmediatamente el primer ciclo de alarma
+    this._ejecutarPulsoAlarma();
+
+    // Repetición periódica rítmica cada 1300 ms (cadencia estándar de contingencia aeroespacial)
+    if (this._alarmaLoopId) clearInterval(this._alarmaLoopId);
+    this._alarmaLoopId = setInterval(() => {
+      if (this._alarmaActiva && !this._muted) {
+        this._ejecutarPulsoAlarma();
+      }
+    }, 1300);
+  }
+
+  /**
+   * Detiene de inmediato la sirena de emergencia.
+   */
+  detenerAlarmaEmergencia() {
+    this._alarmaActiva = false;
+    if (this._alarmaLoopId) {
+      clearInterval(this._alarmaLoopId);
+      this._alarmaLoopId = null;
+    }
+  }
+
+  /**
+   * Genera un pulso bitonal de alarma táctica de cabina (estilo Master Alarm de la NASA).
+   * Tono 1: 940 Hz (urgencia alta, 140 ms)
+   * Tono 2: 720 Hz (aviso de contingencia, 140 ms)
+   * Tono 3: 940 Hz (reiteración de impacto, 140 ms)
+   */
+  _ejecutarPulsoAlarma() {
+    const ctx = this._obtenerContexto();
+    if (!ctx) return;
+
+    try {
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const filter = ctx.createBiquadFilter();
+
+      // Forma de onda diente de sierra con filtro pasa-bajas para sonido de cabina presurizada
+      osc.type = "sawtooth";
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(1700, t);
+
+      // Bitonalidad urgente: 940 Hz -> 720 Hz -> 940 Hz
+      osc.frequency.setValueAtTime(940, t);
+      osc.frequency.setValueAtTime(720, t + 0.12);
+      osc.frequency.setValueAtTime(940, t + 0.24);
+
+      // Envolvente de volumen (ataque inmediato, sostenido con caída exponencial)
+      gain.gain.setValueAtTime(this._volumenGeneral * 1.4, t);
+      gain.gain.setValueAtTime(this._volumenGeneral * 1.2, t + 0.12);
+      gain.gain.setValueAtTime(this._volumenGeneral * 1.4, t + 0.24);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.42);
+
+      osc.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(t);
+      osc.stop(t + 0.45);
+    } catch (_) {}
   }
 
   /**
@@ -102,67 +200,6 @@ class SoundService {
       osc2.start(t);
       osc1.stop(t + 0.13);
       osc2.stop(t + 0.13);
-    } catch (_) {}
-  }
-
-  /**
-   * Alarma táctica para simulaciones de crisis o anomalías de soporte vital.
-   */
-  reproducirAlertaCrisis() {
-    const ctx = this._obtenerContexto();
-    if (!ctx) return;
-
-    try {
-      const t = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      osc.type = "sawtooth";
-      osc.frequency.setValueAtTime(880, t);
-      osc.frequency.setValueAtTime(660, t + 0.08);
-      osc.frequency.setValueAtTime(880, t + 0.16);
-
-      // Filtro pasa-bajas para suavizar el tono militar
-      const filter = ctx.createBiquadFilter();
-      filter.type = "lowpass";
-      filter.frequency.setValueAtTime(1400, t);
-
-      gain.gain.setValueAtTime(this._volumenGeneral * 1.2, t);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.28);
-
-      osc.connect(filter);
-      filter.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start(t);
-      osc.stop(t + 0.30);
-    } catch (_) {}
-  }
-
-  /**
-   * Latido cardíaco sutil de baja frecuencia (60 Hz sub-bass, 80 ms).
-   */
-  reproducirLatido() {
-    const ctx = this._obtenerContexto();
-    if (!ctx) return;
-
-    try {
-      const t = ctx.currentTime;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(65, t);
-      osc.frequency.exponentialRampToValueAtTime(38, t + 0.08);
-
-      gain.gain.setValueAtTime(this._volumenGeneral * 0.9, t);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.09);
-
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-
-      osc.start(t);
-      osc.stop(t + 0.10);
     } catch (_) {}
   }
 }

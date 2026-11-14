@@ -127,12 +127,15 @@ class HudController {
   }
 
   activarModoCrisis() {
-    if (this._sound) this._sound.reproducirAlertaCrisis();
     this._state.activarModoCrisis();
+    if (this._sound) this._sound.iniciarAlarmaEmergencia();
   }
 
   restablecerModoNominal() {
-    if (this._sound) this._sound.reproducirClick();
+    if (this._sound) {
+      this._sound.detenerAlarmaEmergencia();
+      this._sound.reproducirClick();
+    }
     this._state.restablecerModoNominal();
   }
 
@@ -148,6 +151,22 @@ class HudController {
     const amb = tel.ambiente;
     const cog = tel.cognicion;
     const kron = tel.kronecker;
+
+    // Control dinámico de Sirena de Emergencia / Alarma Sonora
+    const hayEmergencia = state.modoCrisis ||
+      kron.estres_severo ||
+      amb.co2_mmHg > 3.0 ||
+      amb.evento_solar_activo ||
+      fis.ritmo_cardiaco_bpm > 100 ||
+      fis.spo2_pct < 94.0;
+
+    if (this._sound) {
+      if (hayEmergencia) {
+        this._sound.iniciarAlarmaEmergencia();
+      } else {
+        this._sound.detenerAlarmaEmergencia();
+      }
+    }
 
     // 1. Renderizar pestañas activas
     this._actualizarPestanas(state.vistaActiva);
@@ -306,7 +325,7 @@ class HudController {
 
     if (state.modalAlertaAbierto) {
       if (!this._ultimoEstadoModal && this._sound) {
-        this._sound.reproducirAlertaCrisis();
+        this._sound.iniciarAlarmaEmergencia();
       }
       modalBackdrop.classList.add("open");
     } else {
