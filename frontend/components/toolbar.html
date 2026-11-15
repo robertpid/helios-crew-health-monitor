@@ -1,0 +1,15 @@
+<!-- ========================================================================= -->
+<!-- 2. TOOLBAR DE CONTROL INTERACTIVO Y DEMO                                   -->
+<!-- ========================================================================= -->
+<div class="control-toolbar">
+  <div class="toolbar-group">
+    <span style="color:var(--neon-cyan); font-weight:700;">ENLACE DSN ESPACIO PROFUNDO:</span>
+    <span id="dsnLatency" style="color:#ffffff;">14 min (Store-and-Forward Activo) · Sol 120</span>
+  </div>
+  <div class="toolbar-group">
+    <button id="btnAudioToggle" class="btn-hud" onclick="window.hudController.toggleAudio()" title="Activar/Silenciar Efectos de Audio Procedural">🔊 AUDIO: ACTIVO</button>
+    <button class="btn-hud" onclick="window.hudController.restablecerModoNominal()">MODO NOMINAL</button>
+    <button class="btn-hud btn-hud-danger" onclick="window.hudController.activarModoCrisis()">SIMULAR CRISIS (DÍA 95)</button>
+    <button class="btn-hud" onclick="window.hudController.toggleModal()">VER ALERTA MODAL</button>
+  </div>
+</div>
