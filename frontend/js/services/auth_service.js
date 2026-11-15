@@ -109,6 +109,10 @@ class AuthService {
     });
   }
 
+  estaAutenticado() {
+    return !!this._usuarioActual;
+  }
+
   _cargarSesionGuardada() {
     try {
       const guardado = localStorage.getItem(this._claveStorage);
@@ -120,8 +124,8 @@ class AuthService {
     } catch (e) {
       console.warn("[AuthService] Error al leer sesión previa:", e);
     }
-    // Usuario por defecto inicial si no hay sesión guardada: Astronauta 1
-    return this._usuarios[0];
+    // Requiere autenticación explícita por PIN (sin auto-login por defecto)
+    return null;
   }
 }
 

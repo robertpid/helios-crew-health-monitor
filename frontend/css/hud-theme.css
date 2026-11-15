@@ -7,7 +7,7 @@
    4. hud-wellness.css  : Ventana 3 (sueño, tareas, gamificación, asistente y login) (~60 líneas)
    ========================================================================== */
 
-@import url('./hud-base.css');
-@import url('./hud-panels.css');
-@import url('./hud-hologram.css');
-@import url('./hud-wellness.css');
+@import url('./hud-base.css?v=20261115_v2');
+@import url('./hud-panels.css?v=20261115_v2');
+@import url('./hud-hologram.css?v=20261115_v2');
+@import url('./hud-wellness.css?v=20261115_v2');

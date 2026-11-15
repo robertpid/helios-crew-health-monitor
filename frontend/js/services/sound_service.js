@@ -229,6 +229,59 @@ class SoundService {
       osc2.stop(t + 0.13);
     } catch (_) {}
   }
+
+  /**
+   * Acorde armónico ascendente de confirmación y estado nominal (180 ms).
+   */
+  reproducirNominal() {
+    this.detenerAlarmaEmergencia();
+    const ctx = this._obtenerContexto();
+    if (!ctx) return;
+    try {
+      const t = ctx.currentTime;
+      [523.25, 659.25, 783.99].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, t + i * 0.05);
+        gain.gain.setValueAtTime(this._volumenGeneral * 0.7, t + i * 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.05 + 0.12);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(t + i * 0.05);
+        osc.stop(t + i * 0.05 + 0.13);
+      });
+    } catch (_) {}
+  }
+
+  /**
+   * Dispara el protocolo sonoro de crisis espacial (Master Alarm).
+   */
+  reproducirCrisis() {
+    this.iniciarAlarmaEmergencia();
+  }
+
+  /**
+   * Tono táctico de alerta breve para credencial errónea o advertencia (120 ms).
+   */
+  reproducirAlerta() {
+    const ctx = this._obtenerContexto();
+    if (!ctx) return;
+    try {
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(440, t);
+      osc.frequency.setValueAtTime(330, t + 0.06);
+      gain.gain.setValueAtTime(this._volumenGeneral * 0.9, t);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + 0.13);
+    } catch (_) {}
+  }
 }
 
 window.soundService = new SoundService();

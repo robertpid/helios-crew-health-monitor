@@ -192,8 +192,13 @@ async def estado_sistema(request: Request) -> Any:
     ):
         ruta_html = os.path.join(os.path.dirname(__file__), "frontend", "index.html")
         if os.path.exists(ruta_html):
+            headers = {
+                "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+                "Pragma": "no-cache",
+                "Expires": "0",
+            }
             with open(ruta_html, "r", encoding="utf-8") as f:
-                return HTMLResponse(content=f.read())
+                return HTMLResponse(content=f.read(), headers=headers)
 
     return {
         "sistema": "H.E.L.I.O.S. Edge AI Inference Engine",
@@ -233,8 +238,13 @@ async def ver_dashboard() -> HTMLResponse:
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Archivo de interfaz frontend/index.html no encontrado.",
         )
+    headers = {
+        "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+        "Pragma": "no-cache",
+        "Expires": "0",
+    }
     with open(ruta_html, "r", encoding="utf-8") as f:
-        return HTMLResponse(content=f.read())
+        return HTMLResponse(content=f.read(), headers=headers)
 
 
 @app.get(

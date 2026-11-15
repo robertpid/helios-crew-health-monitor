@@ -31,3 +31,7 @@ ENV/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Playwright MCP testing artifacts
+.playwright-mcp/
+

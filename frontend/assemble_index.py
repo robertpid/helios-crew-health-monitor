@@ -17,6 +17,7 @@ Cumple estrictamente con:
 import logging
 import os
 import sys
+import time
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -90,6 +91,7 @@ class DashboardAssembler:
         modal_alert = self.leer_componente("modal_alert.html")
         modal_login = self.leer_componente("modal_login.html")
         footer_html = self.leer_componente("footer.html")
+        version_tag = int(time.time())
 
         # Ensamblaje seguro de la estructura HTML5 con indentación estricta
         html_consolidado = f"""<!DOCTYPE html>
@@ -105,8 +107,8 @@ class DashboardAssembler:
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   
   <!-- H.E.L.I.O.S. Capa de Estilos N-Capas Modular -->
-  <link rel="stylesheet" href="/static/css/hud-theme.css">
-  <link rel="stylesheet" href="/static/css/animations.css">
+  <link rel="stylesheet" href="/static/css/hud-theme.css?v={version_tag}">
+  <link rel="stylesheet" href="/static/css/animations.css?v={version_tag}">
 </head>
 <body>
 
@@ -136,14 +138,14 @@ class DashboardAssembler:
   <!-- ========================================================================= -->
   <!-- 6. CARGA DE MÓDULOS DE ARQUITECTURA N-CAPAS EN JAVASCRIPT                 -->
   <!-- ========================================================================= -->
-  <script src="/static/js/state/state_manager.js"></script>
-  <script src="/static/js/services/auth_service.js"></script>
-  <script src="/static/js/services/sound_service.js"></script>
-  <script src="/static/js/services/telemetry_service.js"></script>
-  <script src="/static/js/services/ecg_service.js"></script>
-  <script src="/static/js/services/hologram_service.js"></script>
-  <script src="/static/js/controllers/wellness_controller.js"></script>
-  <script src="/static/js/controllers/hud_controller.js"></script>
+  <script src="/static/js/state/state_manager.js?v={version_tag}"></script>
+  <script src="/static/js/services/auth_service.js?v={version_tag}"></script>
+  <script src="/static/js/services/sound_service.js?v={version_tag}"></script>
+  <script src="/static/js/services/telemetry_service.js?v={version_tag}"></script>
+  <script src="/static/js/services/ecg_service.js?v={version_tag}"></script>
+  <script src="/static/js/services/hologram_service.js?v={version_tag}"></script>
+  <script src="/static/js/controllers/wellness_controller.js?v={version_tag}"></script>
+  <script src="/static/js/controllers/hud_controller.js?v={version_tag}"></script>
 
   <script>
     // Inicialización del ecosistema HUD N-Capas Modular

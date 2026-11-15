@@ -261,3 +261,14 @@ footer.hud-footer {
   color: var(--text-muted);
   margin-top: 40px;
 }
+
+/* Bloqueo estricto de pantalla pre-autenticación (Zero-Access Gate) */
+body.locked .hud-header,
+body.locked .control-toolbar,
+body.locked .main-viewport,
+body.locked .hud-footer {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
