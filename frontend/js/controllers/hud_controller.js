@@ -270,26 +270,32 @@ class HudController {
     });
 
     if (vistaActiva === "biomedical") {
+      if (this._ecg && this._ecg.reanudar) this._ecg.reanudar();
       if (tabs[0]) tabs[0].classList.add("active");
       const v = document.getElementById("viewBiomedical");
       if (v) {
         v.classList.add("active-view");
         v.style.setProperty("display", "grid", "important");
       }
-    } else if (vistaActiva === "environmental") {
-      if (tabs[1]) tabs[1].classList.add("active");
-      const v = document.getElementById("viewEnvironmental");
-      if (v) {
-        v.classList.add("active-view");
-        v.style.setProperty("display", "grid", "important");
-      }
-      setTimeout(() => window.dispatchEvent(new Event("resize")), 60);
-    } else if (vistaActiva === "matrix") {
-      if (tabs[2]) tabs[2].classList.add("active");
-      const v = document.getElementById("viewMatrix");
-      if (v) {
-        v.classList.add("active-view");
-        v.style.setProperty("display", "block", "important");
+    } else {
+      // En modo liviano: pausar el osciloscopio cuando la vista médica no es visible
+      if (this._ecg && this._ecg.pausar) this._ecg.pausar();
+
+      if (vistaActiva === "environmental") {
+        if (tabs[1]) tabs[1].classList.add("active");
+        const v = document.getElementById("viewEnvironmental");
+        if (v) {
+          v.classList.add("active-view");
+          v.style.setProperty("display", "grid", "important");
+        }
+        setTimeout(() => window.dispatchEvent(new Event("resize")), 60);
+      } else if (vistaActiva === "matrix") {
+        if (tabs[2]) tabs[2].classList.add("active");
+        const v = document.getElementById("viewMatrix");
+        if (v) {
+          v.classList.add("active-view");
+          v.style.setProperty("display", "block", "important");
+        }
       }
     }
   }

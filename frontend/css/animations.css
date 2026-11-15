@@ -161,14 +161,24 @@
   animation: alarmFlash 0.7s infinite alternate ease-in-out;
 }
 
-/* 8. Partículas Cuánticas de Fondo */
+.hologram-stage-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 520px;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 240, 255, 0.18);
+  background: 
+    radial-gradient(circle at 50% 50%, rgba(0, 240, 255, 0.08) 0%, transparent 75%),
+    linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px) 0 0 / 24px 24px,
+    linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px) 0 0 / 24px 24px,
+    #050811 !important;
+}
+
+/* 8. Modo Liviano Permanente: Desactivación Total de Lienzos de Partículas */
 #particlesCanvas,
 #particlesHabitatCanvas {
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  pointer-events: none;
-  z-index: 1;
+  display: none !important;
 }
