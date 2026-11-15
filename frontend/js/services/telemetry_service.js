@@ -14,10 +14,17 @@ class TelemetryService {
 
   iniciarPolling() {
     if (this._intervalId) return;
-    this._obtenerTelemetria();
-    this._intervalId = setInterval(() => {
-      this._obtenerTelemetria();
-    }, this._pollingMs);
+    // El libro de códigos se descarga una sola vez; a partir de ahí el enlace
+    // transporta únicamente códigos y números.
+    window.codebookService
+      ?.cargar()
+      .catch((err) => console.warn("CodebookService: usando reporte completo.", err))
+      .finally(() => {
+        this._obtenerTelemetria();
+        this._intervalId = setInterval(() => {
+          this._obtenerTelemetria();
+        }, this._pollingMs);
+      });
   }
 
   detenerPolling() {
@@ -29,6 +36,20 @@ class TelemetryService {
 
   async _obtenerTelemetria() {
     try {
+      // Ruta nominal: registro compacto + traducción local mediante el codebook.
+      if (window.codebookService?.disponible) {
+        const resp = await fetch("/api/v1/telemetria/compacto");
+        if (resp.ok) {
+          const registro = await resp.json();
+          const reporte = window.codebookService.expandir(registro);
+          if (reporte) {
+            this._state.actualizarDesdeBackend(reporte);
+            return;
+          }
+        }
+      }
+
+      // Repliegue: reporte completo con texto (depuración o codebook ausente).
       const resp = await fetch("/api/v1/fusion/resultado");
       if (resp.ok) {
         const datos = await resp.json();

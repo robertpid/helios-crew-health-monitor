@@ -87,9 +87,16 @@ class DashboardAssembler:
         toolbar_html = self.leer_componente("toolbar.html")
         view_biomedical = self.leer_componente("view_biomedical.html")
         view_environmental = self.leer_componente("view_environmental.html")
-        view_wellness = self.leer_componente("view_wellness.html")
+        view_wellness = self.leer_componente("view_wellness.html").replace(
+            "<!-- PANEL_SLEEP -->", self.leer_componente("panel_sleep.html")
+        ).replace("<!-- PANEL_GAMES -->", self.leer_componente("panel_games.html"))
+        view_support = self.leer_componente("view_support.html")
+        view_surgeon = self.leer_componente("view_surgeon.html")
         modal_alert = self.leer_componente("modal_alert.html")
         modal_login = self.leer_componente("modal_login.html")
+        modal_games = self.leer_componente("modal_games.html")
+        modal_oftalmico = self.leer_componente("modal_oftalmico.html")
+        modal_sonar = self.leer_componente("modal_sonar.html")
         footer_html = self.leer_componente("footer.html")
         version_tag = int(time.time())
 
@@ -133,11 +140,21 @@ class DashboardAssembler:
 
     {view_wellness}
 
+    {view_support}
+
+    {view_surgeon}
+
   </main>
 
   {modal_alert}
 
   {modal_login}
+
+  {modal_games}
+
+  {modal_oftalmico}
+
+  {modal_sonar}
 
   {footer_html}
 
@@ -147,10 +164,18 @@ class DashboardAssembler:
   <script src="/static/js/state/state_manager.js?v={version_tag}"></script>
   <script src="/static/js/services/auth_service.js?v={version_tag}"></script>
   <script src="/static/js/services/sound_service.js?v={version_tag}"></script>
+  <script src="/static/js/services/codebook_service.js?v={version_tag}"></script>
   <script src="/static/js/services/telemetry_service.js?v={version_tag}"></script>
   <script src="/static/js/services/ecg_service.js?v={version_tag}"></script>
   <script src="/static/js/services/hologram_service.js?v={version_tag}"></script>
+  <script src="/static/js/services/fit_service.js?v={version_tag}"></script>
+  <script src="/static/js/services/oftalmico_service.js?v={version_tag}"></script>
+  <script src="/static/js/services/sonar_service.js?v={version_tag}"></script>
   <script src="/static/js/controllers/wellness_controller.js?v={version_tag}"></script>
+  <script src="/static/js/controllers/games_controller.js?v={version_tag}"></script>
+  <script src="/static/js/controllers/sleep_controller.js?v={version_tag}"></script>
+  <script src="/static/js/controllers/surgeon_controller.js?v={version_tag}"></script>
+  <script src="/static/js/controllers/viewport_controller.js?v={version_tag}"></script>
   <script src="/static/js/controllers/hud_controller.js?v={version_tag}"></script>
 
   <script>
@@ -166,6 +191,10 @@ class DashboardAssembler:
       const habitatHologramService = new HologramRendererService("particlesHabitatCanvas", "svgHologramHabitat");
       habitatHologramService.inicializar();
 
+      if (window.fitService?.inicializar) {{
+        window.fitService.inicializar();
+      }}
+
       // 2. Instanciar Controlador de Bienestar y Rutinas
       const wellnessController = new WellnessController(window.soundService);
       window.wellnessController = wellnessController;
@@ -179,6 +208,13 @@ class DashboardAssembler:
         wellnessController,
         window.authService
       );
+      window.viewportController = new ViewportController();
+      window.viewportController.inicializar();
+      window.gamesController = new GamesController(window.stateManager);
+      window.gamesController.inicializar();
+      window.sleepController = new SleepController(window.stateManager);
+      window.sleepController.inicializar();
+      window.surgeonController?.inicializar?.();
       window.hudController.inicializar();
     }});
   </script>

@@ -1,10 +1,13 @@
 <!-- ========================================================================= -->
 <!-- 1. HEADER HUD COCKPIT (CAPA DE PRESENTACIÓN)                               -->
+<!-- Tres grupos en una fila: marca · navegación · tripulante.                  -->
+<!-- Los rótulos de pestaña son cortos a propósito; la descripción completa     -->
+<!-- vive en el title, no ocupando ancho permanente en la barra.                -->
 <!-- ========================================================================= -->
 <header class="hud-header">
   <div class="brand-wrapper">
     <div class="brand-title">
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true">
         <circle cx="12" cy="12" r="10"></circle>
         <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
         <path d="M2 12h20"></path>
@@ -13,42 +16,54 @@
     </div>
     <div class="brand-sub">
       CREW HEALTH &amp; HABITAT MONITOR<br>
-      <span style="color:var(--neon-cyan);">DEEP SPACE EXPEDITION · SOL 120</span>
+      <span style="color:var(--c-cyan-ink);">DEEP SPACE EXPEDITION · SOL 120</span>
     </div>
   </div>
 
-  <!-- TABS DE NAVEGACIÓN ENTRE VENTANAS -->
-  <div class="nav-tabs-wrapper">
-    <button class="nav-tab-btn active" onclick="window.hudController.cambiarVista('biomedical')">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+  <!-- NAVEGACIÓN ENTRE VENTANAS -->
+  <nav class="nav-tabs-wrapper" aria-label="Ventanas del cockpit">
+    <button class="nav-tab-btn active" onclick="window.hudController.cambiarVista('biomedical')"
+            title="Ventana 1 — Biomédica y holograma anatómico">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
       </svg>
-      VENTANA 1: BIOMÉDICA &amp; HOLOGRAMA
+      <span class="tab-index">1</span>
+      <span class="tab-text">BIOMÉDICA</span>
     </button>
-    <button class="nav-tab-btn" onclick="window.hudController.cambiarVista('environmental')">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <button class="nav-tab-btn" onclick="window.hudController.cambiarVista('environmental')"
+            title="Ventana 2 — Ambiente y hábitat espacial">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <circle cx="12" cy="12" r="10"></circle>
         <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
       </svg>
-      VENTANA 2: AMBIENTE &amp; HÁBITAT
+      <span class="tab-index">2</span>
+      <span class="tab-text">AMBIENTE</span>
     </button>
-    <button class="nav-tab-btn" onclick="window.hudController.cambiarVista('matrix')">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <button class="nav-tab-btn" onclick="window.hudController.cambiarVista('matrix')"
+            title="Ventana 3 — Bienestar, rutinas y asistente ASTRA">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
         <polyline points="22 4 12 14.01 9 11.01"></polyline>
       </svg>
-      VENTANA 3: BIENESTAR, RUTINAS &amp; ASISTENTE
+      <span class="tab-index">3</span>
+      <span class="tab-text">BIENESTAR</span>
     </button>
-  </div>
+    <button class="nav-tab-btn" onclick="window.hudController.cambiarVista('support')" title="Ventana 4 — ASTRA, evaluaciones, correo y matriz técnica"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><span class="tab-index">4</span><span class="tab-text">SOPORTE</span></button>
+    <button id="navTabSurgeon" class="nav-tab-btn" onclick="window.hudController.cambiarVista('surgeon')" title="Ventana 5 — Consola Exclusiva del Cirujano de Vuelo (Dr. Marcus Vance)" style="display:none; border-color:rgba(168,85,247,0.5);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#c084fc" stroke-width="2" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span class="tab-index" style="color:#c084fc;">5</span><span class="tab-text" style="color:#e9d5ff;">CIRUJANO</span></button>
+  </nav>
 
-  <!-- ESTADO DEL TRIPULANTE / ACCESO DE USUARIO -->
-  <div class="crew-status-indicator" style="display:flex; align-items:center; gap:8px;">
-    <div class="astro-tag" onclick="window.hudController.abrirModalLogin()" style="cursor:pointer;" title="Clic para cambiar de usuario o ingresar clave PIN">
-      <span id="userAvatarTag">👨‍🚀</span>
-      <span id="userIdentTag">ASTRONAUTA A01</span>
-      <small id="userRoleTag" style="color:var(--neon-cyan); margin-left:4px;">(Alex Mercer)</small>
-    </div>
-    <button class="btn-hud" onclick="window.hudController.abrirModalLogin()" style="font-size:10px; padding:4px 9px;" title="Cambiar usuario o perfil de tripulante">🔑 LOGIN</button>
+  <!-- ESTADO DEL TRIPULANTE / ACCESO -->
+  <div class="crew-status-indicator">
+    <button class="astro-tag" onclick="window.hudController.abrirModalLogin()"
+            title="Cambiar de tripulante o introducir PIN de acceso">
+      <span id="userAvatarTag" aria-hidden="true">👨‍🚀</span>
+      <span class="astro-names">
+        <span id="userIdentTag">ASTRONAUTA A01</span>
+        <small id="userRoleTag">Alex Mercer</small>
+      </span>
+    </button>
+    <button class="btn-hud btn-icon" onclick="window.hudController.abrirModalLogin()"
+            title="Cambiar usuario o perfil de tripulante" aria-label="Iniciar sesión">🔑</button>
     <div id="statusPill" class="badge-status status-stable">ESTABLE</div>
   </div>
 </header>

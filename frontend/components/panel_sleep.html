@@ -1,0 +1,44 @@
+<div class="hud-panel screen-panel sleep-dashboard" data-panel="sleep">
+  <div class="panel-header">
+    <div class="panel-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>DESCANSO Y RECUPERACIÓN</div>
+    <span class="sleep-source" id="sleepSource">CICLO ACTUAL · SIMULADOR</span>
+  </div>
+  <div class="sleep-mobile-tabs" aria-label="Detalles de sueño">
+    <button type="button" class="btn-hud" data-sleep-tab="summary" aria-pressed="true">Resumen</button>
+    <button type="button" class="btn-hud" data-sleep-tab="phases" aria-pressed="false">Fases</button>
+    <button type="button" class="btn-hud" data-sleep-tab="history" aria-pressed="false">7 ciclos</button>
+  </div>
+  <div class="sleep-summary" data-sleep-section="summary">
+    <div class="sleep-gauge" aria-label="Cumplimiento de la meta de duración">
+      <svg viewBox="0 0 260 150" aria-hidden="true">
+        <path class="sleep-gauge-track" d="M24 128 A106 106 0 0 1 236 128" pathLength="100"/>
+        <path id="sleepGaugeArc" class="sleep-gauge-arc" d="M24 128 A106 106 0 0 1 236 128" pathLength="100"/>
+        <text id="sleepScore" x="130" y="102" text-anchor="middle">90%</text>
+        <text class="sleep-gauge-caption" x="130" y="124" text-anchor="middle">DE LA META DE 8 H</text>
+      </svg>
+      <div id="sleepGoalStatus" class="sleep-goal-status">48 min para la meta</div>
+    </div>
+    <div class="sleep-night-summary">
+      <div class="sleep-kicker" id="sleepCycleLabel">ÚLTIMO CICLO</div>
+      <div id="sleepTotalHeadline" class="sleep-total-headline">7 h <span>12 min</span></div>
+      <div id="sleepTrend" class="sleep-trend">Comparación con el ciclo anterior</div>
+      <div class="sleep-night-metrics">
+        <div><span>Inicio del sueño</span><strong id="sleepStart">23:10</strong></div>
+        <div><span>Despertar</span><strong id="sleepEnd">06:46</strong></div>
+        <div><span>Sueño total</span><strong id="sleepTotal">7 h 12 min</strong></div>
+        <div><span>Tiempo en cama</span><strong id="sleepInBed">7 h 36 min</strong></div>
+      </div>
+    </div>
+  </div>
+  <section class="sleep-phases" data-sleep-section="phases" aria-labelledby="sleepPhasesTitle">
+    <div class="sleep-section-heading"><h3 id="sleepPhasesTitle">Así transcurrió tu descanso</h3><span>FASES · DEMOSTRACIÓN</span></div>
+    <div id="sleepPhaseLegend" class="sleep-phase-legend"></div>
+    <svg id="sleepHypnogram" class="sleep-hypnogram" viewBox="0 0 620 146" role="group" aria-label="Fases del sueño. Selecciona un tramo para ver su horario."></svg>
+    <div id="sleepPhaseDetail" class="sleep-phase-detail" aria-live="polite">Selecciona un tramo para consultar el horario y la duración.</div>
+  </section>
+  <section class="sleep-history" data-sleep-section="history" aria-labelledby="sleepHistoryTitle">
+    <div class="sleep-section-heading"><h3 id="sleepHistoryTitle">Tus últimos 7 ciclos</h3><span id="sleepWeekAverage">Promedio: 7 h 6 min</span></div>
+    <div id="sleepHistoryDays" class="sleep-history-days"></div>
+  </section>
+  <p class="sleep-data-note">Duración: telemetría del simulador. Horarios, fases e historial: demostración. El porcentaje compara duración con la meta; no es un puntaje clínico.</p>
+</div>

@@ -1,0 +1,101 @@
+/* Sleep overview inspired by the summary / phases / history pattern, in HELIOS tokens. */
+.sleep-dashboard { --sleep-accent: #bc9ce8; gap: 12px !important; }
+.sleep-dashboard .panel-header { margin-bottom: 0; }
+.sleep-source { font: 10px var(--font-data); color: var(--text-muted); }
+.sleep-mobile-tabs { display: none; }
+.sleep-summary { display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.25fr); gap: 18px; align-items: center; }
+.sleep-gauge svg { display: block; width: 100%; max-height: 150px; }
+.sleep-gauge-track, .sleep-gauge-arc { fill: none; stroke-width: 16px; stroke-linecap: round; }
+.sleep-gauge-track { stroke: var(--surface-3); }
+.sleep-gauge-arc { stroke: var(--sleep-accent); stroke-dasharray: 90 100; transition: stroke-dasharray .3s ease; }
+#sleepScore { font: 500 42px var(--font-data); fill: var(--text-primary); letter-spacing: -2px; }
+.sleep-gauge-caption { font: 10px var(--font-body); fill: var(--text-secondary); letter-spacing: 1px; }
+.sleep-goal-status { text-align: center; color: var(--sleep-accent); font-size: 12px; }
+.sleep-kicker { font: 10px var(--font-data); color: var(--text-secondary); letter-spacing: .08em; }
+.sleep-total-headline { font: 500 clamp(23px, 2.1vw, 34px) var(--font-data); color: var(--text-primary); letter-spacing: -1px; margin-top: 4px; }
+.sleep-trend { font-size: 11px; color: var(--text-muted); margin: 4px 0 12px; }
+.sleep-night-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.sleep-night-metrics > div { background: var(--surface-2); padding: 8px 10px; border: 1px solid var(--line-subtle); border-radius: var(--r-sm); }
+.sleep-night-metrics span { display: block; font-size: 11px; color: var(--text-secondary); }
+.sleep-night-metrics strong { display: block; font: 500 13px var(--font-data); margin-top: 3px; color: var(--sleep-accent); }
+.sleep-section-heading { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; margin-bottom: 8px; }
+.sleep-section-heading h3 { font: 600 14px var(--font-body); color: var(--text-primary); }
+.sleep-section-heading > span { font: 10px var(--font-data); color: var(--text-muted); }
+.sleep-phases { border-top: 1px solid var(--line-subtle); padding-top: 10px; }
+.sleep-phase-legend { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px 10px; }
+.sleep-phase-key { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-secondary); }
+.sleep-phase-key::before { content: ''; width: 6px; height: 6px; border-radius: 2px; background: var(--phase-color); }
+.phase-awake { --phase-color: #d6af76; }
+.phase-rem { --phase-color: #77c2d4; }
+.phase-light { --phase-color: #849bcf; }
+.phase-deep { --phase-color: #bc9ce8; }
+.sleep-hypnogram { width: 100%; height: 128px; display: block; margin-top: 4px; }
+.sleep-axis { font: 10px var(--font-data); fill: var(--text-muted); }
+.sleep-chart-grid { stroke: var(--line-subtle); stroke-width: 1; }
+.sleep-phase-block { fill: var(--phase-color); cursor: pointer; opacity: .85; }
+.sleep-phase-block:hover, .sleep-phase-block[aria-pressed="true"] { opacity: 1; stroke: var(--text-primary); stroke-width: 1.5; }
+.sleep-phase-connector { stroke: var(--text-muted); opacity: .3; pointer-events: none; }
+.sleep-phase-detail { font: 10px/1.4 var(--font-data); color: var(--text-secondary); min-height: 15px; }
+.sleep-history { border-top: 1px solid var(--line-subtle); padding-top: 10px; }
+.sleep-history-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.sleep-day-button { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 5px 2px; background: transparent; border: 1px solid transparent; border-radius: var(--r-sm); color: var(--text-secondary); font: 11px var(--font-data); cursor: pointer; min-width: 0; }
+.sleep-day-button[aria-pressed="true"] { background: #bc9ce812; border-color: #bc9ce855; color: var(--text-primary); }
+.sleep-day-ring { display: grid; place-items: center; width: 43px; height: 43px; border-radius: 50%; background: radial-gradient(closest-side, var(--surface-1) 82%, transparent 84%), conic-gradient(var(--sleep-accent) var(--sleep-day-progress), var(--surface-3) 0); font-size: 11px; font-weight: 500; }
+.sleep-data-note { font: 10px/1.4 var(--font-body); color: var(--text-muted); border-top: 1px solid var(--line-subtle); padding-top: 8px; }
+#viewMatrix[data-layout="full"] { grid-template-columns: 1.15fr 1fr !important; }
+#viewMatrix[data-layout="full"] .wellness-column[data-column="right"] { gap: 10px; }
+#viewMatrix[data-layout="full"] [data-panel="progress"] { padding-top: 10px; padding-bottom: 10px; }
+@media (min-width: 900px) and (max-height: 850px) {
+  .sleep-dashboard { gap: 8px !important; }
+  .sleep-summary { gap: 12px; }
+  .sleep-gauge svg { max-height: 125px; }
+  .sleep-hypnogram { height: 104px; }
+  .sleep-night-metrics > div { padding: 6px 8px; }
+  .sleep-night-metrics strong { font-size: 12px; }
+  .sleep-night-metrics span { font-size: 10px; line-height: 1.3; }
+  .sleep-night-metrics strong { line-height: 1.3; }
+  .sleep-total-headline { font-size: 26px; }
+  .sleep-trend { margin-bottom: 8px; }
+  .sleep-day-ring { width: 38px; height: 38px; font-size: 10px; }
+  .sleep-section-heading { margin-bottom: 6px; }
+}
+@media (min-width: 900px) {
+  #viewMatrix[data-layout="pair"] .sleep-mobile-tabs { display: flex; gap: 6px; }
+  #viewMatrix[data-layout="pair"] .sleep-mobile-tabs .btn-hud { flex: 1; }
+  #viewMatrix[data-layout="pair"] .sleep-mobile-tabs [aria-pressed="true"] { background: #bc9ce81a; border-color: #bc9ce877; color: #d9c4f5; }
+  #viewMatrix[data-layout="pair"] .sleep-dashboard[data-sleep-tab="summary"] [data-sleep-section]:not([data-sleep-section="summary"]),
+  #viewMatrix[data-layout="pair"] .sleep-dashboard[data-sleep-tab="phases"] [data-sleep-section]:not([data-sleep-section="phases"]),
+  #viewMatrix[data-layout="pair"] .sleep-dashboard[data-sleep-tab="history"] [data-sleep-section]:not([data-sleep-section="history"]) { display: none; }
+}
+@media (max-width: 899px) {
+  .sleep-mobile-tabs { display: flex; gap: 6px; }
+  .sleep-mobile-tabs .btn-hud { flex: 1; }
+  .sleep-mobile-tabs [aria-pressed="true"] { background: #bc9ce81a; border-color: #bc9ce877; color: #d9c4f5; }
+  .sleep-dashboard[data-sleep-tab="summary"] [data-sleep-section]:not([data-sleep-section="summary"]),
+  .sleep-dashboard[data-sleep-tab="phases"] [data-sleep-section]:not([data-sleep-section="phases"]),
+  .sleep-dashboard[data-sleep-tab="history"] [data-sleep-section]:not([data-sleep-section="history"]) { display: none; }
+  .sleep-summary { grid-template-columns: 1fr; gap: 10px; }
+  .sleep-gauge svg { max-height: 140px; }
+  .sleep-night-summary { text-align: center; }
+  .sleep-total-headline { font-size: 25px; }
+  .sleep-night-metrics { text-align: left; }
+  .sleep-phase-legend { display: grid; grid-template-columns: 1fr 1fr; }
+  .sleep-hypnogram { height: 210px; }
+  .sleep-phase-detail { min-height: 28px; }
+  .sleep-section-heading { flex-wrap: wrap; }
+  .sleep-day-ring { width: 34px; height: 34px; font-size: 9px; }
+  .sleep-history-days { gap: 2px; }
+  .sleep-source { font-size: 9px; }
+}
+@media (max-width: 899px) and (max-height: 790px) {
+  .sleep-dashboard { gap: 8px !important; }
+  .sleep-summary { grid-template-columns: .85fr 1.15fr; gap: 8px; }
+  .sleep-night-summary { text-align: left; }
+  .sleep-total-headline { font-size: 21px; }
+  .sleep-night-metrics > div { padding: 6px; }
+  .sleep-night-metrics span { font-size: 10px; }
+  .sleep-night-metrics strong { font-size: 11px; }
+  .sleep-gauge-caption { font-size: 11px; }
+  .sleep-hypnogram { height: 150px; }
+}
+@media (prefers-reduced-motion: reduce) { .sleep-gauge-arc { transition: none; } }

@@ -1,0 +1,811 @@
+<div id="viewSurgeon" class="view-container viewport-view screen-panel" data-panel="surgeon_dashboard"
+  style="display:none;">
+  <div class="view-pager" style="border-bottom:1px solid rgba(168,85,247,0.3); padding-bottom:6px; margin-bottom:10px;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div id="viewSurgeon" class="view-container viewport-view" style="display:none;">
+        <div class="view-pager"
+          style="grid-column:1 / -1; border-bottom:1px solid rgba(168,85,247,0.35); padding-bottom:6px;">
+          <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <span style="font-size:16px;">🩺</span>
+            <strong style="color:#c084fc; font-family:var(--font-hud); font-size:13px; letter-spacing:1px;">
+              5 · CONSOLA CIRUJANO DE VUELO (FLIGHT SURGEON · JSC HOUSTON)
+            </strong>
+            <span class="badge-status"
+              style="background:rgba(168,85,247,0.18); border:1px solid #c084fc; color:#e9d5ff; font-size:10px; padding:2px 8px;">
+              CANAL MÉDICO CLASIFICADO BMed
+              CANAL MÉDICO BMed · SOLO CIRUJANO
+            </span>
+          </div>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button type="button" class="btn-hud" onclick="window.surgeonController?.cambiarTripulante('ASTRO-01')"
+              id="btnSurgeonAstro1" style="font-size:11px; padding:5px 10px; border-color:var(--neon-cyan);">
+              <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                <button type="button" class="btn-hud" onclick="window.surgeonController?.cambiarTripulante('ASTRO-01')"
+                  id="btnSurgeonAstro1"
+                  style="font-size:11px; padding:5px 11px; border-color:var(--neon-cyan); background:rgba(0,240,255,0.14);">
+                  👨‍🚀 Alex Mercer (A01)
+                </button>
+                <button type="button" class="btn-hud" onclick="window.surgeonController?.cambiarTripulante('ASTRO-02')"
+                  id="btnSurgeonAstro2" style="font-size:11px; padding:5px 10px; border-color:#64748b;">
+                  <button type="button" class="btn-hud"
+                    onclick="window.surgeonController?.cambiarTripulante('ASTRO-02')" id="btnSurgeonAstro2"
+                    style="font-size:11px; padding:5px 11px; border-color:#64748b;">
+                    👩‍🚀 Elena Rostova (A02)
+                  </button>
+                  <button type="button" class="btn-hud" onclick="window.surgeonController?.alternarModoComparativo()"
+                    id="btnSurgeonCompare"
+                    style="font-size:11px; padding:5px 10px; border-color:#38bdf8; color:#38bdf8;">
+                    📊 Comparar Tripulantes
+                    <button type="button" class="btn-hud" onclick="window.surgeonController?.alternarModoComparativo()"
+                      id="btnSurgeonCompare"
+                      style="font-size:11px; padding:5px 11px; border-color:#c084fc; color:#e9d5ff;">
+                      📊 Comparar Resultados (A01 vs A02)
+                    </button>
+                    <button type="button" class="btn-hud" onclick="window.hudController.abrirModalLogin()"
+                      style="font-size:11px; padding:5px 10px; border-color:#ec4899; color:#f472b6;"
+                      title="Cerrar sesión de cirujano">
+                      🔒 Cerrar Sesión
+                      <button type="button" class="btn-hud" onclick="window.hudController.abrirModalLogin()"
+                        style="font-size:11px; padding:5px 10px; border-color:#ec4899; color:#f472b6;"
+                        title="Cambiar de usuario">
+                        🔑 Cambiar Usuario
+                      </button>
+              </div>
+              <div class="pager-controls" style="display:none;"><button type="button"
+                  class="btn-hud page-prev">‹</button><span class="page-label">1/1</span><button type="button"
+                  class="btn-hud page-next">›</button></div>
+              <div class="pager-controls" hidden>
+                <button type="button" class="btn-hud page-prev">‹</button>
+                <span class="page-label">1/1</span>
+                <button type="button" class="btn-hud page-next">›</button>
+              </div>
+          </div>
+
+          <!-- Vista Comparativa Multi-Astronauta (Toggle) -->
+          <div id="surgeonCompareContainer"
+            style="display:none; width:100%; height:100%; min-height:0; overflow-y:auto; padding-right:4px;">
+            <div style="background:#060d1d; border:1px solid rgba(168,85,247,0.3); border-radius:10px; padding:16px;">
+              <div
+                style="font-family:var(--font-hud); font-size:14px; color:#c084fc; margin-bottom:4px; display:flex; align-items:center; gap:8px;">
+                <span>📊</span> TABLERO COMPARATIVO DE TRIPULACIÓN (CROSS-CREW TELEMETRY)
+              </div>
+              <div style="font-size:11px; color:#94a3b8; margin-bottom:14px;">
+                Vigilancia hemodinámica, fatiga acumulada, radiación de carrera y congruencia vocal entre miembros de la
+                misión ARES-VI.
+              </div>
+              <!-- ===================================================================== -->
+              <!-- MODO 1: EXPEDIENTE DETALLADO INDIVIDUAL Y RESULTADOS DEL ASTRONAUTA   -->
+              <!-- ===================================================================== -->
+              <div id="surgeonSingleContainer"
+                style="grid-column:1 / -1; grid-row:2 / -1; display:grid; grid-template-columns:1.12fr 1fr; gap:12px; padding:0; background:transparent; border:none; box-shadow:none; min-height:0; overflow-y:auto;">
+
+                <!-- Tabla Comparativa de Tripulantes -->
+                <div style="overflow-x:auto;">
+                  <table
+                    style="width:100%; border-collapse:collapse; font-size:11.5px; text-align:left; font-family:var(--font-data);">
+                    <thead>
+                      <tr
+                        style="border-bottom:1px solid rgba(0,240,255,0.25); color:var(--c-cyan-ink); font-family:var(--font-hud); font-size:10.5px;">
+                        <th style="padding:10px 8px;">TRIPULANTE</th>
+                        <th style="padding:10px 8px;">PULSO (bpm)</th>
+                        <th style="padding:10px 8px;">PRESIÓN</th>
+                        <th style="padding:10px 8px;">SpO2</th>
+                        <th style="padding:10px 8px;">HRV</th>
+                        <th style="padding:10px 8px;">SUEÑO 24h</th>
+                        <th style="padding:10px 8px;">SANS OCULAR</th>
+                        <th style="padding:10px 8px;">ACÚSTICA / VOZ</th>
+                        <th style="padding:10px 8px;">ESTADO CLÍNICO</th>
+                      </tr>
+                    </thead>
+                    <tbody id="surgeonCompareTableBody">
+                      <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                        <td style="padding:10px 8px; font-weight:bold; color:#f8fafc;">👨‍🚀 Alex Mercer (A01)</td>
+                        <td style="padding:10px 8px; color:var(--c-cyan-ink);">76 bpm</td>
+                        <td style="padding:10px 8px;">118/76 mmHg</td>
+                        <td style="padding:10px 8px; color:var(--c-green-ink);">98%</td>
+                        <td style="padding:10px 8px;">42 ms</td>
+                        <td style="padding:10px 8px; color:#c084fc;">7.2 h (90%)</td>
+                        <td style="padding:10px 8px;"><span class="badge-status status-stable"
+                            style="font-size:9px;">ESTABLE (20/20)</span></td>
+                        <td style="padding:10px 8px;"><span class="badge-status status-stable"
+                            style="font-size:9px;">LEQ16 59.5 dBA</span></td>
+                        <td style="padding:10px 8px;"><span class="badge-status status-stable"
+                            style="font-size:10px;">COMPENSADO</span></td>
+                      </tr>
+                      <tr style="border-bottom:1px solid rgba(255,255,255,0.06);">
+                        <td style="padding:10px 8px; font-weight:bold; color:#f8fafc;">👩‍🚀 Elena Rostova (A02)</td>
+                        <td style="padding:10px 8px; color:var(--c-cyan-ink);">82 bpm</td>
+                        <td style="padding:10px 8px;">124/80 mmHg</td>
+                        <td style="padding:10px 8px; color:var(--c-green-ink);">97%</td>
+                        <td style="padding:10px 8px;">35 ms</td>
+                        <td style="padding:10px 8px; color:var(--neon-amber);">5.8 h (72%)</td>
+                        <td style="padding:10px 8px;"><span class="badge-status status-warning"
+                            style="font-size:9px;">LEVE HIPEROPIA</span></td>
+                        <td style="padding:10px 8px;"><span class="badge-status status-warning"
+                            style="font-size:9px;">LEQ8 55.4 dBA</span></td>
+                        <td style="padding:10px 8px;"><span class="badge-status status-warning"
+                            style="font-size:10px;">VIGILANCIA</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <!-- COLUMNA IZQUIERDA: SIGNOS VITALES DETALLADOS + RESULTADOS DE EXÁMENES -->
+                <div style="display:flex; flex-direction:column; gap:10px; min-width:0;">
+
+                  <!-- Resumen Comparativo de Fatiga y Riesgos -->
+                  <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:16px;">
+                    <div
+                      style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:12px;">
+                      <strong style="color:var(--c-cyan-ink); font-size:12px;">📋 RECOMENDACIÓN COLECTIVA BMed:</strong>
+                      <p style="font-size:11.5px; color:#cbd5e1; margin:6px 0 0 0; line-height:1.45;">
+                        El Comandante Mercer presenta biomarcadores de alerta óptimos. La Especialista Rostova muestra
+                        ligera acumulación de fatiga por ruido nocturno en cabina (LEQ8 &gt; 50 dBA). Se recomienda
+                        descanso compensatorio antes de la EVA Sol 122.
+                      </p>
+                    </div>
+                    <div
+                      style="background:#081326; border:1px solid rgba(168,85,247,0.3); border-radius:8px; padding:12px;">
+                      <strong style="color:#c084fc; font-size:12px;">🩺 PROTOCOLO CLÍNICO CONJUNTO:</strong>
+                      <div style="display:flex; gap:8px; margin-top:8px;">
+                        <button type="button" class="btn-hud"
+                          onclick="window.surgeonController?.prescribir('Revisión acústica de ventiladores en cabina de sueño')"
+                          style="flex:1; font-size:10.5px; padding:6px 8px;">
+                          Revisar Cabina Sueño A02
+                        </button>
+                        <button type="button" class="btn-hud"
+                          onclick="window.surgeonController?.prescribir('Sincronización de ciclos circadianos')"
+                          style="flex:1; font-size:10.5px; padding:6px 8px;">
+                          Sincronizar Circadianos
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Contenedor Maestro de la Consola del Cirujano (Grid de 2 columnas) -->
+              <div id="surgeonSingleContainer"
+                style="display:grid; grid-template-columns:1.15fr 1fr; gap:14px; width:100%; height:100%; min-height:0; overflow-y:auto; padding-right:4px;">
+
+                <!-- COLUMNA IZQUIERDA: SIGNOS VITALES CLÍNICOS Y TELEMETRÍA MULTIVARIADA -->
+                <div style="display:flex; flex-direction:column; gap:12px; min-width:0;">
+
+                  <!-- Panel 1: Estado General del Paciente -->
+                  <div class="hud-panel screen-panel" style="border-color:rgba(168,85,247,0.3); background:#060d1d;">
+                    <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center;">
+                      <!-- Tarjeta 1: Signos Vitales Clínicos del Astronauta Seleccionado -->
+                      <div class="hud-panel"
+                        style="border-color:rgba(168,85,247,0.35); background:#060d1d; padding:12px 14px;">
+                        <div class="panel-header"
+                          style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding-bottom:6px;">
+                          <div>
+                            <div class="panel-title" style="color:#c084fc;">
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                              </svg>
+                              EXPEDIENTE CLÍNICO EN TIEMPO REAL · <span id="surgeonPatientName">ALEX MERCER
+                                (ASTRO-01)</span>
+                              <div class="panel-title" style="color:#c084fc; font-size:12.5px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                  stroke-width="2">
+                                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                                </svg>
+                                SIGNOS VITALES DETALLADOS · <span id="surgeonPatientName" style="color:#f8fafc;">ALEX
+                                  MERCER (COMANDANTE A01)</span>
+                              </div>
+                              <div class="panel-subtitle">MISIÓN ARES-VI · SOL 120 · MONITOREO CONTINUO ASTROSKIN Y
+                                BIO-SENSORES</div>
+                              <div id="surgeonPatientMeta" class="panel-subtitle" style="font-size:10px;">
+                                ID: ASTRO-01 · ARES-VI SOL 120 · BIO-TELEMETRÍA ASTROSKIN EN TIEMPO REAL
+                              </div>
+                            </div>
+                            <span id="surgeonClinicalStatusBadge" class="badge-status status-stable"
+                              style="font-size:11px; padding:4px 10px;">ESTADO: COMPENSADO</span>
+                            <span id="surgeonClinicalStatusBadge" class="badge-status status-stable"
+                              style="font-size:10px; padding:3px 9px;">ESTADO: COMPENSADO</span>
+                          </div>
+
+                          <!-- Grilla de Signos Vitales Detallados -->
+                          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-top:8px;">
+                            <!-- Ritmo Cardíaco & HRV -->
+                            <div
+                              style="background:#040914; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:10px;">
+                              <div style="font-size:10px; color:#94a3b8; font-family:var(--font-hud);">PULSO &amp; HRV
+                              </div>
+                              <div style="display:flex; align-items:baseline; gap:6px; margin:4px 0;">
+                                <span id="surgHrVal"
+                                  style="font-family:var(--font-hud); font-size:22px; font-weight:900; color:var(--c-cyan-ink);">76</span>
+                                <span style="font-size:11px; color:#64748b;">bpm</span>
+                                <!-- Cuadrícula 3x3 de Signos Vitales Clínicos -->
+                                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;">
+                                  <div
+                                    style="background:#040914; border:1px solid rgba(0,240,255,0.2); border-radius:6px; padding:8px 10px;">
+                                    <div style="font-size:9.5px; color:#94a3b8; font-family:var(--font-hud);">FRECUENCIA
+                                      CARDÍACA</div>
+                                    <div style="display:flex; align-items:baseline; gap:5px; margin:2px 0;">
+                                      <span id="surgHrVal"
+                                        style="font-family:var(--font-hud); font-size:20px; font-weight:900; color:var(--c-cyan-ink);">76</span>
+                                      <span style="font-size:10px; color:#64748b;">lpm</span>
+                                    </div>
+                                    <div style="font-size:10.5px; color:#cbd5e1;">HRV: <strong id="surgHrvVal"
+                                        style="color:var(--c-green-ink);">42 ms</strong></div>
+                                    <div style="font-size:9.5px; color:#64748b; margin-top:2px;">Rango nominal: 55-88
+                                      bpm</div>
+                                    <div style="font-size:10px; color:#cbd5e1;">HRV (RMSSD): <strong id="surgHrvVal"
+                                        style="color:var(--c-green-ink);">42 ms</strong></div>
+                                  </div>
+
+                                  <!-- Presión Arterial & SpO2 -->
+                                  <div
+                                    style="background:#040914; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:10px;">
+                                    <div style="font-size:10px; color:#94a3b8; font-family:var(--font-hud);">PRESIÓN /
+                                      SpO2</div>
+                                    <div style="display:flex; align-items:baseline; gap:6px; margin:4px 0;">
+                                      <span id="surgBpVal"
+                                        style="font-family:var(--font-hud); font-size:20px; font-weight:900; color:#f8fafc;">118/76</span>
+                                      <span style="font-size:10.5px; color:#64748b;">mmHg</span>
+                                      <div
+                                        style="background:#040914; border:1px solid rgba(0,240,255,0.2); border-radius:6px; padding:8px 10px;">
+                                        <div style="font-size:9.5px; color:#94a3b8; font-family:var(--font-hud);">
+                                          PRESIÓN ARTERIAL &amp; PAM</div>
+                                        <div style="display:flex; align-items:baseline; gap:5px; margin:2px 0;">
+                                          <span id="surgBpVal"
+                                            style="font-family:var(--font-hud); font-size:19px; font-weight:900; color:#f8fafc;">118/76</span>
+                                          <span style="font-size:10px; color:#64748b;">mmHg</span>
+                                        </div>
+                                        <div style="font-size:10.5px; color:#cbd5e1;">Sat O2: <strong id="surgSpo2Val"
+                                            style="color:var(--c-green-ink);">98%</strong></div>
+                                        <div style="font-size:9.5px; color:#64748b; margin-top:2px;">Target SpO2 &gt;
+                                          95%</div>
+                                        <div style="font-size:10px; color:#cbd5e1;">PAM: <strong id="surgMapVal"
+                                            style="color:var(--c-cyan-ink);">90 mmHg</strong></div>
+                                      </div>
+
+                                      <!-- Temperatura & Frec. Resp. -->
+                                      <div
+                                        style="background:#040914; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:10px;">
+                                        <div style="font-size:10px; color:#94a3b8; font-family:var(--font-hud);">
+                                          TEMPERATURA / RPM</div>
+                                        <div style="display:flex; align-items:baseline; gap:6px; margin:4px 0;">
+                                          <span id="surgTempVal"
+                                            style="font-family:var(--font-hud); font-size:22px; font-weight:900; color:var(--c-cyan-ink);">36.6</span>
+                                          <span style="font-size:11px; color:#64748b;">°C</span>
+                                          <div
+                                            style="background:#040914; border:1px solid rgba(0,240,255,0.2); border-radius:6px; padding:8px 10px;">
+                                            <div style="font-size:9.5px; color:#94a3b8; font-family:var(--font-hud);">
+                                              OXIGENACIÓN &amp; RESP.</div>
+                                            <div style="display:flex; align-items:baseline; gap:5px; margin:2px 0;">
+                                              <span id="surgSpo2Val"
+                                                style="font-family:var(--font-hud); font-size:20px; font-weight:900; color:var(--c-green-ink);">98%</span>
+                                              <span style="font-size:10px; color:#64748b;">SpO₂</span>
+                                            </div>
+                                            <div style="font-size:10.5px; color:#cbd5e1;">Resp: <strong id="surgRpmVal"
+                                                style="color:var(--c-cyan-ink);">14 rpm</strong></div>
+                                            <div style="font-size:9.5px; color:#64748b; margin-top:2px;">Piel: 34.8 °C
+                                            </div>
+                                            <div style="font-size:10px; color:#cbd5e1;">Frec. Resp: <strong
+                                                id="surgRpmVal" style="color:var(--c-cyan-ink);">14 rpm</strong></div>
+                                          </div>
+                                        </div>
+
+                                        <!-- Fila secundaria: Densidad Ósea, Hidratación y Sueño -->
+                                        <div
+                                          style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-top:10px;">
+                                          <!-- Densidad Ósea Acumulada -->
+                                          <div
+                                            style="background:#040914; border:1px solid rgba(0,240,255,0.15); border-radius:8px; padding:10px;">
+                                            <div style="font-size:10px; color:#94a3b8; font-family:var(--font-hud);">
+                                              PÉRDIDA ÓSEA (BMD)</div>
+                                            <div id="surgBoneVal"
+                                              style="font-family:var(--font-hud); font-size:18px; color:var(--c-cyan-ink); margin:4px 0;">
+                                              -1.8%</div>
+                                            <div style="font-size:9.5px; color:#94a3b8;">ARED: 100% compliant</div>
+                                            <div
+                                              style="background:#040914; border:1px solid rgba(0,240,255,0.16); border-radius:6px; padding:8px 10px;">
+                                              <div style="font-size:9.5px; color:#94a3b8; font-family:var(--font-hud);">
+                                                TEMP. CENTRAL / PIEL</div>
+                                              <div id="surgTempVal"
+                                                style="font-family:var(--font-hud); font-size:17px; font-weight:800; color:var(--c-cyan-ink); margin:2px 0;">
+                                                36.6 °C</div>
+                                              <div style="font-size:10px; color:#cbd5e1;">Cutánea: <strong
+                                                  id="surgSkinTempVal" style="color:#94a3b8;">34.8 °C</strong></div>
+                                            </div>
+
+                                            <!-- Balance de Hidratación FIT -->
+                                            <div
+                                              style="background:#040914; border:1px solid rgba(0,240,255,0.15); border-radius:8px; padding:10px;">
+                                              <div style="font-size:10px; color:#94a3b8; font-family:var(--font-hud);">
+                                                BALANCE HÍDRICO FIT</div>
+                                              <div id="surgFluidVal"
+                                                style="font-family:var(--font-hud); font-size:18px; color:var(--c-green-ink); margin:4px 0;">
+                                                2.2 L / 2.2 L</div>
+                                              <div style="font-size:9.5px; color:#94a3b8;">Cuota hídrica cumplida</div>
+                                              <div
+                                                style="background:#040914; border:1px solid rgba(0,240,255,0.16); border-radius:6px; padding:8px 10px;">
+                                                <div
+                                                  style="font-size:9.5px; color:#94a3b8; font-family:var(--font-hud);">
+                                                  DENSIDAD ÓSEA &amp; ARED</div>
+                                                <div id="surgBoneVal"
+                                                  style="font-family:var(--font-hud); font-size:17px; font-weight:800; color:var(--c-cyan-ink); margin:2px 0;">
+                                                  -1.8%</div>
+                                                <div style="font-size:10px; color:#cbd5e1;">Carga ARED: <strong
+                                                    id="surgAredVal" style="color:var(--c-green-ink);">100%</strong>
+                                                </div>
+                                              </div>
+
+                                              <!-- Último Ciclo de Sueño -->
+                                              <div
+                                                style="background:#040914; border:1px solid rgba(0,240,255,0.15); border-radius:8px; padding:10px;">
+                                                <div
+                                                  style="font-size:10px; color:#94a3b8; font-family:var(--font-hud);">
+                                                  SUEÑO &amp; DESCANSO</div>
+                                                <div id="surgSleepVal"
+                                                  style="font-family:var(--font-hud); font-size:18px; color:#c084fc; margin:4px 0;">
+                                                  7.2 h (90%)</div>
+                                                <div style="font-size:9.5px; color:#94a3b8;">REM 23% · Profundo 23%
+                                                </div>
+                                                <div
+                                                  style="background:#040914; border:1px solid rgba(0,240,255,0.16); border-radius:6px; padding:8px 10px;">
+                                                  <div
+                                                    style="font-size:9.5px; color:#94a3b8; font-family:var(--font-hud);">
+                                                    HIDRATACIÓN FIT &amp; SUEÑO</div>
+                                                  <div id="surgFluidVal"
+                                                    style="font-family:var(--font-hud); font-size:16px; font-weight:800; color:var(--c-green-ink); margin:2px 0;">
+                                                    2.20 / 2.2 L</div>
+                                                  <div style="font-size:10px; color:#cbd5e1;">Sueño: <strong
+                                                      id="surgSleepVal" style="color:#c084fc;">7.2 h (90%)</strong>
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </div>
+
+                                            <!-- Panel 2: Evaluación Clínica SANS y Acústica Vocal -->
+                                            <div class="hud-panel screen-panel"
+                                              style="border-color:rgba(0,240,255,0.25); background:#060d1d;">
+                                              <div class="panel-header">
+                                                <div class="panel-title" style="color:var(--c-cyan-ink);">
+                                                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                                    stroke="currentColor" stroke-width="2">
+                                                    <circle cx="12" cy="12" r="3" />
+                                                    <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+                                                    <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+                                                    <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+                                                    <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+                                                  </svg>
+                                                  EVALUACIONES PRELIMINARES ESPECIALIZADAS DE VUELO
+                                                  <!-- Tarjeta 2: Resultados de Evaluaciones del Astronauta (SANS, Sonar y ASTRA) -->
+                                                  <div class="hud-panel"
+                                                    style="border-color:rgba(0,240,255,0.28); background:#060d1d; padding:12px 14px; flex:1;">
+                                                    <div class="panel-header"
+                                                      style="margin-bottom:8px; padding-bottom:6px;">
+                                                      <div class="panel-title"
+                                                        style="color:var(--c-cyan-ink); font-size:12px;">
+                                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                                                          stroke="currentColor" stroke-width="2">
+                                                          <path d="M9 11l3 3L22 4" />
+                                                          <path
+                                                            d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+                                                        </svg>
+                                                        RESULTADOS DE EXÁMENES Y EVALUACIONES DEL ASTRONAUTA
+                                                      </div>
+                                                      <div class="panel-subtitle">ESTADO OFTALMOLÓGICO SANS · DOSIMETRÍA
+                                                        LEQ16/LEQ8 · BIOMARCADORES DE VOZ</div>
+                                                      <div class="panel-subtitle" style="font-size:10px;">
+                                                        REGISTROS SINCRONIZADOS DE PROTOCOLO OFTÁLMICO SANS,
+                                                        AUDIOMETRÍA/VOZ Y CHEQUEO ASTRA-BHP
+                                                      </div>
+                                                    </div>
+
+                                                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                                                      <!-- Tarjeta SANS -->
+                                                      <div
+                                                        style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:12px;">
+                                                        <div
+                                                          style="display:grid; grid-template-columns:repeat(3, 1fr); gap:8px;">
+                                                          <!-- Resultado Examen 1: Oftálmico SANS -->
+                                                          <div
+                                                            style="background:#081326; border:1px solid rgba(0,240,255,0.22); border-radius:8px; padding:10px;">
+                                                            <div
+                                                              style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                                              <strong
+                                                                style="color:var(--c-cyan-ink); font-size:12px;">👁️
+                                                                PROTOCOLO SANS OCULAR</strong>
+                                                              <span id="surgSansStatus"
+                                                                class="badge-status status-stable"
+                                                                style="font-size:9.5px;">ESTABLE</span>
+                                                              <strong
+                                                                style="color:var(--c-cyan-ink); font-size:11px; font-family:var(--font-hud);">👁️
+                                                                OFTÁLMICO SANS</strong>
+                                                              <span id="surgSansStatus"
+                                                                class="badge-status status-stable"
+                                                                style="font-size:9px; padding:2px 6px;">ESTABLE</span>
+                                                            </div>
+                                                            <div
+                                                              style="font-size:11px; color:#cbd5e1; line-height:1.5;">
+                                                              • Agudeza visual: <strong>20/20 bilateral</strong><br>
+                                                              • Anillo Landolt / Contraste: <strong>Nominal</strong><br>
+                                                              • Rejilla Amsler: <strong>Sin metamorfopsia</strong><br>
+                                                              • Ishihara: <strong>7/7 placas correctas</strong>
+                                                              <div id="surgSansDetails"
+                                                                style="font-size:10.5px; color:#cbd5e1; line-height:1.45;">
+                                                                • Agudeza: <strong>20/20 (100%)</strong><br>
+                                                                • Contraste Landolt: <strong>100%</strong><br>
+                                                                • Amsler: <strong>Sin distorsión</strong><br>
+                                                                • Ishihara: <strong>7/7 láminas</strong>
+                                                              </div>
+                                                              <div style="margin-top:8px;">
+                                                                <button type="button" class="btn-hud"
+                                                                  onclick="window.hudController.iniciarExamenOftalmico()"
+                                                                  style="font-size:10.5px; padding:5px 10px; width:100%;">
+                                                                  👁️ Abrir Examen Oftálmico Completo
+                                                                </button>
+                                                              </div>
+
+                                                              <!-- Resultado Examen 2: Sonar Acústico y Voz -->
+                                                              <div
+                                                                style="background:#081326; border:1px solid rgba(168,85,247,0.28); border-radius:8px; padding:10px;">
+                                                                <div
+                                                                  style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                                                  <strong
+                                                                    style="color:#c084fc; font-size:11px; font-family:var(--font-hud);">🎧
+                                                                    SONAR &amp; VOZ</strong>
+                                                                  <span id="surgAudioStatus"
+                                                                    class="badge-status status-stable"
+                                                                    style="font-size:9px; padding:2px 6px;">NOMINAL</span>
+                                                                </div>
+                                                                <div id="surgAudioDetails"
+                                                                  style="font-size:10.5px; color:#cbd5e1; line-height:1.45;">
+                                                                  • Audiometría: <strong>5/5 (Sin tinnitus)</strong><br>
+                                                                  • Dosimetría: <strong>LEQ16 59.5 dBA</strong><br>
+                                                                  • Sueño LEQ8: <strong>48.5 dBA</strong><br>
+                                                                  • Voz F0 / HNR: <strong>124 Hz · 21.4 dB</strong>
+                                                                </div>
+                                                              </div>
+
+                                                              <!-- Tarjeta Acústica y Vocal -->
+                                                              <div
+                                                                style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:12px;">
+                                                                <!-- Resultado Examen 3: Evaluación Psicológica ASTRA-BHP -->
+                                                                <div
+                                                                  style="background:#081326; border:1px solid rgba(0,255,136,0.22); border-radius:8px; padding:10px;">
+                                                                  <div
+                                                                    style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                                                    <strong style="color:#c084fc; font-size:12px;">🎧
+                                                                      ACÚSTICA &amp; VOZ (NASA-STD-3001)</strong>
+                                                                    <span id="surgAudioStatus"
+                                                                      class="badge-status status-stable"
+                                                                      style="font-size:9.5px;">NOMINAL</span>
+                                                                    <strong
+                                                                      style="color:var(--c-green-ink); font-size:11px; font-family:var(--font-hud);">🧠
+                                                                      COGNITIVO ASTRA</strong>
+                                                                    <span id="surgPsychStatus"
+                                                                      class="badge-status status-stable"
+                                                                      style="font-size:9px; padding:2px 6px;">COHERENTE</span>
+                                                                  </div>
+                                                                  <div
+                                                                    style="font-size:11px; color:#cbd5e1; line-height:1.5;">
+                                                                    • Dosimetría LEQ16: <strong>59.5 dBA (&lt; 72
+                                                                      limit)</strong><br>
+                                                                    • Ruido en descanso LEQ8: <strong>48.5 dBA (&lt; 50
+                                                                      limit)</strong><br>
+                                                                    • Tono fundamental (F0): <strong>124 Hz
+                                                                      (Estable)</strong><br>
+                                                                    • Limpieza armónica (HNR): <strong>21.4 dB
+                                                                      (Óptimo)</strong>
+                                                                    <div id="surgPsychDetails"
+                                                                      style="font-size:10.5px; color:#cbd5e1; line-height:1.45;">
+                                                                      • Cadencia vocal: <strong>134 WPM</strong><br>
+                                                                      • Latencia: <strong>210 ms</strong><br>
+                                                                      • Densidad léxica: <strong>0.95</strong><br>
+                                                                      • Coseno ASTRA: <strong>0.985</strong>
+                                                                    </div>
+                                                                    <div style="margin-top:8px;">
+                                                                      <button type="button" class="btn-hud"
+                                                                        onclick="window.hudController.iniciarExamenSonar()"
+                                                                        style="font-size:10.5px; padding:5px 10px; width:100%;">
+                                                                        🎧 Abrir Evaluación Sonora y Voz
+                                                                      </button>
+                                                                    </div>
+                                                                  </div>
+                                                                </div>
+                                                              </div>
+
+                                                            </div>
+
+                                                            <!-- COLUMNA DERECHA: CRUCES DE DECISIÓN CLÍNICA Y CONTRAMEDIDAS ACTIVAS -->
+                                                            <div
+                                                              style="display:flex; flex-direction:column; gap:12px; min-width:0;">
+
+                                                              <!-- Panel 3: Matriz de Decisiones Clínicas (Cruces Activos Martina) -->
+                                                              <div class="hud-panel screen-panel"
+                                                                style="border-color:rgba(168,85,247,0.3); background:#060d1d; flex:1;">
+                                                                <div class="panel-header"
+                                                                  style="display:flex; justify-content:space-between; align-items:center;">
+                                                                  <!-- COLUMNA DERECHA: RESUMEN COMPARATIVO RÁPIDO + DICTAMEN Y ÓRDENES MÉDICAS -->
+                                                                  <div
+                                                                    style="display:flex; flex-direction:column; gap:10px; min-width:0;">
+
+                                                                    <!-- Tarjeta 3: Comparativa Rápida de Resultados entre Astronautas -->
+                                                                    <div class="hud-panel"
+                                                                      style="border-color:rgba(56,189,248,0.3); background:#060d1d; padding:12px 14px;">
+                                                                      <div class="panel-header"
+                                                                        style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; padding-bottom:6px;">
+                                                                        <div>
+                                                                          <div class="panel-title"
+                                                                            style="color:#c084fc;">
+                                                                            <svg width="18" height="18"
+                                                                              viewBox="0 0 24 24" fill="none"
+                                                                              stroke="currentColor" stroke-width="2">
+                                                                              <path
+                                                                                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                                                              <polyline points="14 2 14 8 20 8" />
+                                                                              <line x1="16" y1="13" x2="8" y2="13" />
+                                                                              <line x1="16" y1="17" x2="8" y2="17" />
+                                                                              <polyline points="10 9 9 9 8 9" />
+                                                                            </svg>
+                                                                            DICTAMEN Y CONTRAMEDIDAS PRESCRITAS (CRUCES
+                                                                            ACTIVOS)
+                                                                            <div class="panel-title"
+                                                                              style="color:#38bdf8; font-size:12px;">
+                                                                              📊 RESUMEN DE RESULTADOS POR TRIPULANTE
+                                                                              (A01 vs A02)
+                                                                            </div>
+                                                                            <div class="panel-subtitle">PROTOCOLO DE
+                                                                              ACCIÓN MÉDICA INMEDIATA PARA EL CIRUJANO
+                                                                              DE VUELO</div>
+                                                                            <div class="panel-subtitle"
+                                                                              style="font-size:9.5px;">CLIC EN CUALQUIER
+                                                                              FILA PARA ABRIR SU EXPEDIENTE COMPLETO
+                                                                            </div>
+                                                                          </div>
+                                                                          <button type="button" class="btn-hud"
+                                                                            onclick="window.viewportController.mostrarReglas()"
+                                                                            style="font-size:10.5px; padding:4px 8px;">
+                                                                            Consultar 19 Cruces
+                                                                            <button type="button" class="btn-hud"
+                                                                              onclick="window.surgeonController?.alternarModoComparativo()"
+                                                                              style="font-size:10px; padding:4px 8px;">
+                                                                              Ampliar Tabla ›
+                                                                            </button>
+                                                                        </div>
+
+                                                                        <div id="surgeonAlertsContainer"
+                                                                          style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
+                                                                          <!-- Alerta Activa Mock / Real Dinámica -->
+                                                                          <div
+                                                                            style="background:#081326; border-left:3px solid var(--c-green); border-radius:0 6px 6px 0; padding:10px 14px; font-size:11.5px;">
+                                                                            <div
+                                                                              style="display:flex; justify-content:space-between; align-items:center;">
+                                                                              <strong
+                                                                                style="color:var(--c-green-ink); font-family:var(--font-hud);">SITUACIÓN
+                                                                                CLÍNICA NOMINAL</strong>
+                                                                              <span
+                                                                                style="color:#64748b; font-size:10px;">SOL
+                                                                                120 · ÓRBITA TRANS-MARTE</span>
+                                                                              <table
+                                                                                style="width:100%; border-collapse:collapse; font-size:10.5px; font-family:var(--font-data);">
+                                                                                <thead>
+                                                                                  <tr
+                                                                                    style="border-bottom:1px solid rgba(0,240,255,0.2); color:#94a3b8; font-family:var(--font-hud); font-size:9.5px; text-align:left;">
+                                                                                    <th style="padding:5px 6px;">
+                                                                                      ASTRONAUTA</th>
+                                                                                    <th style="padding:5px 6px;">VITALES
+                                                                                    </th>
+                                                                                    <th style="padding:5px 6px;">SANS
+                                                                                      OCULAR</th>
+                                                                                    <th style="padding:5px 6px;">SONAR /
+                                                                                      VOZ</th>
+                                                                                    <th style="padding:5px 6px;">ASTRA
+                                                                                      BHP</th>
+                                                                                  </tr>
+                                                                                </thead>
+                                                                                <tbody id="surgeonMiniCompareBody">
+                                                                                  <tr
+                                                                                    onclick="window.surgeonController?.cambiarTripulante('ASTRO-01')"
+                                                                                    style="border-bottom:1px solid rgba(255,255,255,0.06); cursor:pointer;">
+                                                                                    <td
+                                                                                      style="padding:6px; font-weight:bold; color:#f8fafc;">
+                                                                                      👨‍🚀 A01 · Mercer</td>
+                                                                                    <td id="miniVitalA01"
+                                                                                      style="padding:6px; color:var(--c-cyan-ink);">
+                                                                                      76 lpm · 98%</td>
+                                                                                    <td id="miniSansA01"
+                                                                                      style="padding:6px; color:var(--c-green-ink);">
+                                                                                      20/20 Nominal</td>
+                                                                                    <td id="miniSonarA01"
+                                                                                      style="padding:6px; color:var(--c-green-ink);">
+                                                                                      59.5 dBA OK</td>
+                                                                                    <td id="miniAstraA01"
+                                                                                      style="padding:6px; color:var(--c-green-ink);">
+                                                                                      Coherente (0.98)</td>
+                                                                                  </tr>
+                                                                                  <tr
+                                                                                    onclick="window.surgeonController?.cambiarTripulante('ASTRO-02')"
+                                                                                    style="cursor:pointer;">
+                                                                                    <td
+                                                                                      style="padding:6px; font-weight:bold; color:#f8fafc;">
+                                                                                      👩‍🚀 A02 · Rostova</td>
+                                                                                    <td id="miniVitalA02"
+                                                                                      style="padding:6px; color:var(--neon-amber);">
+                                                                                      84 lpm · 97%</td>
+                                                                                    <td id="miniSansA02"
+                                                                                      style="padding:6px; color:var(--neon-amber);">
+                                                                                      20/25 Leve</td>
+                                                                                    <td id="miniSonarA02"
+                                                                                      style="padding:6px; color:var(--neon-amber);">
+                                                                                      LEQ8 55.4 dBA</td>
+                                                                                    <td id="miniAstraA02"
+                                                                                      style="padding:6px; color:var(--neon-amber);">
+                                                                                      Fatiga (5.8h)</td>
+                                                                                  </tr>
+                                                                                </tbody>
+                                                                              </table>
+                                                                            </div>
+
+                                                                            <!-- Tarjeta 4: Dictamen y Órdenes Médicas del Cirujano -->
+                                                                            <div class="hud-panel"
+                                                                              style="border-color:rgba(168,85,247,0.35); background:#060d1d; padding:12px 14px; flex:1; display:flex; flex-direction:column;">
+                                                                              <div class="panel-header"
+                                                                                style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding-bottom:6px;">
+                                                                                <div>
+                                                                                  <div class="panel-title"
+                                                                                    style="color:#c084fc; font-size:12px;">
+                                                                                    📋 HALLAZGOS Y CONTRAMEDIDAS DEL
+                                                                                    TRIPULANTE
+                                                                                  </div>
+                                                                                  <p
+                                                                                    style="margin:4px 0 0 0; color:#cbd5e1; font-size:11px; line-height:1.4;">
+                                                                                    Todos los biomarcadores fisiológicos
+                                                                                    y de entorno cumplen los criterios
+                                                                                    de seguridad de NASA-STD-3001. No se
+                                                                                    requiere intervención farmacológica
+                                                                                    ni modificación de itinerario.
+                                                                                  </p>
+                                                                                  <div class="panel-subtitle"
+                                                                                    style="font-size:9.5px;">CRUCES
+                                                                                    ACTIVOS Y PRESCRIPCIÓN BMed EN
+                                                                                    TIEMPO REAL</div>
+                                                                                </div>
+                                                                                <button type="button" class="btn-hud"
+                                                                                  onclick="window.viewportController.mostrarReglas()"
+                                                                                  style="font-size:10px; padding:4px 8px;">
+                                                                                  Matriz 19 Cruces
+                                                                                </button>
+                                                                              </div>
+
+                                                                              <!-- Prescripciones Médicas Rápidas -->
+                                                                              <div
+                                                                                style="background:#081326; border:1px solid rgba(168,85,247,0.25); border-radius:8px; padding:12px; margin-top:auto;">
+                                                                                <div
+                                                                                  style="font-family:var(--font-hud); font-size:11px; color:#c084fc; margin-bottom:8px;">
+                                                                                  ✍️ ACCIONES DIRECTAS DEL CIRUJANO DE
+                                                                                  VUELO:
+                                                                                  <div id="surgeonAlertsContainer"
+                                                                                    style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+                                                                                  </div>
+
+                                                                                  <div
+                                                                                    style="background:#081326; border:1px solid rgba(168,85,247,0.25); border-radius:8px; padding:10px; margin-top:auto;">
+                                                                                    <div
+                                                                                      style="font-family:var(--font-hud); font-size:10.5px; color:#c084fc; margin-bottom:6px;">
+                                                                                      ✍️ TRANSMITIR ORDEN MÉDICA A
+                                                                                      CABINA:
+                                                                                    </div>
+                                                                                    <div
+                                                                                      style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
+                                                                                      <button type="button"
+                                                                                        class="btn-hud"
+                                                                                        onclick="window.surgeonController?.prescribir('Ajuste de cuota hídrica a 2.5 L/d')"
+                                                                                        style="font-size:10.5px; padding:7px 8px; text-align:left;">
+                                                                                        💧 Incrementar Hidratación
+                                                                                        (+300mL)
+                                                                                        <button type="button"
+                                                                                          class="btn-hud"
+                                                                                          onclick="window.surgeonController?.prescribir('Incrementar cuota hídrica FIT en +300 mL')"
+                                                                                          style="font-size:10px; padding:6px 8px; text-align:left;">
+                                                                                          💧 +300 mL Cuota Hídrica
+                                                                                        </button>
+                                                                                        <button type="button"
+                                                                                          class="btn-hud"
+                                                                                          onclick="window.surgeonController?.prescribir('Pausa de silencio y descanso auditivo')"
+                                                                                          style="font-size:10.5px; padding:7px 8px; text-align:left;">
+                                                                                          🔇 Prescribir Pausa de
+                                                                                          Silencio
+                                                                                          <button type="button"
+                                                                                            class="btn-hud"
+                                                                                            onclick="window.surgeonController?.prescribir('Uso de tapones auditivos y pausa de silencio (CX-17)')"
+                                                                                            style="font-size:10px; padding:6px 8px; text-align:left;">
+                                                                                            🔇 Tapones / Pausa Acústica
+                                                                                          </button>
+                                                                                          <button type="button"
+                                                                                            class="btn-hud"
+                                                                                            onclick="window.surgeonController?.prescribir('Sesión de respiración 4-4-6 supervisada')"
+                                                                                            style="font-size:10.5px; padding:7px 8px; text-align:left;">
+                                                                                            🧘 Ordenar Relajación Guiada
+                                                                                            <button type="button"
+                                                                                              class="btn-hud"
+                                                                                              onclick="window.surgeonController?.prescribir('Sesión de respiración 4-4-6 y control PVT (CX-19)')"
+                                                                                              style="font-size:10px; padding:6px 8px; text-align:left;">
+                                                                                              🧘 Guía 4-4-6 + Test PVT
+                                                                                            </button>
+                                                                                            <button type="button"
+                                                                                              class="btn-hud"
+                                                                                              onclick="window.surgeonController?.prescribir('Reprogramar tareas críticas por fatiga')"
+                                                                                              style="font-size:10.5px; padding:7px 8px; text-align:left;">
+                                                                                              📋 Proteger Ciclo de Sueño
+                                                                                              (8h)
+                                                                                              <button type="button"
+                                                                                                class="btn-hud"
+                                                                                                onclick="window.surgeonController?.prescribir('Seguimiento de fondo de ojo SANS en 48 h')"
+                                                                                                style="font-size:10px; padding:6px 8px; text-align:left;">
+                                                                                                👁️ Control Ocular SANS
+                                                                                              </button>
+                                                                                    </div>
+                                                                                    <div id="surgeonActionFeedback"
+                                                                                      style="display:none; margin-top:8px; font-size:11px; color:var(--c-green-ink); background:rgba(0,255,136,0.08); padding:6px 10px; border-radius:4px; border:1px solid var(--c-green);">
+                                                                                    </div>
+                                                                                    <div id="surgeonActionFeedback"
+                                                                                      style="display:none; margin-top:8px; font-size:10.5px; color:var(--c-green-ink); background:rgba(0,255,136,0.08); padding:6px 10px; border-radius:4px; border:1px solid var(--c-green);">
+                                                                                    </div>
+                                                                                  </div>
+                                                                                </div>
+
+                                                                              </div>
+                                                                            </div>
+
+                                                                            <!-- ===================================================================== -->
+                                                                            <!-- MODO 2: TABLERO COMPARATIVO COMPLETO ENTRE ASTRONAUTAS                -->
+                                                                            <!-- ===================================================================== -->
+                                                                            <div id="surgeonCompareContainer"
+                                                                              style="display:none; grid-column:1 / -1; grid-row:2 / -1; width:100%; height:100%; min-height:0; overflow-y:auto;">
+                                                                              <div class="hud-panel"
+                                                                                style="background:#060d1d; border:1px solid rgba(168,85,247,0.35); padding:16px;">
+                                                                                <div
+                                                                                  style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                                                                  <div>
+                                                                                    <div
+                                                                                      style="font-family:var(--font-hud); font-size:14px; color:#c084fc;">
+                                                                                      📊 COMPARATIVA INTEGRAL DE SIGNOS
+                                                                                      Y RESULTADOS DE LA TRIPULACIÓN
+                                                                                      (ARES-VI · SOL 120)
+                                                                                    </div>
+                                                                                    <div
+                                                                                      style="font-size:11px; color:#94a3b8;">
+                                                                                      Comparación lado a lado de signos
+                                                                                      vitales, examen oftálmico SANS,
+                                                                                      dosimetría/voz y estado cognitivo
+                                                                                      ASTRA.
+                                                                                    </div>
+                                                                                  </div>
+                                                                                  <button type="button" class="btn-hud"
+                                                                                    onclick="window.surgeonController?.alternarModoComparativo()"
+                                                                                    style="font-size:11px; padding:6px 12px;">
+                                                                                    ← Volver a Vista Detallada
+                                                                                  </button>
+                                                                                </div>
+
+                                                                                <table
+                                                                                  style="width:100%; border-collapse:collapse; font-size:11.5px; text-align:left; font-family:var(--font-data); margin-bottom:14px;">
+                                                                                  <thead>
+                                                                                    <tr
+                                                                                      style="border-bottom:1px solid rgba(0,240,255,0.3); color:var(--c-cyan-ink); font-family:var(--font-hud); font-size:10.5px; background:rgba(0,240,255,0.05);">
+                                                                                      <th style="padding:9px 10px;">
+                                                                                        PARÁMETRO / EVALUACIÓN</th>
+                                                                                      <th style="padding:9px 10px;">
+                                                                                        👨‍🚀 ALEX MERCER (COMANDANTE
+                                                                                        A01)</th>
+                                                                                      <th style="padding:9px 10px;">
+                                                                                        👩‍🚀 ELENA ROSTOVA
+                                                                                        (ESPECIALISTA A02)</th>
+                                                                                      <th style="padding:9px 10px;">
+                                                                                        UMBRAL / REFERENCIA NASA</th>
+                                                                                    </tr>
+                                                                                  </thead>
+                                                                                  <tbody id="surgeonFullCompareBody">
+                                                                                  </tbody>
+                                                                                </table>
+                                                                              </div>
+
+                                                                            </div>
+                                                                          </div>
