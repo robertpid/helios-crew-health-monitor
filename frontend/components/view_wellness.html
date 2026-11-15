@@ -1,8 +1,8 @@
 <div id="viewMatrix" class="view-container viewport-view">
-  <div class="view-pager"><strong>3 · BIENESTAR</strong>
-    <div class="pager-controls"><button type="button" class="btn-hud page-prev" aria-label="Panel anterior">‹
-        Anterior</button><span class="page-label" aria-live="polite"></span><button type="button"
-        class="btn-hud page-next" aria-label="Panel siguiente">Siguiente ›</button></div>
+  <div class="view-pager"><strong>3 · WELLBEING</strong>
+    <div class="pager-controls"><button type="button" class="btn-hud page-prev" aria-label="Previous panel">‹
+        Previous</button><span class="page-label" aria-live="polite"></span><button type="button"
+        class="btn-hud page-next" aria-label="Next panel">Next ›</button></div>
   </div>
   <div class="wellness-column" data-column="left"><!-- PANEL_SLEEP --></div>
   <div class="wellness-column" data-column="right">
@@ -13,216 +13,167 @@
             <polyline points="9 11 12 14 22 4"></polyline>
             <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
           </svg>
-          TAREAS DIARIAS (clic para avanzar)
+          DAILY TASKS (click to advance)
         </div>
-        <div class="panel-subtitle">PROTOCOLO PREVENTIVO AEROESPACIAL · CLIC SUMA +20%</div>
+        <div class="panel-subtitle">PREVENTIVE AEROSPACE PROTOCOL · EACH CLICK ADDS +20%</div>
       </div>
 
       <div class="tasks-list-container" style="display:flex; flex-direction:column; gap:10px;">
-        <!-- Tarea 1: Meditación -->
-        <div class="task-card-item" id="taskMeditacion" onclick="window.hudController.avanzarTarea('meditacion')"
+        <!-- Task 1: Meditation -->
+        <div class="task-card-item" id="taskMeditation" onclick="window.hudController.advanceTask('meditation')"
           style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:12px 16px; cursor:pointer; transition:all 0.2s ease;">
           <div
             style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-hud); font-size:13px; color:#f1f5f9; margin-bottom:8px;">
-            <span>🧘 Meditación 30 min</span><span id="taskPercentMeditacion"
+            <span>🧘 Meditation 30 min</span><span id="taskPercentMeditation"
               style="color:var(--c-green-ink); font-weight:800;">100%</span>
           </div>
           <div class="hud-progress-track" style="height:6px; background:#040814; border-radius:3px; overflow:hidden;">
-            <div id="taskBarMeditacion" class="hud-progress-fill"
+            <div id="taskBarMeditation" class="hud-progress-fill"
               style="width:100%; height:100%; background:linear-gradient(90deg, var(--c-cyan), var(--c-green)); box-shadow:0 0 8px rgba(0,255,136,0.6); transition:width 0.3s ease;">
             </div>
           </div>
         </div>
-        <!-- Tarea 2: Estiramiento -->
-        <div class="task-card-item" id="taskEstiramiento" onclick="window.hudController.avanzarTarea('estiramiento')"
+        <!-- Task 2: Stretching -->
+        <div class="task-card-item" id="taskStretching" onclick="window.hudController.advanceTask('stretching')"
           style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:12px 16px; cursor:pointer; transition:all 0.2s ease;">
           <div
             style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-hud); font-size:13px; color:#f1f5f9; margin-bottom:8px;">
-            <span>🤸 Estiramiento 15 min</span><span id="taskPercentEstiramiento"
+            <span>🤸 Stretching 15 min</span><span id="taskPercentStretching"
               style="color:var(--c-green-ink); font-weight:800;">100%</span>
           </div>
           <div class="hud-progress-track" style="height:6px; background:#040814; border-radius:3px; overflow:hidden;">
-            <div id="taskBarEstiramiento" class="hud-progress-fill"
+            <div id="taskBarStretching" class="hud-progress-fill"
               style="width:100%; height:100%; background:linear-gradient(90deg, var(--c-cyan), var(--c-green)); box-shadow:0 0 8px rgba(0,255,136,0.6); transition:width 0.3s ease;">
             </div>
           </div>
         </div>
-        <!-- Tarea 3: Ejercicio -->
-        <div class="task-card-item" id="taskEjercicio" onclick="window.hudController.avanzarTarea('ejercicio')"
+        <!-- Task 3: Exercise -->
+        <div class="task-card-item" id="taskExercise" onclick="window.hudController.advanceTask('exercise')"
           style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:12px 16px; cursor:pointer; transition:all 0.2s ease;">
           <div
             style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-hud); font-size:13px; color:#f1f5f9; margin-bottom:8px;">
-            <span>🏋️ Ejercicio 45 min</span><span id="taskPercentEjercicio"
+            <span>🏋️ Exercise 45 min</span><span id="taskPercentExercise"
               style="color:var(--c-cyan-ink); font-weight:800;">60%</span>
           </div>
           <div class="hud-progress-track" style="height:6px; background:#040814; border-radius:3px; overflow:hidden;">
-            <div id="taskBarEjercicio" class="hud-progress-fill"
+            <div id="taskBarExercise" class="hud-progress-fill"
               style="width:60%; height:100%; background:linear-gradient(90deg, var(--c-cyan), var(--c-green)); box-shadow:0 0 8px rgba(0,240,255,0.6); transition:width 0.3s ease;">
             </div>
           </div>
         </div>
-        <!-- Tarea 4: Hidratación -->
-        <div class="task-card-item" id="taskHidratacion" onclick="window.hudController.avanzarTarea('hidratacion')"
+        <!-- Task 4: Hydration -->
+        <div class="task-card-item" id="taskHydration" onclick="window.hudController.advanceTask('hydration')"
           style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:12px 16px; cursor:pointer; transition:all 0.2s ease;">
           <div
             style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-hud); font-size:13px; color:#f1f5f9; margin-bottom:8px;">
-            <span>💧 Hidratación 2 L</span><span id="taskPercentHidratacion"
+            <span>💧 Hydration 2 L</span><span id="taskPercentHydration"
               style="color:var(--c-cyan-ink); font-weight:800;">80%</span>
           </div>
           <div class="hud-progress-track" style="height:6px; background:#040814; border-radius:3px; overflow:hidden;">
-            <div id="taskBarHidratacion" class="hud-progress-fill"
+            <div id="taskBarHydration" class="hud-progress-fill"
               style="width:80%; height:100%; background:linear-gradient(90deg, var(--c-cyan), var(--c-green)); box-shadow:0 0 8px rgba(0,240,255,0.6); transition:width 0.3s ease;">
             </div>
           </div>
         </div>
       </div>
     </div>
+
     <div class="hud-panel screen-panel" id="panelHydrationFit" data-panel="hydration">
-      <div class="panel-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
-        <div class="panel-header"
-          style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; padding-bottom:6px;">
-          <div>
-            <div class="panel-title">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-              </svg>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-              </svg>
-              HIDRATACIÓN Y NUTRICIÓN (NASA ISS FIT)
-            </div>
-            <div class="panel-subtitle">SISTEMA NASA FIT (IPAD) · ESCÁNER DE BOLSAS, AGUA PWD Y BALANCE HÍDRICO</div>
-            <div class="panel-subtitle">ESCÁNER DE RACIONES, AGUA PWD Y BALANCE HÍDRICO</div>
+      <div class="panel-header"
+        style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; padding-bottom:6px;">
+        <div>
+          <div class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+            </svg>
+            HYDRATION AND NUTRITION (NASA ISS FIT)
           </div>
-          <div id="fitSyncBadge" class="badge-status status-stable" style="font-size:10px; padding:3px 8px;">📡 FIT
-            SINCRONIZADO</div>
-          <div id="fitSyncBadge" class="badge-status status-stable" style="font-size:9.5px; padding:2px 7px;">📡 FIT
-            ACTIVO</div>
+          <div class="panel-subtitle">NASA FIT SYSTEM (IPAD) · BAG SCANNER, PWD WATER AND FLUID BALANCE</div>
+        </div>
+        <div id="fitSyncBadge" class="badge-status status-stable" style="font-size:9.5px; padding:2px 7px;">📡 FIT
+          ACTIVE</div>
+      </div>
+
+      <div style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:10px 12px;">
+        <!-- Quantified status row and goal -->
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:5px;">
+          <div>
+            <strong id="fitVolumeVal"
+              style="color:var(--c-cyan-ink); font-size:15px; font-family:var(--font-hud);">1,850 mL</strong>
+            <span id="fitQuotaTag" style="color:#94a3b8; font-size:11px; font-family:var(--font-data);">/ 2,200 mL
+              (84%)</span>
+          </div>
+          <strong id="fitStatusTag"
+            style="color:var(--c-green-ink); font-family:var(--font-hud); font-size:10.5px;">▲ OPTIMAL</strong>
         </div>
 
-        <div style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:14px 16px;">
-          <div style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:10px 12px;">
-            <!-- Fila de Estado Cuantificado y Meta -->
-            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
-              <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:5px;">
-                <div>
-                  <strong id="fitVolumeVal"
-                    style="color:var(--c-cyan-ink); font-size:17px; font-family:var(--font-hud);">1,850 mL</strong>
-                  <span id="fitQuotaTag" style="color:#94a3b8; font-size:12px; font-family:var(--font-data);">/ 2,200 mL
-                    (84%)</span>
-                  <strong id="fitVolumeVal"
-                    style="color:var(--c-cyan-ink); font-size:15px; font-family:var(--font-hud);">1,850 mL</strong>
-                  <span id="fitQuotaTag" style="color:#94a3b8; font-size:11px; font-family:var(--font-data);">/ 2,200 mL
-                    (84%)</span>
-                </div>
-                <strong id="fitStatusTag"
-                  style="color:var(--c-green-ink); font-family:var(--font-hud); font-size:11px;">▲ ÓPTIMO</strong>
-                <span id="fitNutriSummary" style="font-family:var(--font-data); font-size:10px; color:#94a3b8;">Kcal:
-                  2,150 · Na: 2,100 mg</span>
-                <strong id="fitStatusTag"
-                  style="color:var(--c-green-ink); font-family:var(--font-hud); font-size:10.5px;">▲ ÓPTIMO</strong>
-              </div>
+        <!-- Fluid balance traffic light -->
+        <div class="hydration-semaphore-bar"
+          style="display:flex; gap:6px; height:14px; border-radius:5px; overflow:hidden; background:#040814; padding:2px; margin-bottom:4px;">
+          <div id="semOptimal" class="sem-segment sem-active"
+            style="flex:1; background:var(--c-green); border-radius:3px; box-shadow:0 0 10px rgba(0,255,136,0.6); transition:all 0.3s ease;">
+          </div>
+          <div id="semWarning" class="sem-segment"
+            style="flex:1; background:#f59e0b; opacity:0.25; border-radius:3px; transition:all 0.3s ease;">
+          </div>
+          <div id="semCritical" class="sem-segment"
+            style="flex:1; background:var(--c-red); opacity:0.25; border-radius:3px; transition:all 0.3s ease;">
+          </div>
+        </div>
+        <div
+          style="display:flex; justify-content:space-between; font-family:var(--font-hud); font-size:10px; color:var(--text-secondary); margin-bottom:6px;">
+          <span id="lblOptimal" style="color:var(--c-green-ink); font-weight:bold;">▲ Optimal (&gt;2.0L)</span>
+          <span id="lblWarning" style="color:#64748b;">Warning (1.2-2.0L)</span>
+          <span id="lblCritical" style="color:#64748b;">Critical (&lt;1.2L)</span>
+        </div>
 
-              <!-- Semáforo de Balance Hídrico -->
-              <div class="hydration-semaphore-bar"
-                style="display:flex; gap:8px; height:18px; border-radius:6px; overflow:hidden; background:#040814; padding:3px; margin-bottom:6px;">
-                <div id="semOptimo" class="sem-segment sem-active"
-                  style="flex:1; background:var(--c-green); border-radius:4px; box-shadow:0 0 12px rgba(0,255,136,0.6); transition:all 0.3s ease;">
-                </div>
-                <div id="semAviso" class="sem-segment"
-                  style="flex:1; background:#f59e0b; opacity:0.25; border-radius:4px; transition:all 0.3s ease;"></div>
-                <div id="semCritico" class="sem-segment"
-                  style="flex:1; background:var(--c-red); opacity:0.25; border-radius:4px; transition:all 0.3s ease;">
-                </div>
-                <div class="hydration-semaphore-bar"
-                  style="display:flex; gap:6px; height:14px; border-radius:5px; overflow:hidden; background:#040814; padding:2px; margin-bottom:4px;">
-                  <div id="semOptimo" class="sem-segment sem-active"
-                    style="flex:1; background:var(--c-green); border-radius:3px; box-shadow:0 0 10px rgba(0,255,136,0.6); transition:all 0.3s ease;">
-                  </div>
-                  <div id="semAviso" class="sem-segment"
-                    style="flex:1; background:#f59e0b; opacity:0.25; border-radius:3px; transition:all 0.3s ease;">
-                  </div>
-                  <div id="semCritico" class="sem-segment"
-                    style="flex:1; background:var(--c-red); opacity:0.25; border-radius:3px; transition:all 0.3s ease;">
-                  </div>
-                </div>
-                <div
-                  style="display:flex; justify-content:space-between; font-family:var(--font-hud); font-size:11px; color:var(--text-secondary); margin-bottom:8px;">
-                  <div
-                    style="display:flex; justify-content:space-between; font-family:var(--font-hud); font-size:10px; color:var(--text-secondary); margin-bottom:6px;">
-                    <span id="lblOptimo" style="color:var(--c-green-ink); font-weight:bold;">▲ Óptimo (&gt;2.0L)</span>
-                    <span id="lblAviso" style="color:#64748b;">Aviso (1.2-2.0L)</span>
-                    <span id="lblCritico" style="color:#64748b;">Crítico (&lt;1.2L)</span>
-                  </div>
+        <!-- Micronutrients and sodium -->
+        <div id="fitNutriSummary"
+          style="font-family:var(--font-data); font-size:10px; color:#94a3b8; padding-top:4px; border-top:1px solid rgba(0,240,255,0.1); margin-bottom:8px;">
+          Kcal: 2,150 · Sodium (Na): 2,100 mg · Ca/Vit D: Nominal
+        </div>
 
-                  <!-- Micronutrientes y Sodio -->
-                  <div id="fitNutriSummary"
-                    style="font-family:var(--font-data); font-size:11px; color:#94a3b8; padding-top:4px; border-top:1px solid rgba(0,240,255,0.1); margin-bottom:10px;">
-                    Kcal: 2,150 · Sodio (Na): 2,100 mg · Ca/Vit D: Nominal
-                  </div>
+        <!-- Quick flight ration scanner (barcode bags) -->
+        <div
+          style="font-family:var(--font-hud); font-size:10.5px; color:var(--c-cyan-ink); margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+          <span>📲 SCAN RATION / FLIGHT BAG:</span>
+        </div>
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:5px;">
+          <button class="btn-hud" onclick="window.fitService?.logServing('water')"
+            style="font-size:9.5px; padding:4px 5px; text-transform:none;"
+            title="ISS Potable Water Dispenser (+250 mL)">
+            💧 Water (+250mL)
+          </button>
+          <button class="btn-hud" onclick="window.fitService?.logServing('electrolyte')"
+            style="font-size:9.5px; padding:4px 5px; text-transform:none;"
+            title="Oral rehydration salts (+300 mL)">
+            ⚡ Salts (+300mL)
+          </button>
+          <button class="btn-hud" onclick="window.fitService?.logServing('coffee')"
+            style="font-size:9.5px; padding:4px 5px; text-transform:none;"
+            title="Rehydratable coffee / tea (+200 mL)">
+            ☕ Coffee/Tea (+200mL)
+          </button>
+          <button class="btn-hud" onclick="window.fitService?.logServing('freezeDried')"
+            style="font-size:9.5px; padding:4px 5px; text-transform:none; grid-column:span 2;"
+            title="Freeze-dried ration (+150 mL water · 450 kcal)">
+            🍲 Freeze-Dried Ration (+150mL · 450kcal)
+          </button>
+          <button class="btn-hud" onclick="window.fitService?.logServing('protein')"
+            style="font-size:9.5px; padding:4px 5px; text-transform:none;"
+            title="Protein and calcium pack (+550 kcal)">
+            🥫 Protein (+550k)
+          </button>
+        </div>
 
-                  <!-- Escáner Rápido de Raciones de Vuelo (Bolsas con código de barras) -->
-                  <div
-                    style="font-family:var(--font-hud); font-size:10.5px; color:var(--c-cyan-ink); margin-bottom:6px; display:flex; align-items:center; gap:6px;">
-                    <span>📲 ESCANEAR RACIÓN / BOLSA DE VUELO:</span>
-                  </div>
-                  <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:6px;">
-                    <button class="btn-hud" onclick="window.fitService?.registrarRacion('agua')"
-                      style="font-size:10px; padding:6px 6px; text-transform:none;"
-                      title="Dispensador de Agua Potable ISS (+250 mL)">
-                      💧 Agua PWD (+250mL)
-                      <!-- Escáner Rápido de Raciones de Vuelo -->
-                      <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:5px;">
-                        <button class="btn-hud" onclick="window.fitService?.registrarRacion('agua')"
-                          style="font-size:9.5px; padding:4px 5px; text-transform:none;"
-                          title="Dispensador de Agua Potable ISS (+250 mL)">
-                          💧 Agua (+250mL)
-                        </button>
-                        <button class="btn-hud" onclick="window.fitService?.registrarRacion('electrolito')"
-                          style="font-size:10px; padding:6px 6px; text-transform:none;"
-                          title="Sales de rehidratación oral (+300 mL)">
-                          ⚡ Sales Orales (+300mL)
-                          <button class="btn-hud" onclick="window.fitService?.registrarRacion('electrolito')"
-                            style="font-size:9.5px; padding:4px 5px; text-transform:none;"
-                            title="Sales de rehidratación oral (+300 mL)">
-                            ⚡ Sales (+300mL)
-                          </button>
-                          <button class="btn-hud" onclick="window.fitService?.registrarRacion('cafe')"
-                            style="font-size:10px; padding:6px 6px; text-transform:none;"
-                            title="Café / Té Rehidratable (+200 mL)">
-                            <button class="btn-hud" onclick="window.fitService?.registrarRacion('cafe')"
-                              style="font-size:9.5px; padding:4px 5px; text-transform:none;"
-                              title="Café / Té Rehidratable (+200 mL)">
-                              ☕ Café/Té (+200mL)
-                            </button>
-                            <button class="btn-hud" onclick="window.fitService?.registrarRacion('liofilizada')"
-                              style="font-size:10px; padding:6px 6px; text-transform:none; grid-column:span 2;"
-                              title="Ración Liofilizada (+150 mL agua · 450 kcal)">
-                              <button class="btn-hud" onclick="window.fitService?.registrarRacion('liofilizada')"
-                                style="font-size:9.5px; padding:4px 5px; text-transform:none; grid-column:span 2;"
-                                title="Ración Liofilizada (+150 mL agua · 450 kcal)">
-                                🍲 Ración Liofilizada (+150mL · 450kcal)
-                              </button>
-                              <button class="btn-hud" onclick="window.fitService?.registrarRacion('proteina')"
-                                style="font-size:10px; padding:6px 6px; text-transform:none;"
-                                title="Pack de Proteína y Calcio (+550 kcal)">
-                                🥫 Pack Proteína (+550k)
-                                <button class="btn-hud" onclick="window.fitService?.registrarRacion('proteina')"
-                                  style="font-size:9.5px; padding:4px 5px; text-transform:none;"
-                                  title="Pack de Proteína y Calcio (+550 kcal)">
-                                  🥫 Proteína (+550k)
-                                </button>
-                      </div>
+        <!-- Log / traceability with Houston BMed -->
+        <div id="fitLogMsg"
+          style="font-family:var(--font-data); font-size:10px; color:#cbd5e1; background:rgba(0,240,255,0.05); border:1px solid rgba(0,240,255,0.15); border-radius:4px; padding:4px 8px; margin-top:6px; line-height:1.3;">
+          📡 FIT telemetry linked with Houston BMed. Intake within the Sol 120 quota.
+        </div>
+      </div>
+    </div>
 
-                      <!-- Log / Trazabilidad con Houston BMed -->
-                      <div id="fitLogMsg"
-                        style="font-family:var(--font-data); font-size:10.5px; color:#cbd5e1; background:rgba(0,240,255,0.05); border:1px solid rgba(0,240,255,0.15); border-radius:4px; padding:6px 10px; margin-top:10px; line-height:1.4;">
-                        <div id="fitLogMsg"
-                          style="font-family:var(--font-data); font-size:10px; color:#cbd5e1; background:rgba(0,240,255,0.05); border:1px solid rgba(0,240,255,0.15); border-radius:4px; padding:4px 8px; margin-top:6px; line-height:1.3;">
-                          📡 Telemetría FIT enlazada con Houston BMed. Ingesta dentro de cuota Sol 120.
-                        </div>
-                      </div>
-                  </div>
-                  <!-- PANEL_GAMES -->
-                </div>
-              </div>
+    <!-- PANEL_GAMES -->
+  </div>
+</div>

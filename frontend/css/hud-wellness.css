@@ -1,14 +1,14 @@
 /* ==========================================================================
-   H.E.L.I.O.S. - VENTANA 3: COMPLEMENTOS DE BIENESTAR
+   H.E.L.I.O.S. - VIEW 3: WELLBEING ADD-ONS
 
-   Las reglas de tarjetas de tarea, gráfico de sueño, pacer de respiración,
-   modal de acceso y responsive táctil viven ahora en hud-matrix.css, junto al
-   resto de la Ventana 2/3, para no duplicarlas en dos módulos.
+   The rules for task cards, the sleep chart, the breathing pacer, the login
+   modal and the touch responsive layout now live in hud-matrix.css, next to
+   the rest of View 2/3, so they are not duplicated across two modules.
    ========================================================================== */
 
-/* Barras del gráfico de sueño: una sola familia de tono, la magnitud la
-   porta la altura de la barra; el color sólo distingue noche cumplida de
-   noche deficitaria, y siempre va acompañado del valor escrito. */
+/* Sleep chart bars: a single hue family, the magnitude is carried by the bar
+   height; the color only distinguishes a night that met the goal from a
+   deficit night, and it is always accompanied by the written value. */
 .sleep-bar-rect {
   transition: filter 0.2s ease;
 }
@@ -27,13 +27,13 @@
   fill: var(--text-muted);
 }
 
-/* Anillo del pacer de respiración */
+/* Breathing pacer ring */
 .breath-pacer-ring {
   border: 2px solid var(--c-cyan);
   background: rgba(23, 159, 179, 0.10);
 }
 
-/* Medidor de gamificación */
+/* Gamification meter */
 .wellness-meter-track {
   background: var(--surface-sunken);
   border-radius: 999px;

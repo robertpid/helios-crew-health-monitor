@@ -1,17 +1,17 @@
 """
-H.E.L.I.O.S. - Generador y Ensamblador Modular del Cockpit HUD.
+H.E.L.I.O.S. - Modular Cockpit HUD Generator and Assembler.
 
-Este script ensambla el archivo 'frontend/index.html' a partir de componentes HTML
-independientes y desacoplados ubicados en 'frontend/components/'.
-Permite mantener componentes individuales de menos de 400 líneas sin sobrecargar
-el archivo principal, manteniendo compatibilidad pura sin requerir bundlers pesados
-(Webpack, Vite) ni dependencias externas.
+This script assembles the file 'frontend/index.html' from independent, decoupled
+HTML components located in 'frontend/components/'.
+It keeps individual components under 400 lines without bloating the main file,
+preserving pure compatibility with no heavy bundlers (Webpack, Vite) or external
+dependencies.
 
-Cumple estrictamente con:
-- PEP 8 y anotaciones de tipo estático (Type Hints).
-- Sistema de trazabilidad con logging aeroespacial (sin sentencias print).
-- Principio de Responsabilidad Única (SRP).
-- Punto de entrada seguro (`if __name__ == '__main__':`).
+Complies strictly with:
+- PEP 8 and static type annotations (Type Hints).
+- Traceability through aerospace logging (no print statements).
+- Single Responsibility Principle (SRP).
+- Safe entry point (`if __name__ == '__main__':`).
 """
 
 import logging
@@ -21,7 +21,7 @@ import time
 from pathlib import Path
 from typing import Dict, List, Optional
 
-# Configuración del subsistema de logging
+# Logging subsystem configuration
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s.%(msecs)03d UTC | %(levelname)-8s | [%(name)s] | %(message)s",
@@ -32,14 +32,14 @@ logger = logging.getLogger("helios_assembler")
 
 
 class DashboardAssembler:
-    """Ensamblador de vistas y componentes modulares para la interfaz H.E.L.I.O.S."""
+    """Assembler of modular views and components for the H.E.L.I.O.S. interface."""
 
     def __init__(self, frontend_dir: Optional[Path] = None) -> None:
         """
-        Inicializa las rutas base del frontend y del directorio de componentes.
+        Initializes the base paths of the frontend and the components directory.
 
         Args:
-            frontend_dir: Ruta al directorio 'frontend'. Si es None, se autocalcula.
+            frontend_dir: Path to the 'frontend' directory. If None, it is auto-computed.
         """
         if frontend_dir is None:
             self._frontend_dir = Path(__file__).resolve().parent
@@ -49,77 +49,77 @@ class DashboardAssembler:
         self._components_dir = self._frontend_dir / "components"
         self._output_file = self._frontend_dir / "index.html"
 
-    def leer_componente(self, nombre_archivo: str) -> str:
+    def read_component(self, file_name: str) -> str:
         """
-        Lee el contenido de un archivo de componente parcial en formato UTF-8.
+        Reads the content of a partial component file in UTF-8.
 
         Args:
-            nombre_archivo: Nombre del archivo dentro de 'components/'.
+            file_name: Name of the file inside 'components/'.
 
         Returns:
-            Contenido HTML del componente.
+            HTML content of the component.
 
         Raises:
-            FileNotFoundError: Si el componente no existe.
+            FileNotFoundError: If the component does not exist.
         """
-        ruta_componente = self._components_dir / nombre_archivo
-        if not ruta_componente.is_file():
-            logger.error("Componente no encontrado: %s", ruta_componente)
-            raise FileNotFoundError(f"Componente requerido no existe: {ruta_componente}")
+        component_path = self._components_dir / file_name
+        if not component_path.is_file():
+            logger.error("Component not found: %s", component_path)
+            raise FileNotFoundError(f"Required component does not exist: {component_path}")
 
         try:
-            with open(ruta_componente, "r", encoding="utf-8") as f:
+            with open(component_path, "r", encoding="utf-8") as f:
                 return f.read().strip()
         except OSError as e:
-            logger.error("Error al leer el archivo %s: %s", nombre_archivo, str(e))
+            logger.error("Error reading the file %s: %s", file_name, str(e))
             raise
 
-    def generar_plantilla_maestra(self) -> str:
+    def generate_master_template(self) -> str:
         """
-        Ensambla todos los componentes parciales en el orden estructural del Cockpit HUD.
+        Assembles every partial component in the structural order of the Cockpit HUD.
 
         Returns:
-            Cadena de texto con el documento HTML5 completo y formateado.
+            String with the complete, formatted HTML5 document.
         """
-        logger.info("Cargando componentes modulares desde %s...", self._components_dir)
+        logger.info("Loading modular components from %s...", self._components_dir)
 
-        header_html = self.leer_componente("header.html")
-        toolbar_html = self.leer_componente("toolbar.html")
-        view_biomedical = self.leer_componente("view_biomedical.html")
-        view_environmental = self.leer_componente("view_environmental.html")
-        view_wellness = self.leer_componente("view_wellness.html").replace(
-            "<!-- PANEL_SLEEP -->", self.leer_componente("panel_sleep.html")
-        ).replace("<!-- PANEL_GAMES -->", self.leer_componente("panel_games.html"))
-        view_support = self.leer_componente("view_support.html")
-        view_surgeon = self.leer_componente("view_surgeon.html")
-        modal_alert = self.leer_componente("modal_alert.html")
-        modal_login = self.leer_componente("modal_login.html")
-        modal_games = self.leer_componente("modal_games.html")
-        modal_oftalmico = self.leer_componente("modal_oftalmico.html")
-        modal_sonar = self.leer_componente("modal_sonar.html")
-        footer_html = self.leer_componente("footer.html")
+        header_html = self.read_component("header.html")
+        toolbar_html = self.read_component("toolbar.html")
+        view_biomedical = self.read_component("view_biomedical.html")
+        view_environmental = self.read_component("view_environmental.html")
+        view_wellness = self.read_component("view_wellness.html").replace(
+            "<!-- PANEL_SLEEP -->", self.read_component("panel_sleep.html")
+        ).replace("<!-- PANEL_GAMES -->", self.read_component("panel_games.html"))
+        view_support = self.read_component("view_support.html")
+        view_surgeon = self.read_component("view_surgeon.html")
+        modal_alert = self.read_component("modal_alert.html")
+        modal_login = self.read_component("modal_login.html")
+        modal_games = self.read_component("modal_games.html")
+        modal_ophthalmic = self.read_component("modal_ophthalmic.html")
+        modal_sonar = self.read_component("modal_sonar.html")
+        footer_html = self.read_component("footer.html")
         version_tag = int(time.time())
 
-        # Ensamblaje seguro de la estructura HTML5 con indentación estricta
-        html_consolidado = f"""<!DOCTYPE html>
-<html lang="es">
+        # Safe assembly of the HTML5 structure with strict indentation
+        consolidated_html = f"""<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>H.E.L.I.O.S. - Cockpit HUD &amp; Crew Health Monitor | NASA Space Apps 2026</title>
-  
-  <!-- Optimización Apple WebKit & PWA para iPadOS e iOS -->
+
+  <!-- Apple WebKit & PWA optimization for iPadOS and iOS -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="HELIOS HUD">
   <meta name="theme-color" content="#030712">
-  
-  <!-- Tipografías Aeroespaciales de Google Fonts -->
+
+  <!-- Aerospace typefaces from Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
-  
-  <!-- H.E.L.I.O.S. Capa de Estilos N-Capas Modular -->
+
+  <!-- H.E.L.I.O.S. modular N-layer style layer -->
   <link rel="stylesheet" href="/static/css/hud-theme.css?v={version_tag}">
   <link rel="stylesheet" href="/static/css/animations.css?v={version_tag}">
 </head>
@@ -130,7 +130,7 @@ class DashboardAssembler:
   {toolbar_html}
 
   <!-- ========================================================================= -->
-  <!-- 3. VIEWPORT PRINCIPAL CON CONTENEDORES DE VENTANA                         -->
+  <!-- 3. MAIN VIEWPORT WITH THE VIEW CONTAINERS                                 -->
   <!-- ========================================================================= -->
   <main class="main-viewport">
 
@@ -152,14 +152,14 @@ class DashboardAssembler:
 
   {modal_games}
 
-  {modal_oftalmico}
+  {modal_ophthalmic}
 
   {modal_sonar}
 
   {footer_html}
 
   <!-- ========================================================================= -->
-  <!-- 6. CARGA DE MÓDULOS DE ARQUITECTURA N-CAPAS EN JAVASCRIPT                 -->
+  <!-- 6. LOADING THE N-LAYER ARCHITECTURE MODULES IN JAVASCRIPT                 -->
   <!-- ========================================================================= -->
   <script src="/static/js/state/state_manager.js?v={version_tag}"></script>
   <script src="/static/js/services/auth_service.js?v={version_tag}"></script>
@@ -170,7 +170,7 @@ class DashboardAssembler:
   <script src="/static/js/services/habitat_diagram_service.js?v={version_tag}"></script>
   <script src="/static/js/services/hologram_service.js?v={version_tag}"></script>
   <script src="/static/js/services/fit_service.js?v={version_tag}"></script>
-  <script src="/static/js/services/oftalmico_service.js?v={version_tag}"></script>
+  <script src="/static/js/services/ophthalmic_service.js?v={version_tag}"></script>
   <script src="/static/js/services/sonar_service.js?v={version_tag}"></script>
   <script src="/static/js/controllers/wellness_controller.js?v={version_tag}"></script>
   <script src="/static/js/controllers/games_controller.js?v={version_tag}"></script>
@@ -180,29 +180,29 @@ class DashboardAssembler:
   <script src="/static/js/controllers/hud_controller.js?v={version_tag}"></script>
 
   <script>
-    // Inicialización del ecosistema HUD N-Capas Modular
+    // Initialization of the modular N-layer HUD ecosystem
     window.addEventListener("DOMContentLoaded", () => {{
-      // 1. Instanciar Servicios
+      // 1. Instantiate services
       const ecgService = new EcgOscilloscopeService("ecgDisplayCanvas");
-      ecgService.inicializar();
+      ecgService.initialize();
 
       const hologramService = new HologramRendererService("particlesCanvas", "svgHologramBody");
-      hologramService.inicializar();
+      hologramService.initialize();
 
       window.habitatDiagramService = new HabitatDiagramService();
-      window.habitatDiagramService.inicializar();
+      window.habitatDiagramService.initialize();
       const habitatHologramService = new HologramRendererService(null, "habitatIllustration");
-      habitatHologramService.inicializar();
+      habitatHologramService.initialize();
 
-      if (window.fitService?.inicializar) {{
-        window.fitService.inicializar();
+      if (window.fitService?.initialize) {{
+        window.fitService.initialize();
       }}
 
-      // 2. Instanciar Controlador de Bienestar y Rutinas
+      // 2. Instantiate the wellbeing and routines controller
       const wellnessController = new WellnessController(window.soundService);
       window.wellnessController = wellnessController;
 
-      // 3. Instanciar Controlador Principal con Inyección de Dependencias
+      // 3. Instantiate the main controller with dependency injection
       window.hudController = new HudController(
         window.stateManager,
         ecgService,
@@ -212,59 +212,59 @@ class DashboardAssembler:
         window.authService
       );
       window.viewportController = new ViewportController();
-      window.viewportController.inicializar();
+      window.viewportController.initialize();
       window.gamesController = new GamesController(window.stateManager);
-      window.gamesController.inicializar();
+      window.gamesController.initialize();
       window.sleepController = new SleepController(window.stateManager);
-      window.sleepController.inicializar();
-      window.surgeonController?.inicializar?.();
-      window.hudController.inicializar();
+      window.sleepController.initialize();
+      window.surgeonController?.initialize?.();
+      window.hudController.initialize();
     }});
   </script>
 </body>
 </html>
 """
-        return html_consolidado
+        return consolidated_html
 
-    def guardar_index(self) -> Path:
+    def save_index(self) -> Path:
         """
-        Genera el documento consolidado y lo escribe en el archivo index.html.
+        Generates the consolidated document and writes it to the index.html file.
 
         Returns:
-            Ruta absoluta del archivo generado.
+            Absolute path of the generated file.
         """
-        html_final = self.generar_plantilla_maestra()
+        final_html = self.generate_master_template()
         try:
             with open(self._output_file, "w", encoding="utf-8") as f:
-                f.write(html_final)
-            logger.info("Archivo ensamblado con éxito en: %s (%d bytes)", self._output_file, len(html_final))
+                f.write(final_html)
+            logger.info("File assembled successfully at: %s (%d bytes)", self._output_file, len(final_html))
             return self._output_file
         except OSError as e:
-            logger.error("Error al escribir el archivo %s: %s", self._output_file, str(e))
+            logger.error("Error writing the file %s: %s", self._output_file, str(e))
             raise
 
 
-def ensamblar_interfaz_frontend(directorio_frontend: Optional[str] = None) -> str:
+def assemble_frontend_interface(frontend_directory: Optional[str] = None) -> str:
     """
-    Función de utilidad pública para invocar el ensamblaje programáticamente.
+    Public utility function to invoke the assembly programmatically.
 
     Args:
-        directorio_frontend: Ruta opcional a la carpeta 'frontend'.
+        frontend_directory: Optional path to the 'frontend' folder.
 
     Returns:
-        Ruta como string del archivo generado.
+        Path of the generated file as a string.
     """
-    directorio_path = Path(directorio_frontend) if directorio_frontend else None
-    assembler = DashboardAssembler(directorio_path)
-    resultado = assembler.guardar_index()
-    return str(resultado)
+    directory_path = Path(frontend_directory) if frontend_directory else None
+    assembler = DashboardAssembler(directory_path)
+    result = assembler.save_index()
+    return str(result)
 
 
 if __name__ == "__main__":
-    logger.info("Iniciando compilador/ensamblador modular de H.E.L.I.O.S....")
+    logger.info("Starting the H.E.L.I.O.S. modular compiler/assembler...")
     try:
-        ruta_salida = ensamblar_interfaz_frontend()
-        logger.info("Compilación modular finalizada sin errores: %s", ruta_salida)
+        output_path = assemble_frontend_interface()
+        logger.info("Modular compilation finished with no errors: %s", output_path)
     except Exception as exc:
-        logger.error("Fallo durante el ensamblado modular: %s", str(exc))
+        logger.error("Failure during the modular assembly: %s", str(exc))
         sys.exit(1)

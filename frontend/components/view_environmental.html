@@ -1,4 +1,4 @@
-<div id="viewEnvironmental" class="view-container viewport-view"><div class="view-pager"><strong>2 · AMBIENTE</strong><div class="pager-controls"><button type="button" class="btn-hud page-prev" aria-label="Panel anterior">‹ Anterior</button><span class="page-label" aria-live="polite"></span><button type="button" class="btn-hud page-next" aria-label="Panel siguiente">Siguiente ›</button></div></div>
+<div id="viewEnvironmental" class="view-container viewport-view"><div class="view-pager"><strong>2 · ENVIRONMENT</strong><div class="pager-controls"><button type="button" class="btn-hud page-prev" aria-label="Previous panel">‹ Previous</button><span class="page-label" aria-live="polite"></span><button type="button" class="btn-hud page-next" aria-label="Next panel">Next ›</button></div></div>
 <div class="hud-panel screen-panel" data-panel="habitat" data-habitat-tab="image">
     <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center;">
       <div>
@@ -7,47 +7,47 @@
             <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"></path>
             <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"></path>
           </svg>
-          HÁBITAT ESPACIAL · VISTA ESTRUCTURAL
+          SPACE HABITAT · STRUCTURAL VIEW
         </div>
-        <div class="panel-subtitle" id="habitatSubtitle">ORION DEEP SPACE VEHICLE · TRÁNSITO INTERPLANETARIO (0.00g)</div>
+        <div class="panel-subtitle" id="habitatSubtitle">ORION DEEP SPACE VEHICLE · INTERPLANETARY TRANSIT (0.00g)</div>
       </div>
-      <!-- Selector de Hábitat -->
+      <!-- Habitat selector -->
       <div style="display:flex; gap:6px;">
-        <button id="btnHabitatOrion" aria-pressed="true" class="btn-hud active" style="font-size:10px; padding:5px 11px;" onclick="window.hudController.alternarModeloHabitat('orion')">🛰️ NAVE ESPACIAL</button>
-        <button id="btnHabitatMars" aria-pressed="false" class="btn-hud" style="font-size:10px; padding:5px 11px;" onclick="window.hudController.alternarModeloHabitat('mars')">🔴 BASE MARCIANA</button>
-        <button id="btnHabitatIss" aria-pressed="false" class="btn-hud" style="font-size:10px; padding:5px 11px;" onclick="window.hudController.alternarModeloHabitat('iss')">🛸 ESTACIÓN ESPACIAL</button>
+        <button id="btnHabitatOrion" aria-pressed="true" class="btn-hud active" style="font-size:10px; padding:5px 11px;" onclick="window.hudController.switchHabitatModel('orion')">🛰️ SPACECRAFT</button>
+        <button id="btnHabitatMars" aria-pressed="false" class="btn-hud" style="font-size:10px; padding:5px 11px;" onclick="window.hudController.switchHabitatModel('mars')">🔴 MARS BASE</button>
+        <button id="btnHabitatIss" aria-pressed="false" class="btn-hud" style="font-size:10px; padding:5px 11px;" onclick="window.hudController.switchHabitatModel('iss')">🛸 SPACE STATION</button>
       </div>
     </div>
 
-    <div class="habitat-view-tabs" aria-label="Detalle del hábitat"><button type="button" class="btn-hud" data-habitat-tab-button="image" aria-pressed="true" onclick="window.hudController.cambiarDetalleHabitat('image')">Imagen</button><button type="button" class="btn-hud" data-habitat-tab-button="sensors" aria-pressed="false" onclick="window.hudController.cambiarDetalleHabitat('sensors')">Sensores</button></div>
-    <!-- ILUSTRACIÓN DEL HÁBITAT E INDICADORES DE CABINA -->
-    <div class="hologram-stage-wrapper habitat-image-stage"><div id="habitatIllustration" class="habitat-raster-layout" data-habitat-tab="image"><div class="habitat-diagram-frame"><figure class="habitat-artwork"><img id="habitatImage" src="/static/assets/habitats/orion-transparent.png?v=20261115_alpha" width="1993" height="1525" loading="lazy" decoding="async" alt="Ilustración de una nave tripulada con corte de cabina, módulo de servicio y paneles solares." data-habitat="orion"><figcaption id="habitatImageCaption">Nave espacial · Ilustración conceptual</figcaption></figure><svg id="habitatConnectors" class="habitat-connectors" viewBox="0 0 680 500" aria-hidden="true"></svg><div id="habitatMarkers"></div><div class="habitat-readouts" role="group" aria-label="Indicadores del hábitat"><button type="button" class="hologram-callout callout-lungs habitat-module-node" aria-pressed="false" data-habitat-module="co2" aria-label="CO₂ de cabina" data-habitat-card="co2" onmouseenter="window.hudController.enfocarModuloHabitat('co2')" onmouseleave="window.hudController.desenfocarModuloHabitat()">
+    <div class="habitat-view-tabs" aria-label="Habitat detail"><button type="button" class="btn-hud" data-habitat-tab-button="image" aria-pressed="true" onclick="window.hudController.changeHabitatDetail('image')">Image</button><button type="button" class="btn-hud" data-habitat-tab-button="sensors" aria-pressed="false" onclick="window.hudController.changeHabitatDetail('sensors')">Sensors</button></div>
+    <!-- HABITAT ILLUSTRATION AND CABIN INDICATORS -->
+    <div class="hologram-stage-wrapper habitat-image-stage"><div id="habitatIllustration" class="habitat-raster-layout" data-habitat-tab="image"><div class="habitat-diagram-frame"><figure class="habitat-artwork"><img id="habitatImage" src="/static/assets/habitats/orion-transparent.png?v=20261115_alpha" width="1993" height="1525" loading="lazy" decoding="async" alt="Illustration of a crewed spacecraft with a cabin cutaway, service module and solar panels." data-habitat="orion"><figcaption id="habitatImageCaption">Spacecraft · Concept illustration</figcaption></figure><svg id="habitatConnectors" class="habitat-connectors" viewBox="0 0 680 500" aria-hidden="true"></svg><div id="habitatMarkers"></div><div class="habitat-readouts" role="group" aria-label="Habitat indicators"><button type="button" class="hologram-callout callout-lungs habitat-module-node" aria-pressed="false" data-habitat-module="co2" aria-label="Cabin CO₂" data-habitat-card="co2" onmouseenter="window.hudController.focusHabitatModule('co2')" onmouseleave="window.hudController.unfocusHabitatModule()">
         <span class="callout-header" id="labelEnvCo2" style="color:var(--c-green-ink);">ECLSS SCRUBBER (ppCO2)</span>
-        <span class="callout-sub">VALOR: <span id="calloutEnvCo2" class="callout-val" style="color:var(--c-green-ink);">1.8 mmHg</span></span>
+        <span class="callout-sub">VALUE: <span id="calloutEnvCo2" class="callout-val" style="color:var(--c-green-ink);">1.8 mmHg</span></span>
       </button>
-<button type="button" class="hologram-callout callout-bone habitat-module-node" aria-pressed="false" data-habitat-module="rad" aria-label="Radiación acumulada" data-habitat-card="rad" onmouseenter="window.hudController.enfocarModuloHabitat('rad')" onmouseleave="window.hudController.desenfocarModuloHabitat()">
-        <span class="callout-header" id="labelEnvRad" style="color:var(--c-amber-ink);">BLINDAJE RADIACIÓN (SPE)</span>
-        <span class="callout-sub">DOSIS: <span id="calloutEnvRad" class="callout-val" style="color:var(--c-amber-ink);">85.0 mSv</span></span>
+<button type="button" class="hologram-callout callout-bone habitat-module-node" aria-pressed="false" data-habitat-module="rad" aria-label="Cumulative radiation" data-habitat-card="rad" onmouseenter="window.hudController.focusHabitatModule('rad')" onmouseleave="window.hudController.unfocusHabitatModule()">
+        <span class="callout-header" id="labelEnvRad" style="color:var(--c-amber-ink);">RADIATION SHIELDING (SPE)</span>
+        <span class="callout-sub">DOSE: <span id="calloutEnvRad" class="callout-val" style="color:var(--c-amber-ink);">85.0 mSv</span></span>
       </button>
-<button type="button" class="hologram-callout habitat-module-node" aria-pressed="false" data-habitat-module="temp" aria-label="Temperatura de cabina" data-habitat-card="temp" onmouseenter="window.hudController.enfocarModuloHabitat('temp')" onmouseleave="window.hudController.desenfocarModuloHabitat()">
-        <span class="callout-header" id="labelEnvTemp" style="color:#fff;">CONTROL TÉRMICO (ATCS)</span>
+<button type="button" class="hologram-callout habitat-module-node" aria-pressed="false" data-habitat-module="temp" aria-label="Cabin temperature" data-habitat-card="temp" onmouseenter="window.hudController.focusHabitatModule('temp')" onmouseleave="window.hudController.unfocusHabitatModule()">
+        <span class="callout-header" id="labelEnvTemp" style="color:#fff;">THERMAL CONTROL (ATCS)</span>
         <span class="callout-sub">TEMP: <span id="calloutEnvTemp" class="callout-val" style="color:#fff;">21.8 °C</span></span>
       </button>
-<button type="button" class="hologram-callout callout-brain habitat-module-node" aria-pressed="false" data-habitat-module="press" aria-label="Presión de cabina" data-habitat-card="press" onmouseenter="window.hudController.enfocarModuloHabitat('press')" onmouseleave="window.hudController.desenfocarModuloHabitat()">
-        <span class="callout-header" id="labelEnvPress" style="color:var(--c-cyan-ink);">PRESIÓN CASCO (HULL)</span>
-        <span class="callout-sub">CABINA: <span id="calloutEnvPress" class="callout-val" style="color:var(--c-cyan-ink);">101.3 kPa</span></span>
+<button type="button" class="hologram-callout callout-brain habitat-module-node" aria-pressed="false" data-habitat-module="press" aria-label="Cabin pressure" data-habitat-card="press" onmouseenter="window.hudController.focusHabitatModule('press')" onmouseleave="window.hudController.unfocusHabitatModule()">
+        <span class="callout-header" id="labelEnvPress" style="color:var(--c-cyan-ink);">HULL PRESSURE</span>
+        <span class="callout-sub">CABIN: <span id="calloutEnvPress" class="callout-val" style="color:var(--c-cyan-ink);">101.3 kPa</span></span>
       </button>
-<button type="button" class="hologram-callout callout-hydration habitat-module-node" aria-pressed="false" data-habitat-module="hum" aria-label="Humedad relativa" data-habitat-card="hum" onmouseenter="window.hudController.enfocarModuloHabitat('hum')" onmouseleave="window.hudController.desenfocarModuloHabitat()">
-        <span class="callout-header" id="labelEnvHum" style="color:var(--c-blue-ink);">HUMEDAD ATMOSFÉRICA</span>
-        <span class="callout-sub">HUMEDAD: <span id="calloutEnvHum" class="callout-val" style="color:var(--c-blue-ink);">45.0 %</span></span>
+<button type="button" class="hologram-callout callout-hydration habitat-module-node" aria-pressed="false" data-habitat-module="hum" aria-label="Relative humidity" data-habitat-card="hum" onmouseenter="window.hudController.focusHabitatModule('hum')" onmouseleave="window.hudController.unfocusHabitatModule()">
+        <span class="callout-header" id="labelEnvHum" style="color:var(--c-blue-ink);">ATMOSPHERIC HUMIDITY</span>
+        <span class="callout-sub">HUMIDITY: <span id="calloutEnvHum" class="callout-val" style="color:var(--c-blue-ink);">45.0 %</span></span>
       </button></div></div></div></div>
-    <!-- PILLS INFORMATIVAS -->
+    <!-- INFORMATIONAL PILLS -->
     <div class="habitat-operational-pills" style="margin-top:14px; display:flex; justify-content:space-between; gap:12px; font-family:var(--font-data); font-size:12px;">
       <div style="flex:1; background:rgba(0,240,255,0.06); border:1px solid rgba(0,240,255,0.25); padding:8px 14px; border-radius:4px; color:var(--c-cyan-ink); text-align:center;">
-        GRAVEDAD: <span id="envGravity" style="font-weight:bold;">0.00 g</span> (MICROGRAVEDAD)
+        GRAVITY: <span id="envGravity" style="font-weight:bold;">0.00 g</span> (MICROGRAVITY)
       </div>
       <div style="flex:1; background:rgba(0,255,136,0.06); border:1px solid rgba(0,255,136,0.25); padding:8px 14px; border-radius:4px; color:var(--c-green-ink); text-align:center;">
-        VENTILACIÓN: <span style="font-weight:bold;">FORZADA ACTIVA (NASA-STD-3001)</span>
+        VENTILATION: <span style="font-weight:bold;">FORCED ACTIVE (NASA-STD-3001)</span>
       </div>
     </div>
   </div>
@@ -57,58 +57,58 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path>
         </svg>
-        SENSORES AMBIENTALES DE CABINA EN TIEMPO REAL
+        REAL-TIME CABIN ENVIRONMENTAL SENSORS
       </div>
       <div class="panel-subtitle">NASA-STD-3001 VOL. 2 [V2 6004 / 6006] · SOL 120</div>
     </div>
 
     <div class="metrics-grid-2x">
       <div class="metric-tile" id="cardCo2">
-        <div class="tile-label">CO₂ DE CABINA (ppCO₂)</div>
+        <div class="tile-label">CABIN CO₂ (ppCO₂)</div>
         <div class="tile-value"><span id="valCo2">1.8</span> <span class="tile-unit">mmHg</span></div>
-        <div class="tile-status" id="statusCo2">LÍMITE NASA: &lt; 3.0 mmHg (~1200 ppm)</div>
+        <div class="tile-status" id="statusCo2">NASA LIMIT: &lt; 3.0 mmHg (~1200 ppm)</div>
       </div>
       <div class="metric-tile" id="cardRad">
-        <div class="tile-label">DOSIS RADIACIÓN ACUMULADA</div>
+        <div class="tile-label">CUMULATIVE RADIATION DOSE</div>
         <div class="tile-value"><span id="valRad">85.0</span> <span class="tile-unit">mSv</span></div>
-        <div class="tile-status" id="statusRad">14.1% DE LÍMITE CARRERA (600 mSv)</div>
+        <div class="tile-status" id="statusRad">14.1% OF THE CAREER LIMIT (600 mSv)</div>
       </div>
       <div class="metric-tile" id="cardPress">
-        <div class="tile-label">PRESIÓN CABINA</div>
+        <div class="tile-label">CABIN PRESSURE</div>
         <div class="tile-value"><span id="valPress">101.3</span> <span class="tile-unit">kPa</span></div>
-        <div class="tile-status">RANGO NOMINAL (95.0 - 103.0 kPa)</div>
+        <div class="tile-status">NOMINAL RANGE (95.0 - 103.0 kPa)</div>
       </div>
       <div class="metric-tile">
-        <div class="tile-label">TEMPERATURA CABINA</div>
+        <div class="tile-label">CABIN TEMPERATURE</div>
         <div class="tile-value"><span id="valCabinTemp">21.8</span> <span class="tile-unit">°C</span></div>
-        <div class="tile-status">CONFORT OPERACIONAL</div>
+        <div class="tile-status">OPERATIONAL COMFORT</div>
       </div>
       <div class="metric-tile">
-        <div class="tile-label">HUMEDAD RELATIVA</div>
+        <div class="tile-label">RELATIVE HUMIDITY</div>
         <div class="tile-value"><span id="valHumidity">45.0</span> <span class="tile-unit">%</span></div>
-        <div class="tile-status">RANGO NOMINAL (40 - 60%)</div>
+        <div class="tile-status">NOMINAL RANGE (40 - 60%)</div>
       </div>
       <div class="metric-tile" id="cardSolar">
-        <div class="tile-label">CLIMA ESPACIAL (NOAA SWPC)</div>
-        <div class="tile-value"><span id="valSolarStatus">S0 QUIETO</span></div>
-        <div class="tile-status" id="statusSolar">SIN EVENTOS SPE ACTIVOS</div>
+        <div class="tile-label">SPACE WEATHER (NOAA SWPC)</div>
+        <div class="tile-value"><span id="valSolarStatus">S0 QUIET</span></div>
+        <div class="tile-status" id="statusSolar">NO ACTIVE SPE EVENTS</div>
       </div>
     </div>
 
 </div>
 <div class="hud-panel screen-panel" data-panel="synergy"><div style="background:#040814; border:1px solid rgba(0,240,255,0.25); border-radius:8px; padding:14px; margin-top:16px;">
       <div style="font-family:var(--font-hud); font-size:11px; color:var(--c-cyan-ink); display:flex; justify-content:space-between; margin-bottom:8px;">
-        <span>GRAFO MATRICIAL TENSORIAL KRONECKER (R^12)</span>
-        <span id="matrixMaxSeverity" style="color:var(--c-green-ink);">Peligro: 0.0/10</span>
+        <span>KRONECKER TENSOR MATRIX GRAPH (R^12)</span>
+        <span id="matrixMaxSeverity" style="color:var(--c-green-ink);">Hazard: 0.0/10</span>
       </div>
       <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px;" id="kroneckerGrid"></div>
     </div></div>
 <div class="hud-panel screen-panel" data-panel="actions"><div style="background:rgba(0,240,255,0.06); border:1px solid rgba(0,240,255,0.3); border-radius:8px; padding:14px; margin-top:14px;">
       <div style="font-family:var(--font-hud); font-size:11px; color:var(--c-cyan-ink); margin-bottom:6px;">
-        CONTRAMEDIDAS ACTIVAS SUGERIDAS (MÁXIMO 3 ACCIONES):
+        SUGGESTED ACTIVE COUNTERMEASURES (MAXIMUM 3 ACTIONS):
       </div>
       <div id="ambientCountermeasuresList" style="font-family:var(--font-data); font-size:12px; line-height:1.6; color:var(--text-secondary);">
-        • Sin contramedidas de emergencia requeridas.
+        • No emergency countermeasures required.
       </div>
     </div></div>
 </div>

@@ -3,11 +3,11 @@ class HabitatDiagramService {
   constructor() {
     this._model = 'orion';
     this._parts = [
-      {key:'co2',label:'CO₂',name:'Soporte vital y CO₂',color:'var(--c-green)',side:'left',y:55},
-      {key:'rad',label:'RAD',name:'Blindaje y radiación',color:'var(--c-amber)',side:'left',y:205},
-      {key:'temp',label:'TEMP',name:'Control térmico',color:'var(--c-cyan)',side:'left',y:380},
-      {key:'press',label:'PRES',name:'Casco y presión',color:'var(--c-cyan)',side:'right',y:115},
-      {key:'hum',label:'HUM',name:'Cabina y humedad',color:'var(--c-blue)',side:'right',y:325}
+      {key:'co2',label:'CO₂',name:'Life support and CO₂',color:'var(--c-green)',side:'left',y:55},
+      {key:'rad',label:'RAD',name:'Shielding and radiation',color:'var(--c-amber)',side:'left',y:205},
+      {key:'temp',label:'TEMP',name:'Thermal control',color:'var(--c-cyan)',side:'left',y:380},
+      {key:'press',label:'PRES',name:'Hull and pressure',color:'var(--c-cyan)',side:'right',y:115},
+      {key:'hum',label:'HUM',name:'Cabin and humidity',color:'var(--c-blue)',side:'right',y:325}
     ];
     this._geometry = {
       orion: {width:1993,height:1525,points:{co2:[.31,.48],rad:[.53,.38],temp:[.73,.44],press:[.41,.22],hum:[.27,.65]}},
@@ -16,7 +16,7 @@ class HabitatDiagramService {
     };
   }
 
-  inicializar() {
+  initialize() {
     this._svg = document.getElementById('habitatConnectors');
     this._markers = document.getElementById('habitatMarkers');
     if (!this._svg || !this._markers) return;
@@ -32,26 +32,26 @@ class HabitatDiagramService {
         const button = document.createElement('button'); button.type = 'button';
         button.className = `habitat-module-node habitat-${kind}`; button.dataset.habitatModule = part.key;
         button.dataset.markerKind = kind; button.dataset.side = part.side;
-        button.setAttribute('aria-label',`${part.name}: ver indicador`); button.setAttribute('aria-pressed','false');
+        button.setAttribute('aria-label',`${part.name}: view indicator`); button.setAttribute('aria-pressed','false');
         button.style.setProperty('--sensor-color',part.color);
         button.textContent = kind === 'label' ? part.label : '';
-        button.addEventListener('mouseenter',() => { if (matchMedia('(hover: hover)').matches) window.hudController?.enfocarModuloHabitat(part.key); });
-        button.addEventListener('mouseleave',() => { if (matchMedia('(hover: hover)').matches) window.hudController?.desenfocarModuloHabitat(); });
+        button.addEventListener('mouseenter',() => { if (matchMedia('(hover: hover)').matches) window.hudController?.focusHabitatModule(part.key); });
+        button.addEventListener('mouseleave',() => { if (matchMedia('(hover: hover)').matches) window.hudController?.unfocusHabitatModule(); });
         button.onclick = () => {
           if (window.innerWidth < 900) {
-            window.hudController?.cambiarDetalleHabitat('sensors');
+            window.hudController?.changeHabitatDetail('sensors');
             document.querySelector(`.habitat-readouts [data-habitat-card="${part.key}"]`)?.focus({preventScroll:true});
           }
-          window.hudController?.enfocarModuloHabitat(part.key);
+          window.hudController?.focusHabitatModule(part.key);
         };
         this._markers.appendChild(button);
       }
     });
-    this.actualizar(this._model);
-    window.addEventListener('resize',() => this.actualizar(this._model));
+    this.update(this._model);
+    window.addEventListener('resize',() => this.update(this._model));
   }
 
-  actualizar(model) {
+  update(model) {
     if (!this._geometry[model] || !this._svg) return;
     this._model = model;
     const compact = window.innerWidth < 900, geometry = this._geometry[model];

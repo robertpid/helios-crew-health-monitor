@@ -1,130 +1,130 @@
 /**
  * ==============================================================================
- * CAPA DE SERVICIOS: AuthService (Control de Acceso y Gestión de Tripulantes)
+ * SERVICES LAYER: AuthService (Access Control and Crew Management)
  * ==============================================================================
- * Gestiona la autenticación de tripulantes espaciales y cirujano de vuelo
- * mediante credenciales de usuario y clave PIN de 4 dígitos.
+ * Manages the authentication of space crew members and the flight surgeon
+ * through user credentials and a 4-digit PIN.
  */
 
 class AuthService {
   constructor() {
-    this._usuarios = [
+    this._users = [
       {
         id: "ASTRO-01",
-        usuario: "astro1",
+        username: "astro1",
         pin: "1001",
-        nombre: "Alex Mercer",
-        rol: "ASTRONAUTA",
-        rango: "Comandante A01",
+        name: "Alex Mercer",
+        role: "ASTRONAUT",
+        rank: "Commander A01",
         avatar: "👨‍🚀",
-        mision: "ARES-VI (Sol 120)"
+        mission: "ARES-VI (Sol 120)"
       },
       {
         id: "ASTRO-02",
-        usuario: "astro2",
+        username: "astro2",
         pin: "2002",
-        nombre: "Elena Rostova",
-        rol: "ASTRONAUTA",
-        rango: "Especialista A02",
+        name: "Elena Rostova",
+        role: "ASTRONAUT",
+        rank: "Specialist A02",
         avatar: "👩‍🚀",
-        mision: "ARES-VI (Sol 120)"
+        mission: "ARES-VI (Sol 120)"
       },
       {
         id: "MED-01",
-        usuario: "cirujano",
+        username: "surgeon",
         pin: "9009",
-        nombre: "Dr. Marcus Vance",
-        rol: "CIRUJANO_VUELO",
-        rango: "Cirujano de Vuelo",
+        name: "Dr. Marcus Vance",
+        role: "FLIGHT_SURGEON",
+        rank: "Flight Surgeon",
         avatar: "🩺",
-        mision: "Centro de Control JSC Houston"
+        mission: "JSC Houston Control Center"
       }
     ];
 
-    this._claveStorage = "helios_session_user";
-    this._usuarioActual = this._cargarSesionGuardada();
+    this._storageKey = "helios_session_user";
+    this._currentUser = this._loadSavedSession();
     this._listeners = [];
   }
 
-  obtenerUsuarioActual() {
-    return this._usuarioActual;
+  getCurrentUser() {
+    return this._currentUser;
   }
 
-  listarUsuariosDemo() {
-    return this._usuarios.map(u => ({
-      usuario: u.usuario,
+  listDemoUsers() {
+    return this._users.map(u => ({
+      username: u.username,
       pin: u.pin,
-      nombre: u.nombre,
-      rol: u.rol,
-      rango: u.rango,
+      name: u.name,
+      role: u.role,
+      rank: u.rank,
       avatar: u.avatar
     }));
   }
 
-  autenticar(usuario, pin) {
-    const credencialUsuario = (usuario || "").trim().toLowerCase();
-    const credencialPin = (pin || "").trim();
+  authenticate(username, pin) {
+    const usernameCredential = (username || "").trim().toLowerCase();
+    const pinCredential = (pin || "").trim();
 
-    const usuarioEncontrado = this._usuarios.find(
-      u => u.usuario.toLowerCase() === credencialUsuario && u.pin === credencialPin
+    const foundUser = this._users.find(
+      u => u.username.toLowerCase() === usernameCredential && u.pin === pinCredential
     );
 
-    if (usuarioEncontrado) {
-      this._usuarioActual = usuarioEncontrado;
+    if (foundUser) {
+      this._currentUser = foundUser;
       try {
-        localStorage.setItem(this._claveStorage, JSON.stringify(usuarioEncontrado));
+        localStorage.setItem(this._storageKey, JSON.stringify(foundUser));
       } catch (e) {
-        console.warn("[AuthService] No se pudo guardar la sesión en storage:", e);
+        console.warn("[AuthService] Could not save the session to storage:", e);
       }
-      this._notificarCambio();
-      return { exito: true, usuario: usuarioEncontrado };
+      this._notifyChange();
+      return { success: true, user: foundUser };
     }
 
-    return { exito: false, error: "Credenciales inválidas. Verifique usuario o PIN." };
+    return { success: false, error: "Invalid credentials. Check the username or PIN." };
   }
 
-  cerrarSesion() {
-    this._usuarioActual = null;
+  logout() {
+    this._currentUser = null;
     try {
-      localStorage.removeItem(this._claveStorage);
+      localStorage.removeItem(this._storageKey);
     } catch (e) {
-      console.warn("[AuthService] Error al limpiar storage:", e);
+      console.warn("[AuthService] Error clearing storage:", e);
     }
-    this._notificarCambio();
+    this._notifyChange();
   }
 
-  onCambioSesion(callback) {
+  onSessionChange(callback) {
     if (typeof callback === "function") {
       this._listeners.push(callback);
     }
   }
 
-  _notificarCambio() {
+  _notifyChange() {
     this._listeners.forEach(cb => {
       try {
-        cb(this._usuarioActual);
+        cb(this._currentUser);
       } catch (err) {
-        console.error("[AuthService] Error en listener:", err);
+        console.error("[AuthService] Listener error:", err);
       }
     });
   }
 
-  estaAutenticado() {
-    return !!this._usuarioActual;
+  isAuthenticated() {
+    return !!this._currentUser;
   }
 
-  _cargarSesionGuardada() {
+  _loadSavedSession() {
     try {
-      const guardado = localStorage.getItem(this._claveStorage);
-      if (guardado) {
-        const datos = JSON.parse(guardado);
-        const existe = this._usuarios.find(u => u.usuario === datos.usuario);
-        if (existe) return existe;
+      const saved = localStorage.getItem(this._storageKey);
+      if (saved) {
+        const data = JSON.parse(saved);
+        const existing = this._users.find(u => u.username === data.username);
+        if (existing) return existing;
       }
     } catch (e) {
-      console.warn("[AuthService] Error al leer sesión previa:", e);
+      console.warn("[AuthService] Error reading the previous session:", e);
     }
-    // Requiere autenticación explícita por PIN (sin auto-login por defecto)
+    // Requires explicit PIN authentication (no auto-login by default)
     return null;
   }
 }

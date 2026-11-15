@@ -1,8 +1,8 @@
 /**
  * ==============================================================================
- * CAPA DE ESTADO (STATE MANAGEMENT): StateManager
- * Patrón Observer / Singleton reactivo para sincronizar el Cockpit HUD.
- * Mantenido estrictamente bajo 300 líneas (Clean Code & SRP).
+ * STATE LAYER (STATE MANAGEMENT): StateManager
+ * Reactive Observer / Singleton pattern to synchronize the Cockpit HUD.
+ * Kept strictly under 300 lines (Clean Code & SRP).
  * ==============================================================================
  */
 
@@ -11,62 +11,62 @@ class StateManager {
     this._listeners = [];
 
     this._state = {
-      habitatActivo: "TRANSITO_MARTE",
-      vistaActiva: "biomedical",
-      modoCrisis: false,
-      modalAlertaAbierto: false,
-      organoSeleccionado: null,
-      
-      telemetria: {
-        id_mision: "ARES-VI-MARS-EXPEDITION",
-        dia_mision: 120,
-        astronauta_id: "ASTRO-HELIOS-01",
-        fisiologia: {
-          ritmo_cardiaco_bpm: 76.0,
+      activeHabitat: "MARS_TRANSIT",
+      activeView: "biomedical",
+      crisisMode: false,
+      alertModalOpen: false,
+      selectedOrgan: null,
+
+      telemetry: {
+        mission_id: "ARES-VI-MARS-EXPEDITION",
+        mission_day: 120,
+        astronaut_id: "ASTRO-HELIOS-01",
+        physiology: {
+          heart_rate_bpm: 76.0,
           spo2_pct: 98.0,
-          presion_sistolica: 118,
-          presion_diastolica: 76,
-          temperatura_corporal_c: 36.6,
-          temperatura_piel_c: 34.8,
-          variabilidad_hrv_ms: 42.0,
-          frecuencia_respiratoria_rpm: 14.0,
-          horas_sueno_ultimo_ciclo: 7.2,
-          perdida_osea_pct: 1.8,
-          actividad_ared_pct: 100.0,
-          liquidos_litros_dia: 2.2,
+          systolic_pressure: 118,
+          diastolic_pressure: 76,
+          body_temperature_c: 36.6,
+          skin_temperature_c: 34.8,
+          hrv_ms: 42.0,
+          respiratory_rate_rpm: 14.0,
+          last_cycle_sleep_hours: 7.2,
+          bone_loss_pct: 1.8,
+          ared_activity_pct: 100.0,
+          fluids_liters_per_day: 2.2,
         },
-        ambiente: {
+        environment: {
           co2_mmHg: 1.8,
           co2_ppm: 1200,
-          radiacion_acumulada_mSv: 85.0,
-          radiacion_tasa_diaria_mSv: 1.80,
-          presion_cabina_kpa: 101.3,
-          temperatura_cabina_c: 21.8,
-          humedad_relativa_pct: 45.0,
-          evento_solar_activo: false,
-          gravedad_g: 0.0,
-          ruido_db: 58.0,
+          cumulative_radiation_mSv: 85.0,
+          daily_radiation_rate_mSv: 1.80,
+          cabin_pressure_kpa: 101.3,
+          cabin_temperature_c: 21.8,
+          relative_humidity_pct: 45.0,
+          solar_event_active: false,
+          gravity_g: 0.0,
+          noise_db: 58.0,
         },
-        cognicion: {
-          latencia_voz_ms: 210.0,
-          densidad_lexica_score: 0.95,
-          similitud_coseno: 0.985,
-          incongruencia_detectada: false,
-          alerta_astra: null,
-          sans_sintoma_vision: false,
+        cognition: {
+          voice_latency_ms: 210.0,
+          lexical_density_score: 0.95,
+          cosine_similarity: 0.985,
+          incongruence_detected: false,
+          astra_alert: null,
+          sans_vision_symptom: false,
         },
         kronecker: {
-          arista_critica: "ESTADO_NOMINAL_SIN_SINERGIAS",
-          severidad_maxima: 0.0,
-          estres_severo: false,
-          indice_argmax: -1,
+          critical_edge: "NOMINAL_STATE_NO_SYNERGIES",
+          max_severity: 0.0,
+          severe_stress: false,
+          argmax_index: -1,
         },
-        contramedidas_priorizadas: [
-          "Mantener protocolo de hidratación diaria (2.2 L/día).",
-          "Cumplir rutina de sentadilla y peso muerto en ARED programada.",
-          "Verificar filtros del sistema de soporte vital de cabina.",
+        prioritized_countermeasures: [
+          "Maintain the daily hydration protocol (2.2 L/day).",
+          "Complete the scheduled ARED squat and deadlift routine.",
+          "Check the filters of the cabin life support system.",
         ],
-        alertas_activas: [],
+        active_alerts: [],
       },
     };
   }
@@ -89,194 +89,194 @@ class StateManager {
     return this._state;
   }
 
-  setVistaActiva(vista) {
-    if (this._state.vistaActiva !== vista) {
-      this._state.vistaActiva = vista;
+  setActiveView(view) {
+    if (this._state.activeView !== view) {
+      this._state.activeView = view;
       this.notify();
     }
   }
 
   setHabitat(habitatKey) {
-    this._state.habitatActivo = habitatKey;
-    const amb = this._state.telemetria.ambiente;
+    this._state.activeHabitat = habitatKey;
+    const env = this._state.telemetry.environment;
 
-    if (habitatKey === "BASE_MARTE") {
-      amb.gravedad_g = 0.38;
-      amb.radiacion_acumulada_mSv = 42.0;
-      amb.radiacion_tasa_diaria_mSv = 0.67;
-      amb.co2_mmHg = 1.6;
-      amb.co2_ppm = 710;
-      amb.presion_cabina_kpa = 101.3;
-      amb.temperatura_cabina_c = 22.4;
-      amb.humedad_relativa_pct = 52.0;
-      amb.evento_solar_activo = false;
-    } else if (habitatKey === "ESTACION_ESPACIAL") {
-      amb.gravedad_g = 0.0;
-      amb.radiacion_acumulada_mSv = 22.5;
-      amb.radiacion_tasa_diaria_mSv = 0.55;
-      amb.co2_mmHg = 2.1;
-      amb.co2_ppm = 1400;
-      amb.presion_cabina_kpa = 101.3;
-      amb.temperatura_cabina_c = 23.0;
-      amb.humedad_relativa_pct = 42.0;
-      amb.evento_solar_activo = false;
+    if (habitatKey === "MARS_BASE") {
+      env.gravity_g = 0.38;
+      env.cumulative_radiation_mSv = 42.0;
+      env.daily_radiation_rate_mSv = 0.67;
+      env.co2_mmHg = 1.6;
+      env.co2_ppm = 710;
+      env.cabin_pressure_kpa = 101.3;
+      env.cabin_temperature_c = 22.4;
+      env.relative_humidity_pct = 52.0;
+      env.solar_event_active = false;
+    } else if (habitatKey === "SPACE_STATION") {
+      env.gravity_g = 0.0;
+      env.cumulative_radiation_mSv = 22.5;
+      env.daily_radiation_rate_mSv = 0.55;
+      env.co2_mmHg = 2.1;
+      env.co2_ppm = 1400;
+      env.cabin_pressure_kpa = 101.3;
+      env.cabin_temperature_c = 23.0;
+      env.relative_humidity_pct = 42.0;
+      env.solar_event_active = false;
     } else {
-      amb.gravedad_g = 0.0;
-      amb.radiacion_acumulada_mSv = 85.0;
-      amb.radiacion_tasa_diaria_mSv = 1.80;
-      amb.co2_mmHg = 1.8;
-      amb.co2_ppm = 800;
-      amb.presion_cabina_kpa = 101.3;
-      amb.temperatura_cabina_c = 21.8;
-      amb.humedad_relativa_pct = 45.0;
-      amb.evento_solar_activo = false;
+      env.gravity_g = 0.0;
+      env.cumulative_radiation_mSv = 85.0;
+      env.daily_radiation_rate_mSv = 1.80;
+      env.co2_mmHg = 1.8;
+      env.co2_ppm = 800;
+      env.cabin_pressure_kpa = 101.3;
+      env.cabin_temperature_c = 21.8;
+      env.relative_humidity_pct = 45.0;
+      env.solar_event_active = false;
     }
     this.notify();
   }
 
-  setModeloHabitat(modelo) {
-    const mapa = {
-      orion: "TRANSITO_MARTE",
-      mars: "BASE_MARTE",
-      iss: "ESTACION_ESPACIAL"
+  setHabitatModel(model) {
+    const map = {
+      orion: "MARS_TRANSIT",
+      mars: "MARS_BASE",
+      iss: "SPACE_STATION"
     };
-    this.setHabitat(mapa[modelo] || modelo);
+    this.setHabitat(map[model] || model);
   }
 
-  setOrganoSeleccionado(organo) {
-    this._state.organoSeleccionado = organo;
+  setSelectedOrgan(organ) {
+    this._state.selectedOrgan = organ;
     this.notify();
   }
 
-  setModalAlerta(abierto) {
-    this._state.modalAlertaAbierto = abierto;
+  setAlertModal(open) {
+    this._state.alertModalOpen = open;
     this.notify();
   }
 
-  toggleModalAlerta() {
-    this.setModalAlerta(!this._state.modalAlertaAbierto);
+  toggleAlertModal() {
+    this.setAlertModal(!this._state.alertModalOpen);
   }
 
-  setModoOperacion(modo) {
-    if (modo === "crisis") this.activarModoCrisis();
-    else this.restablecerModoNominal();
+  setOperationMode(mode) {
+    if (mode === "crisis") this.activateCrisisMode();
+    else this.restoreNominalMode();
   }
 
-  activarModoCrisis() {
-    this._state.modoCrisis = true;
-    this._state.modalAlertaAbierto = true;
+  activateCrisisMode() {
+    this._state.crisisMode = true;
+    this._state.alertModalOpen = true;
 
-    this._state.telemetria.fisiologia.ritmo_cardiaco_bpm = 132.0;
-    this._state.telemetria.fisiologia.spo2_pct = 88.0;
-    this._state.telemetria.fisiologia.temperatura_corporal_c = 38.4;
-    this._state.telemetria.fisiologia.variabilidad_hrv_ms = 18.0;
-    this._state.telemetria.fisiologia.presion_sistolica = 145;
-    this._state.telemetria.fisiologia.presion_diastolica = 95;
+    this._state.telemetry.physiology.heart_rate_bpm = 132.0;
+    this._state.telemetry.physiology.spo2_pct = 88.0;
+    this._state.telemetry.physiology.body_temperature_c = 38.4;
+    this._state.telemetry.physiology.hrv_ms = 18.0;
+    this._state.telemetry.physiology.systolic_pressure = 145;
+    this._state.telemetry.physiology.diastolic_pressure = 95;
 
-    this._state.telemetria.ambiente.co2_mmHg = 3.8;
-    this._state.telemetria.ambiente.co2_ppm = 3200;
-    this._state.telemetria.ambiente.evento_solar_activo = true;
+    this._state.telemetry.environment.co2_mmHg = 3.8;
+    this._state.telemetry.environment.co2_ppm = 3200;
+    this._state.telemetry.environment.solar_event_active = true;
 
-    this._state.telemetria.cognicion.latencia_voz_ms = 850.0;
-    this._state.telemetria.cognicion.densidad_lexica_score = 0.45;
-    this._state.telemetria.cognicion.similitud_coseno = 0.72;
-    this._state.telemetria.cognicion.incongruencia_detectada = true;
-    this._state.telemetria.cognicion.alerta_astra =
-      "Incongruencia Cognitiva Detectada. Evaluación preliminar: Posible ocultamiento de fatiga.";
+    this._state.telemetry.cognition.voice_latency_ms = 850.0;
+    this._state.telemetry.cognition.lexical_density_score = 0.45;
+    this._state.telemetry.cognition.cosine_similarity = 0.72;
+    this._state.telemetry.cognition.incongruence_detected = true;
+    this._state.telemetry.cognition.astra_alert =
+      "Cognitive Incongruence Detected. Preliminary assessment: Possible fatigue masking.";
 
-    this._state.telemetria.kronecker.arista_critica = "CO2_CON_HIPERTENSION_INTRACRANEAL_SANS";
-    this._state.telemetria.kronecker.severidad_maxima = 9.2;
-    this._state.telemetria.kronecker.estres_severo = true;
-    this._state.telemetria.kronecker.indice_argmax = 3;
+    this._state.telemetry.kronecker.critical_edge = "CO2_WITH_SANS_INTRACRANIAL_HYPERTENSION";
+    this._state.telemetry.kronecker.max_severity = 9.2;
+    this._state.telemetry.kronecker.severe_stress = true;
+    this._state.telemetry.kronecker.argmax_index = 3;
 
-    this._state.telemetria.contramedidas_priorizadas = [
-      "1. Colocación inmediata de mascarilla de O₂ y posición de reposo.",
-      "2. Elevar ciclo forzado de remoción de CO₂ en módulo de cabina (ECLSS).",
-      "3. Notificar al médico de vuelo y transmitir telemetría en ventana DSN.",
+    this._state.telemetry.prioritized_countermeasures = [
+      "1. Immediately don the O₂ mask and assume a resting position.",
+      "2. Raise the forced CO₂ removal cycle in the cabin module (ECLSS).",
+      "3. Notify the flight surgeon and transmit telemetry in the DSN window.",
     ];
 
     this.notify();
   }
 
-  restablecerModoNominal() {
-    this._state.modoCrisis = false;
-    this._state.modalAlertaAbierto = false;
+  restoreNominalMode() {
+    this._state.crisisMode = false;
+    this._state.alertModalOpen = false;
 
-    this._state.telemetria.fisiologia.ritmo_cardiaco_bpm = 76.0;
-    this._state.telemetria.fisiologia.spo2_pct = 98.0;
-    this._state.telemetria.fisiologia.temperatura_corporal_c = 36.6;
-    this._state.telemetria.fisiologia.variabilidad_hrv_ms = 42.0;
-    this._state.telemetria.fisiologia.presion_sistolica = 118;
-    this._state.telemetria.fisiologia.presion_diastolica = 76;
+    this._state.telemetry.physiology.heart_rate_bpm = 76.0;
+    this._state.telemetry.physiology.spo2_pct = 98.0;
+    this._state.telemetry.physiology.body_temperature_c = 36.6;
+    this._state.telemetry.physiology.hrv_ms = 42.0;
+    this._state.telemetry.physiology.systolic_pressure = 118;
+    this._state.telemetry.physiology.diastolic_pressure = 76;
 
-    this._state.telemetria.ambiente.co2_mmHg = 1.8;
-    this._state.telemetria.ambiente.co2_ppm = 1200;
-    this._state.telemetria.ambiente.evento_solar_activo = false;
+    this._state.telemetry.environment.co2_mmHg = 1.8;
+    this._state.telemetry.environment.co2_ppm = 1200;
+    this._state.telemetry.environment.solar_event_active = false;
 
-    this._state.telemetria.cognicion.latencia_voz_ms = 210.0;
-    this._state.telemetria.cognicion.densidad_lexica_score = 0.95;
-    this._state.telemetria.cognicion.similitud_coseno = 0.985;
-    this._state.telemetria.cognicion.incongruencia_detectada = false;
-    this._state.telemetria.cognicion.alerta_astra = null;
+    this._state.telemetry.cognition.voice_latency_ms = 210.0;
+    this._state.telemetry.cognition.lexical_density_score = 0.95;
+    this._state.telemetry.cognition.cosine_similarity = 0.985;
+    this._state.telemetry.cognition.incongruence_detected = false;
+    this._state.telemetry.cognition.astra_alert = null;
 
-    this._state.telemetria.kronecker.arista_critica = "ESTADO_NOMINAL_SIN_SINERGIAS";
-    this._state.telemetria.kronecker.severidad_maxima = 0.0;
-    this._state.telemetria.kronecker.estres_severo = false;
-    this._state.telemetria.kronecker.indice_argmax = -1;
+    this._state.telemetry.kronecker.critical_edge = "NOMINAL_STATE_NO_SYNERGIES";
+    this._state.telemetry.kronecker.max_severity = 0.0;
+    this._state.telemetry.kronecker.severe_stress = false;
+    this._state.telemetry.kronecker.argmax_index = -1;
 
-    this._state.telemetria.contramedidas_priorizadas = [
-      "Mantener protocolo de hidratación diaria (2.2 L/día).",
-      "Cumplir rutina de sentadilla y peso muerto en ARED programada.",
-      "Verificar filtros del sistema de soporte vital de cabina.",
+    this._state.telemetry.prioritized_countermeasures = [
+      "Maintain the daily hydration protocol (2.2 L/day).",
+      "Complete the scheduled ARED squat and deadlift routine.",
+      "Check the filters of the cabin life support system.",
     ];
 
     this.notify();
   }
 
-  actualizarDesdeBackend(reporteConsolidado) {
-    if (this._state.modoCrisis) return;
+  updateFromBackend(consolidatedReport) {
+    if (this._state.crisisMode) return;
 
-    if (!reporteConsolidado) return;
-    const c3 = reporteConsolidado.cerebro_3_grafo_fusion;
-    const c4 = reporteConsolidado.cerebro_4_astra;
+    if (!consolidatedReport) return;
+    const b3 = consolidatedReport.brain_3_fusion_graph;
+    const b4 = consolidatedReport.brain_4_astra;
 
-    if (c3) {
-      this._state.telemetria.kronecker.arista_critica = c3.arista_sinergica_critica;
-      this._state.telemetria.kronecker.severidad_maxima = c3.puntaje_severidad_maximo;
-      this._state.telemetria.kronecker.estres_severo = c3.estres_fisiologico_severo;
-      this._state.telemetria.kronecker.indice_argmax = c3.indice_argmax;
+    if (b3) {
+      this._state.telemetry.kronecker.critical_edge = b3.critical_synergy_edge;
+      this._state.telemetry.kronecker.max_severity = b3.max_severity_score;
+      this._state.telemetry.kronecker.severe_stress = b3.severe_physiological_stress;
+      this._state.telemetry.kronecker.argmax_index = b3.argmax_index;
     }
 
-    if (c4) {
-      this._state.telemetria.cognicion.similitud_coseno = c4.similitud_coseno_linea_base;
-      this._state.telemetria.cognicion.incongruencia_detectada = c4.incongruencia_cognitiva_detectada;
-      this._state.telemetria.cognicion.alerta_astra = c4.alerta_astra;
+    if (b4) {
+      this._state.telemetry.cognition.cosine_similarity = b4.baseline_cosine_similarity;
+      this._state.telemetry.cognition.incongruence_detected = b4.cognitive_incongruence_detected;
+      this._state.telemetry.cognition.astra_alert = b4.astra_alert;
     }
 
-    if (reporteConsolidado.contramedidas_priorizadas?.length > 0) {
-      this._state.telemetria.contramedidas_priorizadas = reporteConsolidado.contramedidas_priorizadas;
+    if (consolidatedReport.prioritized_countermeasures?.length > 0) {
+      this._state.telemetry.prioritized_countermeasures = consolidatedReport.prioritized_countermeasures;
     }
 
     this.notify();
   }
 
-  actualizarCognicion(datosCognitivos) {
-    if (!datosCognitivos) return;
-    const cog = this._state.telemetria.cognicion;
-    if (datosCognitivos.latencia_ms !== undefined) {
-      cog.latencia_voz_ms = Number(datosCognitivos.latencia_ms);
+  updateCognition(cognitiveData) {
+    if (!cognitiveData) return;
+    const cog = this._state.telemetry.cognition;
+    if (cognitiveData.latency_ms !== undefined) {
+      cog.voice_latency_ms = Number(cognitiveData.latency_ms);
     }
-    if (datosCognitivos.densidad_lexica !== undefined) {
-      cog.densidad_lexica_score = Number(datosCognitivos.densidad_lexica);
+    if (cognitiveData.lexical_density !== undefined) {
+      cog.lexical_density_score = Number(cognitiveData.lexical_density);
     }
-    if (datosCognitivos.similitud_coseno !== undefined) {
-      cog.similitud_coseno = Number(datosCognitivos.similitud_coseno);
+    if (cognitiveData.cosine_similarity !== undefined) {
+      cog.cosine_similarity = Number(cognitiveData.cosine_similarity);
     }
-    if (datosCognitivos.incongruencia_detectada !== undefined) {
-      cog.incongruencia_detectada = Boolean(datosCognitivos.incongruencia_detectada);
+    if (cognitiveData.incongruence_detected !== undefined) {
+      cog.incongruence_detected = Boolean(cognitiveData.incongruence_detected);
     }
-    if (datosCognitivos.alerta_astra !== undefined) {
-      cog.alerta_astra = datosCognitivos.alerta_astra;
+    if (cognitiveData.astra_alert !== undefined) {
+      cog.astra_alert = cognitiveData.astra_alert;
     }
     this.notify();
   }

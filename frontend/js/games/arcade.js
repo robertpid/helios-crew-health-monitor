@@ -17,7 +17,7 @@ class Game {
       this.model = type === 'maze' ? new MazeModel() : type === 'snake' ? new SnakeModel() : type === 'breakout' ? new BreakoutModel() : new PongModel();
       this.canvas = document.createElement('canvas'); this.canvas.width = 320; this.canvas.height = 320;
       this.canvas.className = 'arcade-canvas'; this.canvas.setAttribute('role','img');
-      this.canvas.setAttribute('aria-label','Tablero del juego. Usa los controles de dirección o las flechas del teclado.');
+      this.canvas.setAttribute('aria-label','Game board. Use the direction controls or the keyboard arrows.');
       host.appendChild(this.canvas); this.ctx = this.canvas.getContext('2d',{alpha:false});
       this._touchCanvas();
     } else {
@@ -170,7 +170,7 @@ class Game {
       button.className = 'arcade-cell'; button.dataset.gameCell = index;
       if (button.tagName === 'BUTTON') button.type = 'button';
       button.textContent = this.type === 'memory' ? (visible ? value : '?') : this.type === 'lights' ? (value ? '●' : '·') : value || '';
-      button.setAttribute('aria-label',`Casilla ${index + 1}: ${this.type === 'memory' ? (visible ? value : 'oculta') : this.type === 'lights' ? (value ? 'encendida' : 'apagada') : value || 'vacía'}`);
+      button.setAttribute('aria-label',`Square ${index + 1}: ${this.type === 'memory' ? (visible ? value : 'hidden') : this.type === 'lights' ? (value ? 'on' : 'off') : value || 'empty'}`);
       button.classList.toggle('cell-lit',this.type === 'lights' && value === true);
       button.classList.toggle('cell-matched',this.type === 'memory' && this.matched.has(index));
       if (this.type === '2048') button.dataset.value = value;
@@ -184,14 +184,14 @@ class Game {
   render() {
     if (this.isRealtime) this._draw(); else this._drawBoard();
     let score = '', message = '';
-    if (this.type === 'maze' || this.type === 'snake') score = `${this.model.score} puntos`;
-    if (this.type === 'breakout') score = `${this.model.score} puntos · ${this.model.lives} vidas`;
-    if (this.type === 'pong') score = `Tú ${this.model.points[0]} : ${this.model.points[1]} CPU`;
-    if (this.type === 'tic') { const winner = ticWinner(this.board); score = 'Tú: X · CPU: O'; message = winner === 'draw' ? 'Empate. ¿Otra partida?' : winner === 'X' ? '¡Ganaste!' : winner === 'O' ? 'Ganó la CPU. Puedes volver a intentarlo.' : 'Tu turno: elige una casilla.'; }
-    if (this.type === 'lights') { score = `${this.moves} movimientos`; message = this.done ? '¡Todas las luces apagadas!' : 'Apaga todas las luces.'; }
-    if (this.type === 'memory') { score = `${this.matched.size / 2} / 6 parejas · ${this.moves} intentos`; message = this.done ? '¡Encontraste todas las parejas!' : 'Descubre dos tarjetas iguales.'; }
-    if (this.type === '2048') { score = `${this.score} puntos`; message = this.done ? (this.board.includes(2048) ? '¡Llegaste a 2048!' : 'Sin movimientos. Prueba otra partida.') : 'Desliza o usa las flechas para unir números.'; }
-    if (this.isRealtime) message = this.done ? (this.type === 'maze' && this.model.won ? '¡Laberinto completado!' : 'Partida terminada. Puedes reiniciar.') : this.running ? 'En juego' : 'Partida en pausa. Pulsa Iniciar / Continuar.';
+    if (this.type === 'maze' || this.type === 'snake') score = `${this.model.score} points`;
+    if (this.type === 'breakout') score = `${this.model.score} points · ${this.model.lives} lives`;
+    if (this.type === 'pong') score = `You ${this.model.points[0]} : ${this.model.points[1]} CPU`;
+    if (this.type === 'tic') { const winner = ticWinner(this.board); score = 'You: X · CPU: O'; message = winner === 'draw' ? 'Draw. Another match?' : winner === 'X' ? 'You won!' : winner === 'O' ? 'The CPU won. You can try again.' : 'Your turn: choose a square.'; }
+    if (this.type === 'lights') { score = `${this.moves} moves`; message = this.done ? 'All lights out!' : 'Turn off every light.'; }
+    if (this.type === 'memory') { score = `${this.matched.size / 2} / 6 pairs · ${this.moves} tries`; message = this.done ? 'You found all the pairs!' : 'Uncover two matching cards.'; }
+    if (this.type === '2048') { score = `${this.score} points`; message = this.done ? (this.board.includes(2048) ? 'You reached 2048!' : 'No moves left. Try another match.') : 'Swipe or use the arrows to merge numbers.'; }
+    if (this.isRealtime) message = this.done ? (this.type === 'maze' && this.model.won ? 'Maze completed!' : 'Match over. You can restart.') : this.running ? 'In play' : 'Match paused. Press Start / Continue.';
     this.report({score,message,done:this.done,running:this.running,realtime:this.isRealtime});
   }
 
