@@ -35,6 +35,10 @@ from helios_inference.infrastructure.redis_consumer import AsyncRedisTelemetryCo
 from helios_inference.services.decision_matrix_evaluator import DecisionMatrixEvaluator
 from helios_inference.services.inference_engine import InferenceEngine
 from helios_inference.api.psicologia_router import router as psicologia_router
+from helios_inference.api.telemetria_router import (
+    router as telemetria_router,
+    registrar_proveedor_ciclo,
+)
 
 # Configuración del subsistema de logging según normas aeroespaciales
 logging.basicConfig(
@@ -126,6 +130,28 @@ if os.path.exists(ruta_frontend):
 
 # Inclusión del router para evaluación psicológica y bienestar del astronauta (ASTRA BHP)
 app.include_router(psicologia_router, prefix="/api/v1/psicologico", tags=["Evaluación Psicológica"])
+
+# Router de telemetría compacta (códigos + valores numéricos) y su libro de códigos
+app.include_router(telemetria_router, prefix="/api/v1/telemetria", tags=["Telemetría Compacta"])
+
+
+def _obtener_ciclo_vigente() -> tuple[ReporteInferenciaConsolidado, dict[str, Any]] | None:
+    """
+    Entrega el par (reporte, payload) del ciclo vigente para el compactador.
+
+    Si aún no ha llegado telemetría por Redis, procesa la muestra nominal por
+    defecto, de modo que el HUD disponga de un ciclo válido desde el arranque.
+    """
+    reporte = consumidor_redis_global.ultimo_reporte
+    payload = consumidor_redis_global.ultimo_payload
+    if reporte is not None and payload is not None:
+        return reporte, payload
+
+    payload_inicial = TelemetriaInputSchema().model_dump()
+    return motor_inferencia_global.procesar_telemetria(payload_inicial), payload_inicial
+
+
+registrar_proveedor_ciclo(_obtener_ciclo_vigente)
 
 
 def servir_dashboard_html() -> HTMLResponse:

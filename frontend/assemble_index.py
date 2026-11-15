@@ -147,6 +147,7 @@ class DashboardAssembler:
   <script src="/static/js/state/state_manager.js?v={version_tag}"></script>
   <script src="/static/js/services/auth_service.js?v={version_tag}"></script>
   <script src="/static/js/services/sound_service.js?v={version_tag}"></script>
+  <script src="/static/js/services/codebook_service.js?v={version_tag}"></script>
   <script src="/static/js/services/telemetry_service.js?v={version_tag}"></script>
   <script src="/static/js/services/ecg_service.js?v={version_tag}"></script>
   <script src="/static/js/services/hologram_service.js?v={version_tag}"></script>

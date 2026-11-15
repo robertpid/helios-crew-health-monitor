@@ -62,6 +62,7 @@ class AsyncRedisTelemetryConsumer:
         self._activo: bool = False
         self._tarea_background: asyncio.Task[None] | None = None
         self._ultimo_reporte: ReporteInferenciaConsolidado | None = None
+        self._ultimo_payload: dict[str, Any] | None = None
         self._contador_procesados: int = 0
         self._conectado: bool = False
 
@@ -79,6 +80,16 @@ class AsyncRedisTelemetryConsumer:
     def ultimo_reporte(self) -> ReporteInferenciaConsolidado | None:
         """Último reporte de inferencia generado por el motor."""
         return self._ultimo_reporte
+
+    @property
+    def ultimo_payload(self) -> dict[str, Any] | None:
+        """
+        Telemetría cruda que originó el último reporte.
+
+        El compactador la requiere para emitir los valores numéricos del registro
+        de enlace sin tener que parsear las cadenas descriptivas del reporte.
+        """
+        return self._ultimo_payload
 
     async def conectar(self) -> bool:
         """
@@ -179,6 +190,7 @@ class AsyncRedisTelemetryConsumer:
             payload: dict[str, Any] = json.loads(mensaje_crudo)
             reporte = self._motor.procesar_telemetria(payload)
             self._ultimo_reporte = reporte
+            self._ultimo_payload = payload
             self._contador_procesados += 1
 
             if self._callback:
