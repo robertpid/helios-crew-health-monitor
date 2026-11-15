@@ -2,7 +2,7 @@
  * ==============================================================================
  * CAPA DE CONTROLADORES: HudController
  * Orquestador principal de la UI: vincula Estado con el DOM y Servicios.
- * Mantenido estrictamente bajo 320 líneas mediante delegación modular (SRP).
+ * Mantenido estrictamente bajo 350 líneas mediante delegación modular (SRP).
  * ==============================================================================
  */
 
@@ -33,7 +33,7 @@ class HudController {
     }
   }
 
-  // --- AUDIO Y VISTAS ---
+  // --- AUDIO Y NAVEGACIÓN ENTRE VISTAS ---
   toggleAudio() {
     if (!this._sound && window.soundService) this._sound = window.soundService;
     if (this._sound) {
@@ -49,9 +49,12 @@ class HudController {
 
   cambiarVista(nombre) {
     if (this._sound) this._sound.reproducirClick();
+    this.desenfocarOrgano();
+    this.desenfocarModuloHabitat();
     this._state.setVistaActiva(nombre);
   }
 
+  // --- ILUMINACIÓN Y ENFOQUE TÁCTIL (HOLOGRAMA BIOMÉDICO) ---
   enfocarOrgano(nombre) {
     if (this._sound?.reproducirHover) this._sound.reproducirHover();
     const stg = document.querySelector("#viewBiomedical .hologram-stage-wrapper");
@@ -59,7 +62,7 @@ class HudController {
     stg.classList.add("has-organ-focus");
     stg.querySelectorAll(".organ-node, .organ-connector-line, .hologram-callout").forEach(el => el.classList.remove("is-focused"));
     [`.organ-node[data-organ="${nombre}"]`, `.organ-connector-line[data-organ-line="${nombre}"]`, `.hologram-callout[data-organ-card="${nombre}"]`]
-      .forEach(sel => stg.querySelector(sel)?.classList.add("is-focused"));
+      .forEach(sel => stg.querySelectorAll(sel).forEach(el => el.classList.add("is-focused")));
   }
 
   desenfocarOrgano() {
@@ -69,6 +72,7 @@ class HudController {
     stg.querySelectorAll(".organ-node, .organ-connector-line, .hologram-callout").forEach(el => el.classList.remove("is-focused"));
   }
 
+  // --- ILUMINACIÓN Y ENFOQUE TÁCTIL (HOLOGRAMA HÁBITAT) ---
   enfocarModuloHabitat(modulo) {
     if (this._sound?.reproducirHover) this._sound.reproducirHover();
     const stg = document.querySelector("#viewEnvironmental .hologram-stage-wrapper");
@@ -76,7 +80,7 @@ class HudController {
     stg.classList.add("has-habitat-focus");
     stg.querySelectorAll(".habitat-module-node, .habitat-connector-line, .hologram-callout").forEach(el => el.classList.remove("is-focused"));
     [`.habitat-module-node[data-habitat-module="${modulo}"]`, `.habitat-connector-line[data-habitat-line="${modulo}"]`, `.hologram-callout[data-habitat-card="${modulo}"]`]
-      .forEach(sel => stg.querySelector(sel)?.classList.add("is-focused"));
+      .forEach(sel => stg.querySelectorAll(sel).forEach(el => el.classList.add("is-focused")));
   }
 
   desenfocarModuloHabitat() {
@@ -88,6 +92,7 @@ class HudController {
 
   alternarModeloHabitat(modelo) {
     if (this._sound) this._sound.reproducirClick();
+    this.desenfocarModuloHabitat();
     this._state.setModeloHabitat(modelo);
     ["orion", "mars", "iss"].forEach(m => {
       const cap = m.charAt(0).toUpperCase() + m.slice(1);
@@ -121,7 +126,7 @@ class HudController {
     this._state.toggleModalAlerta();
   }
 
-  // --- LOGIN Y AUTENTICACIÓN ---
+  // --- LOGIN Y CONTROL DE ACCESO ---
   abrirModalLogin() {
     if (this._sound) this._sound.reproducirClick();
     const modal = document.getElementById("modalLogin");
@@ -172,7 +177,7 @@ class HudController {
     this._setTxt("userRoleTag", `(${usuario.nombre})`);
   }
 
-  // --- DELEGACIÓN WELLNESS ---
+  // --- DELEGACIÓN A WELLNESS CONTROLLER ---
   avanzarTarea(t) { this._wellness?.avanzarTarea(t); }
   iniciarExamenOftalmico() { this._wellness?.iniciarExamenOftalmico(); }
   iniciarExamenSonar() { this._wellness?.iniciarExamenSonar(); }
@@ -181,7 +186,7 @@ class HudController {
   responderAsistente(t) { this._wellness?.responderAsistente(t); }
   toggleMatrizTecnica() { this._wellness?.toggleMatrizTecnica(); }
 
-  // --- RENDERIZADO REACTIVO ---
+  // --- RENDERIZADO REACTIVO DEL HUD ---
   renderizar(state) {
     this._actualizarPestanas(state.vistaActiva);
     this._actualizarValoresDashboard(state);
@@ -195,7 +200,7 @@ class HudController {
       pill.className = `badge-status ${state.tripulanteEstable ? "status-stable" : "status-critical"}`;
     }
 
-    // Fisiología
+    // Fisiología en tiempo real
     this._setTxt("valHeart", Math.round(fis.ritmo_cardiaco_bpm));
     this._setTxt("valSpo2", Math.round(fis.spo2_pct));
     this._setTxt("valTemp", fis.temperatura_corporal_c.toFixed(1));
@@ -214,7 +219,7 @@ class HudController {
     this._setTxt("calloutAstra", cog.incongruencia_detectada ? "FATIGA OCULTA" : "COHERENTE");
     document.getElementById("nodeHeart")?.classList.toggle("fast", fis.ritmo_cardiaco_bpm > 100);
 
-    // Ambiente
+    // Ambiente de cabina
     this._setTxt("valCo2", amb.co2_mmHg.toFixed(1));
     this._setTxt("valRad", amb.radiacion_acumulada_mSv.toFixed(1));
     this._setTxt("valPress", amb.presion_cabina_kpa.toFixed(1));
@@ -244,6 +249,8 @@ class HudController {
   }
 
   _actualizarPestanas(activa) {
+    this.desenfocarOrgano();
+    this.desenfocarModuloHabitat();
     const tabs = document.querySelectorAll(".nav-tab-btn");
     const vistas = document.querySelectorAll(".view-container");
     tabs.forEach(t => t.classList.remove("active"));

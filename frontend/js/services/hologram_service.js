@@ -2,8 +2,7 @@
  * ==============================================================================
  * CAPA DE SERVICIOS: HologramRendererService (MODO LIVIANO PERMANENTE)
  * Optimizado para 0% de sobrecarga de GPU:
- * - Elimina bucles de física de partículas continuos.
- * - Mantiene interactividad SVG táctil y animaciones CSS nativas por hardware.
+ * - Interactividad SVG nativa con aceleración por hardware.
  * ==============================================================================
  */
 
@@ -14,54 +13,33 @@ class HologramRendererService {
   }
 
   inicializar() {
-    // En modo liviano no se crean bucles de partículas por frame
-    // El fondo utiliza cuadrículas vectoriales CSS de cero impacto en CPU/GPU
-    if (this._canvas) {
-      this._canvas.style.display = "none";
-    }
+    if (this._canvas) this._canvas.style.display = "none";
     this._enlazarEventosOrganos();
   }
 
-  redimensionar() {
-    // En modo liviano no requiere repintado de canvas
-  }
-
-  pausar() {
-    // No-op en modo liviano
-  }
-
-  reanudar() {
-    // No-op en modo liviano
-  }
+  redimensionar() {}
+  pausar() {}
+  reanudar() {}
 
   _enlazarEventosOrganos() {
     if (!this._svg) return;
 
-    const nodosInteraccion = [
-      { id: "nodeBrain", organo: "Cerebro" },
-      { id: "nodeHeart", organo: "Corazón" },
-      { id: "nodeLungs", organo: "Pulmones" },
-      { id: "nodeKidneys", organo: "Riñones" },
-      { id: "nodeBone", organo: "Masa Ósea" },
+    // Vincular clics de selección táctil en los nodos de órganos
+    const mapaOrganos = [
+      { sel: '.organ-node[data-organ="cerebro"]', nombre: "Cerebro (ASTRA)" },
+      { sel: '.organ-node[data-organ="corazon"]', nombre: "Corazón (ECG)" },
+      { sel: '.organ-node[data-organ="pulmones"]', nombre: "Pulmones (SpO2)" },
+      { sel: '.organ-node[data-organ="hidratacion"]', nombre: "Hidratación & Renal" },
+      { sel: '.organ-node[data-organ="huesos"]', nombre: "Escudo Óseo" },
     ];
 
-    nodosInteraccion.forEach(({ id, organo }) => {
-      const el = document.getElementById(id);
+    mapaOrganos.forEach(({ sel, nombre }) => {
+      const el = this._svg.querySelector(sel);
       if (el) {
         el.style.cursor = "pointer";
-        el.addEventListener("mouseenter", () => {
-          el.style.filter = "brightness(1.5)";
-        });
-        el.addEventListener("mouseleave", () => {
-          el.style.filter = "";
-        });
         el.addEventListener("click", () => {
-          if (window.stateManager) {
-            window.stateManager.setOrganoSeleccionado(organo);
-          }
-          if (window.soundService) {
-            window.soundService.reproducirClick();
-          }
+          window.stateManager?.setOrganoSeleccionado(nombre);
+          window.soundService?.reproducirClick();
         });
       }
     });
