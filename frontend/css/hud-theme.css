@@ -535,3 +535,76 @@ footer.hud-footer {
     opacity: 1;
   }
 }
+
+/* ==========================================================================
+   TARJETAS HOLOGRÁFICAS (CALLOUTS) AMPLIADAS Y DESTACADAS
+   ========================================================================== */
+.hologram-callout {
+  background: rgba(5, 11, 24, 0.94);
+  border: 1.8px solid var(--neon-cyan);
+  border-radius: 6px;
+  padding: 10px 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.65), 0 0 14px rgba(0, 240, 255, 0.2);
+  z-index: 10;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  backdrop-filter: blur(6px);
+  pointer-events: auto;
+}
+
+.hologram-callout:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.85), 0 0 18px rgba(0, 240, 255, 0.4);
+}
+
+.callout-header {
+  font-family: var(--font-hud);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.callout-sub {
+  font-family: var(--font-data);
+  font-size: 13px;
+  color: #cbd5e1;
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.callout-val {
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.callout-brain {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 14px rgba(0, 240, 255, 0.3);
+}
+
+.callout-heart {
+  border-color: var(--neon-red);
+  box-shadow: 0 0 14px rgba(255, 34, 85, 0.35);
+}
+
+.callout-hydration {
+  border-color: var(--neon-blue);
+  box-shadow: 0 0 14px rgba(0, 119, 255, 0.3);
+}
+
+.callout-lungs {
+  border-color: var(--neon-green);
+  box-shadow: 0 0 14px rgba(0, 255, 136, 0.3);
+}
+
+.callout-bone {
+  border-color: var(--neon-amber);
+  box-shadow: 0 0 14px rgba(255, 170, 0, 0.3);
+}
+
+.callout-thermal {
+  border-color: #ffffff;
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.25);
+}
