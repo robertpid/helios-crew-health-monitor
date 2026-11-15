@@ -17,8 +17,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   
   <!-- H.E.L.I.O.S. Capa de Estilos N-Capas Modular -->
-  <link rel="stylesheet" href="/static/css/hud-theme.css?v=20261115_games">
-  <link rel="stylesheet" href="/static/css/animations.css?v=20261115_games">
+  <link rel="stylesheet" href="/static/css/hud-theme.css?v=1794768119">
+  <link rel="stylesheet" href="/static/css/animations.css?v=1794768119">
 </head>
 <body>
 
@@ -871,24 +871,70 @@
         </div>
       </div>
     </div>
-<div class="hud-panel screen-panel" data-panel="hydration">
-      <div class="panel-header">
-        <div class="panel-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
-          ESTADO DE HIDRATACIÓN
+<div class="hud-panel screen-panel" id="panelHydrationFit" data-panel="hydration">
+      <div class="panel-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+          <div class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+            HIDRATACIÓN Y NUTRICIÓN (NASA ISS FIT)
+          </div>
+          <div class="panel-subtitle">SISTEMA NASA FIT (IPAD) · ESCÁNER DE BOLSAS, AGUA PWD Y BALANCE HÍDRICO</div>
         </div>
-        <div class="panel-subtitle">BALANCE DE LÍQUIDOS EN MICROGRAVEDAD (2.2 L/D META)</div>
+        <div id="fitSyncBadge" class="badge-status status-stable" style="font-size:10px; padding:3px 8px;">📡 FIT SINCRONIZADO</div>
       </div>
-      <div style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:18px 20px;">
-        <div class="hydration-semaphore-bar" style="display:flex; gap:8px; height:24px; border-radius:6px; overflow:hidden; background:#040814; padding:3px; margin-bottom:8px;">
+
+      <div style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:14px 16px;">
+        <!-- Fila de Estado Cuantificado y Meta -->
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
+          <div>
+            <strong id="fitVolumeVal" style="color:var(--c-cyan-ink); font-size:17px; font-family:var(--font-hud);">1,850 mL</strong>
+            <span id="fitQuotaTag" style="color:#94a3b8; font-size:12px; font-family:var(--font-data);">/ 2,200 mL (84%)</span>
+          </div>
+          <strong id="fitStatusTag" style="color:var(--c-green-ink); font-family:var(--font-hud); font-size:11px;">▲ ÓPTIMO</strong>
+        </div>
+
+        <!-- Semáforo de Balance Hídrico -->
+        <div class="hydration-semaphore-bar" style="display:flex; gap:8px; height:18px; border-radius:6px; overflow:hidden; background:#040814; padding:3px; margin-bottom:6px;">
           <div id="semOptimo" class="sem-segment sem-active" style="flex:1; background:var(--c-green); border-radius:4px; box-shadow:0 0 12px rgba(0,255,136,0.6); transition:all 0.3s ease;"></div>
           <div id="semAviso" class="sem-segment" style="flex:1; background:#f59e0b; opacity:0.25; border-radius:4px; transition:all 0.3s ease;"></div>
           <div id="semCritico" class="sem-segment" style="flex:1; background:var(--c-red); opacity:0.25; border-radius:4px; transition:all 0.3s ease;"></div>
         </div>
-        <div style="display:flex; justify-content:space-between; font-family:var(--font-hud); font-size:12px; color:var(--text-secondary);">
-          <span id="lblOptimo" style="color:var(--c-green-ink); font-weight:bold;">▲ Óptimo</span>
-          <span id="lblAviso" style="color:#64748b;">Aviso</span>
-          <span id="lblCritico" style="color:#64748b;">Crítico</span>
+        <div style="display:flex; justify-content:space-between; font-family:var(--font-hud); font-size:11px; color:var(--text-secondary); margin-bottom:8px;">
+          <span id="lblOptimo" style="color:var(--c-green-ink); font-weight:bold;">▲ Óptimo (&gt;2.0L)</span>
+          <span id="lblAviso" style="color:#64748b;">Aviso (1.2-2.0L)</span>
+          <span id="lblCritico" style="color:#64748b;">Crítico (&lt;1.2L)</span>
+        </div>
+
+        <!-- Micronutrientes y Sodio -->
+        <div id="fitNutriSummary" style="font-family:var(--font-data); font-size:11px; color:#94a3b8; padding-top:4px; border-top:1px solid rgba(0,240,255,0.1); margin-bottom:10px;">
+          Kcal: 2,150 · Sodio (Na): 2,100 mg · Ca/Vit D: Nominal
+        </div>
+
+        <!-- Escáner Rápido de Raciones de Vuelo (Bolsas con código de barras) -->
+        <div style="font-family:var(--font-hud); font-size:10.5px; color:var(--c-cyan-ink); margin-bottom:6px; display:flex; align-items:center; gap:6px;">
+          <span>📲 ESCANEAR RACIÓN / BOLSA DE VUELO:</span>
+        </div>
+        <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:6px;">
+          <button class="btn-hud" onclick="window.fitService?.registrarRacion('agua')" style="font-size:10px; padding:6px 6px; text-transform:none;" title="Dispensador de Agua Potable ISS (+250 mL)">
+            💧 Agua PWD (+250mL)
+          </button>
+          <button class="btn-hud" onclick="window.fitService?.registrarRacion('electrolito')" style="font-size:10px; padding:6px 6px; text-transform:none;" title="Sales de rehidratación oral (+300 mL)">
+            ⚡ Sales Orales (+300mL)
+          </button>
+          <button class="btn-hud" onclick="window.fitService?.registrarRacion('cafe')" style="font-size:10px; padding:6px 6px; text-transform:none;" title="Café / Té Rehidratable (+200 mL)">
+            ☕ Café/Té (+200mL)
+          </button>
+          <button class="btn-hud" onclick="window.fitService?.registrarRacion('liofilizada')" style="font-size:10px; padding:6px 6px; text-transform:none; grid-column:span 2;" title="Ración Liofilizada (+150 mL agua · 450 kcal)">
+            🍲 Ración Liofilizada (+150mL · 450kcal)
+          </button>
+          <button class="btn-hud" onclick="window.fitService?.registrarRacion('proteina')" style="font-size:10px; padding:6px 6px; text-transform:none;" title="Pack de Proteína y Calcio (+550 kcal)">
+            🥫 Pack Proteína (+550k)
+          </button>
+        </div>
+
+        <!-- Log / Trazabilidad con Houston BMed -->
+        <div id="fitLogMsg" style="font-family:var(--font-data); font-size:10.5px; color:#cbd5e1; background:rgba(0,240,255,0.05); border:1px solid rgba(0,240,255,0.15); border-radius:4px; padding:6px 10px; margin-top:10px; line-height:1.4;">
+          📡 Telemetría FIT enlazada con Houston BMed. Ingesta dentro de cuota Sol 120.
         </div>
       </div>
     </div>
@@ -919,10 +965,10 @@
       <!-- Barra de Telemetría Cognitiva en Tiempo Real -->
       <template id="psychReadoutsAnchor"></template>
       <div class="psych-readouts" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; margin-bottom:12px; padding:8px 12px; background:rgba(0,240,255,0.04); border:1px solid rgba(0,240,255,0.15); border-radius:6px; font-family:var(--font-data); font-size:11px;">
-        <div><span style="color:#64748b;">LATENCIA:</span> <strong id="psychMetricLatency" style="color:var(--c-cyan-ink);">210 ms</strong></div>
-        <div><span style="color:#64748b;">DENSIDAD:</span> <strong id="psychMetricDensity" style="color:var(--c-green-ink);">0.95</strong></div>
-        <div><span style="color:#64748b;">COSENO:</span> <strong id="psychMetricCosSim" style="color:var(--c-cyan-ink);">0.985</strong></div>
-        <div><span style="color:#64748b;">ESTADO:</span> <strong id="psychEvalSummary" style="color:var(--c-green-ink);">COHERENTE</strong></div>
+        <div><span style="color:#64748b;">COMUNICACIÓN:</span> <strong id="psychMetricLatency" style="color:var(--c-cyan-ink);">NOMINAL</strong></div>
+        <div><span style="color:#64748b;">ESTABILIDAD:</span> <strong id="psychMetricDensity" style="color:var(--c-green-ink);">ÓPTIMA</strong></div>
+        <div><span style="color:#64748b;">CONCORDANCIA:</span> <strong id="psychMetricCosSim" style="color:var(--c-cyan-ink);">NOMINAL</strong></div>
+        <div><span style="color:#64748b;">ESTADO:</span> <strong id="psychEvalSummary" style="color:var(--c-green-ink);">NOMINAL</strong></div>
       </div>
 
       <div style="background:#081326; border:1px solid rgba(0,240,255,0.25); border-radius:8px; padding:14px 16px;">
@@ -1152,6 +1198,341 @@
 </dialog>
 
   <!-- ========================================================================= -->
+<!-- COMPONENTE MODAL: EVALUACIÓN OFTALMOLÓGICA PRELIMINAR (PROTOCOLO SANS)     -->
+<!-- Basado en estándares NASA SANS y batería clínica de 5 etapas              -->
+<!-- Rigurosamente bajo 400 líneas (Clean Code & SRP)                          -->
+<!-- ========================================================================= -->
+
+<div id="modalOftalmico" class="modal-backdrop" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(3, 7, 18, 0.88); backdrop-filter:blur(8px); z-index:9999; align-items:center; justify-content:center;">
+  <div class="hud-panel" style="width:92%; max-width:760px; max-height:92vh; background:#07101e; border:1px solid var(--neon-cyan); box-shadow:0 0 30px rgba(0,240,255,0.25); border-radius:10px; display:flex; flex-direction:column; overflow:hidden;">
+    
+    <!-- Header del Modal -->
+    <div style="padding:14px 20px; background:rgba(0,240,255,0.06); border-bottom:1px solid rgba(0,240,255,0.2); display:flex; align-items:center; justify-content:space-between;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-size:20px;">👁️</span>
+        <div>
+          <h2 style="font-size:14px; font-weight:700; color:var(--neon-cyan); letter-spacing:1px; margin:0;">
+            EVALUACIÓN OFTALMOLÓGICA PRELIMINAR (SANS)
+          </h2>
+          <span style="font-size:10px; color:#64748b; letter-spacing:0.5px;">PROTOCOLO NASA JSC · CHEQUEO DE SALUD VISUAL EN MICROGRAVEDAD</span>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span id="oftalProgresoTag" class="badge-status" style="font-size:11px; padding:3px 10px; border-color:var(--neon-cyan); color:var(--neon-cyan);">
+          INSPECCIÓN
+        </span>
+        <button class="btn-hud" onclick="window.oftalmicoService?.cerrarModal()" style="padding:4px 10px; font-size:12px; border-color:#64748b; color:#94a3b8;" title="Cerrar modal">
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- Barra de progreso superior -->
+    <div style="width:100%; height:3px; background:rgba(255,255,255,0.08);">
+      <div id="oftalProgressBar" style="width:0%; height:100%; background:var(--neon-cyan); transition:width 0.3s ease;"></div>
+    </div>
+
+    <!-- Cuerpo interactivo del Modal (Vistas dinámicas) -->
+    <div id="oftalContenido" style="padding:24px; overflow-y:auto; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+      
+      <!-- VISTA 0: Instrucciones preliminares -->
+      <div id="oftalPasoIntro" style="max-width:580px;">
+        <h3 style="color:#f8fafc; font-size:18px; margin-bottom:14px;">Instrucciones para el Examen en Cabina</h3>
+        <p style="color:#94a3b8; font-size:13px; line-height:1.6; margin-bottom:20px;">
+          El vuelo orbital altera la morfología ocular y el disco óptico. Por protocolo de calibración a distancia, 
+          <strong>debes contar con un compañero de tripulación como asistente</strong> para ingresar las respuestas en pantalla mientras tú te mantienes en posición:
+        </p>
+        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; margin-bottom:24px;">
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:12px 8px;">
+            <div style="font-size:22px; margin-bottom:6px;">📏</div>
+            <div style="font-size:11px; color:#cbd5e1; font-weight:600;">Distancia 1 m</div>
+            <div style="font-size:10px; color:#64748b; margin-top:4px;">Ubícate a ~1 metro de la pantalla</div>
+          </div>
+          <div style="background:rgba(0,240,255,0.04); border:1px solid rgba(0,240,255,0.2); border-radius:6px; padding:12px 8px;">
+            <div style="font-size:22px; margin-bottom:6px;">🤝</div>
+            <div style="font-size:11px; color:var(--neon-cyan); font-weight:600;">Asistente</div>
+            <div style="font-size:10px; color:#cbd5e1; margin-top:4px;">Un compañero opera la consola</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:12px 8px;">
+            <div style="font-size:22px; margin-bottom:6px;">👓</div>
+            <div style="font-size:11px; color:#cbd5e1; font-weight:600;">Lentes de uso</div>
+            <div style="font-size:10px; color:#64748b; margin-top:4px;">No te quites gafas habituales</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:12px 8px;">
+            <div style="font-size:22px; margin-bottom:6px;">👁️</div>
+            <div style="font-size:11px; color:#cbd5e1; font-weight:600;">Oclusión</div>
+            <div style="font-size:10px; color:#64748b; margin-top:4px;">Tápate el ojo según se indique</div>
+          </div>
+        </div>
+        <button class="btn-hud" onclick="window.oftalmicoService?.iniciarEtapa1()" style="padding:12px 30px; font-size:13px; font-weight:700; border-color:var(--neon-cyan); color:var(--neon-cyan); letter-spacing:1px;">
+          INICIAR EVALUACIÓN (5 ETAPAS)
+        </button>
+      </div>
+
+      <!-- VISTA 1: Agudeza visual (Tumbling E) -->
+      <div id="oftalPasoAgudeza" style="display:none; width:100%; max-width:480px;">
+        <div id="oftalAgudezaOjoTag" style="font-size:12px; color:var(--neon-cyan); letter-spacing:1px; margin-bottom:8px; font-weight:600;">
+          OJO DERECHO (Tápate el ojo izquierdo)
+        </div>
+        <div style="font-size:13px; color:#ffffff; font-weight:600; margin-bottom:4px;">
+          ¿Hacia qué dirección apuntan las patas de la letra <strong>E</strong>?
+        </div>
+        <div style="font-size:11px; color:#94a3b8; margin-bottom:16px;">
+          Lámina <span id="oftalAgudezaIndice">1</span> / 10 (Orientación aleatoria) · Puedes pulsar o usar flechas de teclado
+        </div>
+        <div style="display:flex; justify-content:center; align-items:center; height:180px; margin-bottom:20px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); border-radius:8px;">
+          <div id="oftalOptotipoE" style="font-size:64px; font-weight:900; color:#ffffff; font-family:monospace; line-height:1; user-select:none; transition:all 0.2s;">
+            E
+          </div>
+        </div>
+        <!-- Botones en cruz con texto e icono claros -->
+        <div style="display:grid; grid-template-columns: repeat(3, 90px); grid-template-rows: repeat(3, 44px); gap:8px; justify-content:center; margin:0 auto;">
+          <div></div>
+          <button class="btn-hud" onclick="window.oftalmicoService?.responderAgudeza('up')" style="font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:4px;">▲ Arriba</button>
+          <div></div>
+          <button class="btn-hud" onclick="window.oftalmicoService?.responderAgudeza('left')" style="font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:4px;">◀ Izq</button>
+          <div></div>
+          <button class="btn-hud" onclick="window.oftalmicoService?.responderAgudeza('right')" style="font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:4px;">Der ▶</button>
+          <div></div>
+          <button class="btn-hud" onclick="window.oftalmicoService?.responderAgudeza('down')" style="font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:4px;">▼ Abajo</button>
+          <div></div>
+        </div>
+      </div>
+
+      <!-- VISTA 2: Astigmatismo (Abanico dial 1-7) -->
+      <div id="oftalPasoAstigmatismo" style="display:none; width:100%; max-width:520px;">
+        <div id="oftalAstigOjoTag" style="font-size:12px; color:var(--neon-cyan); letter-spacing:1px; margin-bottom:8px; font-weight:600;">
+          OJO DERECHO (Tápate el izquierdo)
+        </div>
+        <div style="font-size:11px; color:#94a3b8; margin-bottom:16px;">
+          Observa el dial radiante. ¿Ves alguna línea (1 a 7) sensiblemente <strong>más oscura o más nítida</strong> que las demás?
+        </div>
+        <!-- Abanico vectorial SVG nítido y ultraligero -->
+        <div style="display:flex; justify-content:center; align-items:center; height:200px; margin-bottom:20px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); border-radius:8px;">
+          <svg width="340" height="170" viewBox="0 0 340 170" style="overflow:visible;">
+            <g transform="translate(170, 160)">
+              <!-- Líneas radiantes con 3 trazos paralelos cada una -->
+              <!-- 1: 180 deg (horizontal izq) -->
+              <g transform="rotate(-90)">
+                <line x1="-3" y1="-30" x2="-3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="0" y1="-30" x2="0" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="3" y1="-30" x2="3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <text x="0" y="-142" fill="#cbd5e1" font-size="12" text-anchor="middle" font-weight="bold">1</text>
+              </g>
+              <!-- 2: 150 deg -->
+              <g transform="rotate(-60)">
+                <line x1="-3" y1="-30" x2="-3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="0" y1="-30" x2="0" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="3" y1="-30" x2="3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <text x="0" y="-142" fill="#cbd5e1" font-size="12" text-anchor="middle" font-weight="bold">2</text>
+              </g>
+              <!-- 3: 120 deg -->
+              <g transform="rotate(-30)">
+                <line x1="-3" y1="-30" x2="-3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="0" y1="-30" x2="0" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="3" y1="-30" x2="3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <text x="0" y="-142" fill="#cbd5e1" font-size="12" text-anchor="middle" font-weight="bold">3</text>
+              </g>
+              <!-- 4: 90 deg (vertical) -->
+              <g transform="rotate(0)">
+                <line x1="-3" y1="-30" x2="-3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="0" y1="-30" x2="0" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="3" y1="-30" x2="3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <text x="0" y="-142" fill="#cbd5e1" font-size="12" text-anchor="middle" font-weight="bold">4</text>
+              </g>
+              <!-- 5: 60 deg -->
+              <g transform="rotate(30)">
+                <line x1="-3" y1="-30" x2="-3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="0" y1="-30" x2="0" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="3" y1="-30" x2="3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <text x="0" y="-142" fill="#cbd5e1" font-size="12" text-anchor="middle" font-weight="bold">5</text>
+              </g>
+              <!-- 6: 30 deg -->
+              <g transform="rotate(60)">
+                <line x1="-3" y1="-30" x2="-3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="0" y1="-30" x2="0" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="3" y1="-30" x2="3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <text x="0" y="-142" fill="#cbd5e1" font-size="12" text-anchor="middle" font-weight="bold">6</text>
+              </g>
+              <!-- 7: 0 deg (horizontal der) -->
+              <g transform="rotate(90)">
+                <line x1="-3" y1="-30" x2="-3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="0" y1="-30" x2="0" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="3" y1="-30" x2="3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <text x="0" y="-142" fill="#cbd5e1" font-size="12" text-anchor="middle" font-weight="bold">7</text>
+              </g>
+            </g>
+          </svg>
+        </div>
+        <div style="display:flex; justify-content:center; gap:20px;">
+          <button class="btn-hud" onclick="window.oftalmicoService?.responderAstigmatismo(true)" style="padding:10px 32px; font-size:13px; border-color:#f59e0b; color:#f59e0b;">
+            SÍ (Veo una más oscura/nítida)
+          </button>
+          <button class="btn-hud" onclick="window.oftalmicoService?.responderAstigmatismo(false)" style="padding:10px 32px; font-size:13px; border-color:var(--neon-green); color:var(--neon-green);">
+            NO (Todas se ven homogéneas)
+          </button>
+        </div>
+      </div>
+
+      <!-- VISTA 3: Sensibilidad a la Luz / Contraste (Landolt C) -->
+      <div id="oftalPasoContraste" style="display:none; width:100%; max-width:480px;">
+        <div style="font-size:12px; color:var(--neon-cyan); letter-spacing:1px; margin-bottom:8px; font-weight:600;">
+          CONTRASTE Y SENSIBILIDAD LUMÍNICA (ANILLO LANDOLT C)
+        </div>
+        <div style="font-size:13px; color:#ffffff; font-weight:600; margin-bottom:4px;">
+          ¿Hacia qué dirección está la ABERTURA (hueco / corte) del anillo?
+        </div>
+        <div style="font-size:11px; color:#94a3b8; margin-bottom:16px;">
+          Indica el lado por donde está abierto · Lámina <span id="oftalContrasteIndice">1</span> / 8 (o usa flechas del teclado)
+        </div>
+        <div style="display:flex; justify-content:center; align-items:center; height:180px; margin-bottom:20px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); border-radius:8px;">
+          <svg id="oftalSvgLandolt" width="84" height="84" viewBox="0 0 100 100" style="transition:opacity 0.2s, transform 0.2s;">
+            <!-- Anillo Landolt C oficial ISO con corte plano y nítido -->
+            <circle cx="50" cy="50" r="32" fill="none" stroke="#ffffff" stroke-width="15" stroke-linecap="butt" stroke-dasharray="162 39" stroke-dashoffset="-19.5" />
+          </svg>
+        </div>
+        <!-- Botones en cruz con texto e icono claros -->
+        <div style="display:grid; grid-template-columns: repeat(3, 90px); grid-template-rows: repeat(3, 44px); gap:8px; justify-content:center; margin:0 auto;">
+          <div></div>
+          <button class="btn-hud" onclick="window.oftalmicoService?.responderContraste('up')" style="font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:4px;">▲ Arriba</button>
+          <div></div>
+          <button class="btn-hud" onclick="window.oftalmicoService?.responderContraste('left')" style="font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:4px;">◀ Izq</button>
+          <div></div>
+          <button class="btn-hud" onclick="window.oftalmicoService?.responderContraste('right')" style="font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:4px;">Der ▶</button>
+          <div></div>
+          <button class="btn-hud" onclick="window.oftalmicoService?.responderContraste('down')" style="font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:4px;">▼ Abajo</button>
+          <div></div>
+        </div>
+      </div>
+
+      <!-- VISTA 4: Visión de Cerca (Aplanamiento SANS) -->
+      <div id="oftalPasoCerca" style="display:none; width:100%; max-width:540px;">
+        <div style="font-size:12px; color:var(--neon-cyan); letter-spacing:1px; margin-bottom:8px; font-weight:600;">
+          VISIÓN DE CERCA (DETECCIÓN DE CAMBIO HIPERÓPICO SANS)
+        </div>
+        <div style="font-size:11px; color:#94a3b8; margin-bottom:14px;">
+          Lee el siguiente texto a distancia de lectura operativa de cabina:
+        </div>
+        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:18px; margin-bottom:16px; text-align:left;">
+          <p style="font-size:15px; color:#ffffff; margin:0 0 8px 0; font-weight:600;">
+            Ser capaz de ver bien a cualquier distancia sin necesidad de juguetear constantemente con las gafas...
+          </p>
+          <p style="font-size:12px; color:#cbd5e1; margin:0 0 8px 0;">
+            es importante para estudiar, trabajar y mantener la seguridad en las operaciones del hábitat.
+          </p>
+          <p style="font-size:10px; color:#94a3b8; margin:0 0 6px 0;">
+            Con las lentes progresivas, los astronautas pueden compensar el aplanamiento posterior del globo ocular...
+          </p>
+          <p style="font-size:8px; color:#64748b; margin:0; letter-spacing:0.5px;">
+            disfrutando del mismo nivel de agudeza visual de siempre en la misión espacial.
+          </p>
+        </div>
+        <!-- Sub-test optotipo Snellen reducido fila 8 -->
+        <div style="background:rgba(0,240,255,0.04); border:1px solid rgba(0,240,255,0.15); border-radius:6px; padding:10px; margin-bottom:18px;">
+          <span style="font-size:10px; color:var(--neon-cyan); display:block; margin-bottom:4px;">VERIFICACIÓN FILA 8 (SNELLEN REDUCIDO):</span>
+          <span style="font-family:monospace; font-size:15px; letter-spacing:4px; font-weight:700; color:#fff;">D E F P O T E C</span>
+        </div>
+        <div style="font-size:12px; color:#cbd5e1; margin-bottom:14px;">¿Pudiste leer con nitidez todas las líneas, incluida la más pequeña?</div>
+        <div style="display:flex; justify-content:center; gap:16px;">
+          <button class="btn-hud" onclick="window.oftalmicoService?.responderCerca('completa')" style="padding:10px 24px; font-size:12px; border-color:var(--neon-green); color:var(--neon-green);">
+            SÍ (Todas legibles)
+          </button>
+          <button class="btn-hud" onclick="window.oftalmicoService?.responderCerca('parcial')" style="padding:10px 24px; font-size:12px; border-color:#f59e0b; color:#f59e0b;">
+            Dificultad solo en la menor
+          </button>
+          <button class="btn-hud" onclick="window.oftalmicoService?.responderCerca('dificil')" style="padding:10px 24px; font-size:12px; border-color:var(--neon-red); color:var(--neon-red);">
+            NO (Borroso en varias)
+          </button>
+        </div>
+      </div>
+
+      <!-- VISTA 5: Visión Cromática (Ishihara) -->
+      <div id="oftalPasoCromatica" style="display:none; width:100%; max-width:480px;">
+        <div style="font-size:12px; color:var(--neon-cyan); letter-spacing:1px; margin-bottom:8px; font-weight:600;">
+          VISIÓN CROMÁTICA (TEST DE ISHIHARA)
+        </div>
+        <div style="font-size:11px; color:#94a3b8; margin-bottom:14px;">
+          ¿Qué número ves dentro del círculo? (Lámina <span id="oftalCromaticaIndice">1</span> / 7)
+        </div>
+        <div style="display:flex; justify-content:center; align-items:center; margin-bottom:20px;">
+          <div style="width:212px; height:212px; border-radius:50%; padding:6px; background:radial-gradient(circle, rgba(0,240,255,0.08) 0%, rgba(3,7,18,0.7) 70%); border:1px solid rgba(0,240,255,0.3); box-shadow:0 0 25px rgba(0,240,255,0.18); display:flex; align-items:center; justify-content:center;">
+            <img id="oftalImgIshihara" src="/static/assets/oftalmico/ishihara_1.webp" alt="Lámina Ishihara" style="width:196px; height:196px; border-radius:50%; object-fit:contain; display:block;" />
+          </div>
+        </div>
+        <div id="oftalOpcionesIshihara" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; max-width:320px; margin:0 auto;">
+          <!-- Generado dinámicamente -->
+        </div>
+      </div>
+
+      <!-- VISTA 6: Cuadro de Resultados Oficial H.E.L.I.O.S. (Simulación image60.png) -->
+      <div id="oftalPasoResultados" style="display:none; width:100%; max-width:640px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:10px;">
+          <div style="text-align:left;">
+            <h3 style="color:#ffffff; font-size:16px; margin:0 0 4px 0; font-weight:700;">MÓDULO OFTALMOLÓGICO</h3>
+            <span style="font-size:11px; color:#64748b;">REGISTRO DE SALUD VISUAL SOL 120</span>
+          </div>
+          <span class="badge-status" style="border-color:var(--neon-green); color:var(--neon-green); font-size:12px; padding:4px 12px;">
+            EVALUACIÓN COMPLETADA
+          </span>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:24px; text-align:left;">
+          <!-- Agudeza -->
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:14px;">
+            <div style="font-size:11px; color:#94a3b8; margin-bottom:4px;">Agudeza visual</div>
+            <div id="resAgudezaVal" style="font-size:24px; font-weight:800; color:#fff;">9/10</div>
+            <span id="resAgudezaBadge" style="display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:4px; margin-top:6px; background:rgba(0,255,136,0.15); color:var(--neon-green);">
+              Estable
+            </span>
+          </div>
+          <!-- Astigmatismo -->
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:14px;">
+            <div style="font-size:11px; color:#94a3b8; margin-bottom:4px;">Astigmatismo</div>
+            <div id="resAstigVal" style="font-size:24px; font-weight:800; color:#fff;">OD / OI</div>
+            <span id="resAstigBadge" style="display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:4px; margin-top:6px; background:rgba(0,255,136,0.15); color:var(--neon-green);">
+              Estable
+            </span>
+          </div>
+          <!-- Contraste -->
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:14px;">
+            <div style="font-size:11px; color:#94a3b8; margin-bottom:4px;">Contraste visual</div>
+            <div id="resContrasteVal" style="font-size:24px; font-weight:800; color:#fff;">7/8</div>
+            <span id="resContrasteBadge" style="display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:4px; margin-top:6px; background:rgba(0,255,136,0.15); color:var(--neon-green);">
+              Estable
+            </span>
+          </div>
+          <!-- Visión de cerca -->
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:14px;">
+            <div style="font-size:11px; color:#94a3b8; margin-bottom:4px;">Visión de cerca</div>
+            <div id="resCercaVal" style="font-size:24px; font-weight:800; color:#fff;">Completa</div>
+            <span id="resCercaBadge" style="display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:4px; margin-top:6px; background:rgba(0,255,136,0.15); color:var(--neon-green);">
+              Estable
+            </span>
+          </div>
+          <!-- Visión cromática -->
+          <div style="grid-column:1 / span 2; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:14px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:11px; color:#94a3b8; margin-bottom:4px;">Visión cromática</div>
+              <div id="resCromaticaVal" style="font-size:24px; font-weight:800; color:#fff;">7/7</div>
+            </div>
+            <span id="resCromaticaBadge" style="display:inline-block; font-size:10px; font-weight:700; padding:4px 12px; border-radius:4px; background:rgba(0,255,136,0.15); color:var(--neon-green);">
+              Estable
+            </span>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:12px;">
+          <button class="btn-hud" onclick="window.oftalmicoService?.guardarYTransmitir()" style="padding:12px 28px; font-size:12px; font-weight:700; border-color:var(--neon-green); color:var(--neon-green); letter-spacing:1px;">
+            📡 TRANSMITIR REPORTE A HOUSTON (+50 EXP)
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+  <!-- ========================================================================= -->
 <!-- 5. FOOTER REGLAMENTARIO NASA                                               -->
 <!-- ========================================================================= -->
 <footer class="hud-footer">
@@ -1166,18 +1547,20 @@
   <!-- ========================================================================= -->
   <!-- 6. CARGA DE MÓDULOS DE ARQUITECTURA N-CAPAS EN JAVASCRIPT                 -->
   <!-- ========================================================================= -->
-  <script src="/static/js/state/state_manager.js?v=20261115_games"></script>
-  <script src="/static/js/services/auth_service.js?v=20261115_games"></script>
-  <script src="/static/js/services/sound_service.js?v=20261115_games"></script>
-  <script src="/static/js/services/codebook_service.js?v=20261115_games"></script>
-  <script src="/static/js/services/telemetry_service.js?v=20261115_games"></script>
-  <script src="/static/js/services/ecg_service.js?v=20261115_games"></script>
-  <script src="/static/js/services/hologram_service.js?v=20261115_games"></script>
-  <script src="/static/js/controllers/wellness_controller.js?v=20261115_games"></script>
-  <script src="/static/js/controllers/games_controller.js?v=20261115_games"></script>
-  <script src="/static/js/controllers/sleep_controller.js?v=20261115_games"></script>
-  <script src="/static/js/controllers/viewport_controller.js?v=20261115_games"></script>
-  <script src="/static/js/controllers/hud_controller.js?v=20261115_games"></script>
+  <script src="/static/js/state/state_manager.js?v=1794768119"></script>
+  <script src="/static/js/services/auth_service.js?v=1794768119"></script>
+  <script src="/static/js/services/sound_service.js?v=1794768119"></script>
+  <script src="/static/js/services/codebook_service.js?v=1794768119"></script>
+  <script src="/static/js/services/telemetry_service.js?v=1794768119"></script>
+  <script src="/static/js/services/ecg_service.js?v=1794768119"></script>
+  <script src="/static/js/services/hologram_service.js?v=1794768119"></script>
+  <script src="/static/js/services/fit_service.js?v=1794768119"></script>
+  <script src="/static/js/services/oftalmico_service.js?v=1794768119"></script>
+  <script src="/static/js/controllers/wellness_controller.js?v=1794768119"></script>
+  <script src="/static/js/controllers/games_controller.js?v=1794768119"></script>
+  <script src="/static/js/controllers/sleep_controller.js?v=1794768119"></script>
+  <script src="/static/js/controllers/viewport_controller.js?v=1794768119"></script>
+  <script src="/static/js/controllers/hud_controller.js?v=1794768119"></script>
 
   <script>
     // Inicialización del ecosistema HUD N-Capas Modular
@@ -1191,6 +1574,10 @@
 
       const habitatHologramService = new HologramRendererService("particlesHabitatCanvas", "svgHologramHabitat");
       habitatHologramService.inicializar();
+
+      if (window.fitService?.inicializar) {
+        window.fitService.inicializar();
+      }
 
       // 2. Instanciar Controlador de Bienestar y Rutinas
       const wellnessController = new WellnessController(window.soundService);

@@ -94,6 +94,7 @@ class DashboardAssembler:
         modal_alert = self.leer_componente("modal_alert.html")
         modal_login = self.leer_componente("modal_login.html")
         modal_games = self.leer_componente("modal_games.html")
+        modal_oftalmico = self.leer_componente("modal_oftalmico.html")
         footer_html = self.leer_componente("footer.html")
         version_tag = int(time.time())
 
@@ -147,6 +148,8 @@ class DashboardAssembler:
 
   {modal_games}
 
+  {modal_oftalmico}
+
   {footer_html}
 
   <!-- ========================================================================= -->
@@ -159,6 +162,8 @@ class DashboardAssembler:
   <script src="/static/js/services/telemetry_service.js?v={version_tag}"></script>
   <script src="/static/js/services/ecg_service.js?v={version_tag}"></script>
   <script src="/static/js/services/hologram_service.js?v={version_tag}"></script>
+  <script src="/static/js/services/fit_service.js?v={version_tag}"></script>
+  <script src="/static/js/services/oftalmico_service.js?v={version_tag}"></script>
   <script src="/static/js/controllers/wellness_controller.js?v={version_tag}"></script>
   <script src="/static/js/controllers/games_controller.js?v={version_tag}"></script>
   <script src="/static/js/controllers/sleep_controller.js?v={version_tag}"></script>
@@ -177,6 +182,10 @@ class DashboardAssembler:
 
       const habitatHologramService = new HologramRendererService("particlesHabitatCanvas", "svgHologramHabitat");
       habitatHologramService.inicializar();
+
+      if (window.fitService?.inicializar) {{
+        window.fitService.inicializar();
+      }}
 
       // 2. Instanciar Controlador de Bienestar y Rutinas
       const wellnessController = new WellnessController(window.soundService);

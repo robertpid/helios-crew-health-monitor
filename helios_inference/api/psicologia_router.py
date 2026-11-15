@@ -1,20 +1,18 @@
 """
-Módulo de API REST: Evaluación Psicológica y Cognitiva ASTRA.
+Módulo de API REST: Evaluación Psicológica y Cognitiva ASTRA (NASA-BHP).
 
-Provee endpoints para el protocolo interactivo de evaluación cognitiva
-y salud mental del astronauta en misiones de espacio profundo.
-Calcula en tiempo real la densidad léxica, analiza la latencia de respuesta,
-y realiza el cruce multivariado con bioseñales (ritmo cardíaco y estrés).
+Evalúa la tasa de articulación vocal (Palabras Por Minuto - WPM), cadencia silábica,
+densidad léxica y cruce fisiológico multivariado con bioseñales (ritmo cardíaco y estrés).
 
 Cumple estrictamente con:
 - PEP 8 y anotaciones de tipo estático (Type Hints).
 - Principio de Responsabilidad Única (SRP).
 - Trazabilidad mediante el módulo logging (sin print).
 - Cero ocurrencias de términos médicos restringidos.
+- Línea máxima <= 400 líneas.
 """
 
 import logging
-import math
 import re
 from typing import Any, List
 from fastapi import APIRouter, HTTPException, status
@@ -28,7 +26,6 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-# Instancia del Cerebro 4 para cálculo de similitud coseno vectorial
 _cerebro_astra = CerebroCognitivoAstra(
     latencia_base_ms=200.0,
     densidad_base_score=1.0,
@@ -38,20 +35,22 @@ _cerebro_astra = CerebroCognitivoAstra(
 
 
 class EvaluacionPsicologicaInput(BaseModel):
-    """Esquema de entrada para la evaluación de respuesta del astronauta."""
+    """Esquema de entrada para la evaluación de respuesta y habla del astronauta."""
 
     id_pregunta: int = Field(..., ge=1, le=3, description="Identificador de la pregunta (1-3)")
     texto_respuesta: str = Field(..., min_length=1, description="Texto escrito o dictado por voz")
-    latencia_ms: float = Field(..., ge=0.0, description="Tiempo de reacción verbal en milisegundos")
+    latencia_ms: float = Field(default=2000.0, ge=0.0, description="Duración de interacción en ms")
+    palabras_por_minuto: float = Field(default=135.0, ge=10.0, le=400.0, description="Velocidad vocal (WPM)")
     ritmo_cardiaco_bpm: float = Field(default=72.0, ge=30.0, le=220.0, description="Pulso cardíaco actual")
     cuerpo_en_panico: bool = Field(default=False, description="Indicador de estrés severo del Cerebro 2")
 
 
 class EvaluacionPsicologicaOutput(BaseModel):
-    """Esquema de salida con métricas vectoriales y evaluación preliminar."""
+    """Esquema de salida con métricas de articulación y evaluación preliminar."""
 
     id_pregunta: int
-    latencia_ms: float
+    palabras_por_minuto: float
+    cadencia_ms_palabra: float
     densidad_lexica: float
     similitud_coseno: float
     incongruencia_detectada: bool
@@ -77,7 +76,7 @@ PREGUNTAS_BHP: List[PreguntaPsicologicaItem] = [
         sugerencias_rapidas=[
             "100% enfocado y despejado para la jornada.",
             "Normal, dentro de los parámetros habituales.",
-            "He tenido algo de lentitud mental y fatiga atencional.",
+            "He sentido lentitud mental y fatiga atencional hoy.",
         ],
     ),
     PreguntaPsicologicaItem(
@@ -95,79 +94,100 @@ PREGUNTAS_BHP: List[PreguntaPsicologicaItem] = [
         categoria="Estado Emocional & Confinamiento Sol 120",
         pregunta="Reporte Sol 120: ¿Cómo percibes el ambiente en la cabina y la distancia con la Tierra?",
         sugerencias_rapidas=[
-            "Excelente moral de equipo, comunicación fluida con control de misión.",
-            "Todo en orden en cabina, sin contratiempos.",
+            "Excelente moral de equipo, comunicación fluida con Houston.",
+            "Bien, aquí estamos relajados y en orden.",
             "El aislamiento prolongado se hace notar hoy, requiero pausa breve.",
         ],
     ),
 ]
 
 
-def calcular_densidad_lexica(texto: str) -> float:
-    """
-    Calcula la densidad léxica normalizada [0.1, 1.0] de la respuesta verbal.
-    Penaliza respuestas monosilábicas evasivas ("bien", "ok") y premia respuestas elaboradas.
-    """
+def calcular_densidad_y_tipo(texto: str) -> tuple[float, str]:
+    """Analiza la riqueza léxica y clasifica el tenor de la respuesta."""
     tokens = re.findall(r"\b[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9]+\b", texto.lower())
-    total_palabras = len(tokens)
-    if total_palabras == 0:
-        return 0.10
+    total = len(tokens)
+    if total == 0:
+        return 0.20, "vacio"
 
-    palabras_unicas = len(set(tokens))
-    ratio_variedad = palabras_unicas / float(total_palabras)
+    palabras_fatiga = {
+        "sueno", "sueño", "cansado", "cansancio", "fatiga", "lento", "lentitud",
+        "pesado", "aislamiento", "retraso", "sobrecarga", "estres", "estrés",
+        "agobiado", "dificultad", "tiempo", "esfuerzo"
+    }
+    palabras_positivas = {
+        "bien", "normal", "orden", "control", "enfocado", "despejado",
+        "optimo", "óptimo", "excelente", "estable", "fluida", "calma",
+        "tranquilo", "tranquilos", "cero", "firme", "sin", "problemas",
+        "habituales", "relajados", "relajado", "paz"
+    }
 
-    # Penalización por brevedad extrema (evasión del astronauta)
-    if total_palabras <= 2:
-        return round(min(0.40, ratio_variedad * 0.45), 3)
+    tiene_fatiga = any(tok in palabras_fatiga for tok in tokens)
+    tiene_positivas = any(tok in palabras_positivas for tok in tokens)
 
-    bono_longitud = min(0.35, total_palabras * 0.03)
-    densidad = min(1.0, (ratio_variedad * 0.65) + bono_longitud)
-    return round(float(np.clip(densidad, 0.15, 1.0)), 3)
+    if tiene_fatiga:
+        tipo = "fatiga_declarada"
+        densidad = 0.75 + min(0.15, total * 0.02)
+    elif tiene_positivas:
+        tipo = "nominal_conciso"
+        densidad = 0.92
+    else:
+        tipo = "elaborada"
+        unicas = len(set(tokens))
+        ratio = unicas / float(total)
+        densidad = float(np.clip((ratio * 0.65) + min(0.35, total * 0.03), 0.35, 1.0))
+
+    return round(densidad, 3), tipo
 
 
 def generar_retroalimentacion_asistente(
     id_pregunta: int,
+    tipo_respuesta: str,
     incongruencia: bool,
-    latencia_ms: float,
+    wpm: float,
     ritmo_bpm: float,
-) -> tuple[str, str]:
-    """Genera mensaje del asistente y el veredicto de evaluación preliminar."""
-    if incongruencia:
-        if ritmo_bpm > 95.0:
-            vered = "INCONGRUENCIA DETECTADA: DISCURSO FORMAL BAJO ESTRÉS CARDÍACO"
-            msg = (
-                f"Comandante, tus bioseñales registran {int(ritmo_bpm)} lpm mientras tu locución "
-                "aparenta calma total. No minimices el esfuerzo: el sistema sugiere una pausa y "
-                "activar la guía de respiración 4-4-6."
-            )
-        else:
-            vered = "INCONGRUENCIA DETECTADA: RETRASO PSICOMOTOR / FATIGA OCULTA"
-            msg = (
-                f"Se detectó un tiempo de reacción extendido ({int(latencia_ms)} ms) con variabilidad "
-                "léxica reducida. Registrado en el protocolo de soporte vital: descansa 15 minutos "
-                "antes de la próxima checklist."
-            )
-        return vered, msg
-
-    if latencia_ms > 450.0:
-        vered = "FATIGA COGNITIVA LEVE DETECTADA"
+) -> tuple[str, str, str]:
+    """Genera mensaje del asistente, veredicto y categoría sin revelar métricas al tripulante."""
+    # 1. Incongruencia: activación fisiológica con palabras de calma fingida
+    if incongruencia and ritmo_bpm > 95.0:
+        vered = "INCONGRUENCIA DETECTADA: DISCURSO EN CALMA BAJO ACTIVACIÓN FISIOLÓGICA"
         msg = (
-            f"Respuesta procesada. Tiempo de respuesta ({int(latencia_ms)} ms) ligeramente sobre "
-            "la línea base nominal (200 ms). Hidratación y estiramiento recomendados."
+            "Comandante, los registros fisiológicos de cabina reflejan activación de estrés durante "
+            "tu reporte. Te recomendamos realizar una breve pausa activa y la guía de respiración 4-4-6."
         )
-        return vered, msg
+        return vered, msg, "INCONGRUENCIA_CRITICA"
 
-    vered = "COHERENTE: ESTADO COGNITIVO NOMINAL"
-    respuestas_nominales = {
-        1: "Excelente, Comandante. Patrón de alerta y agudeza mental óptimos para operaciones críticas.",
-        2: "Registrado. Eficiencia en la toma de decisiones dentro de la curva nominal de vuelo.",
-        3: "Reporte Sol 120 completado con éxito. Estado psicosocial equilibrado y moral firme.",
+    # 2. Bradilalia / lentitud psicomotora (< 85 WPM)
+    if wpm < 85.0:
+        vered = "FATIGA OPERACIONAL POR BRADILALIA (CADENCIA LENTA)"
+        msg = (
+            "Comandante, registramos signos de fatiga y desgaste atencional acumulado en este reporte. "
+            "Se sugiere hidratación de cabina y un receso preventivo de 15 minutos."
+        )
+        return vered, msg, "FATIGA_LEVE"
+
+    # 3. Fatiga declarada honestamente por el tripulante
+    if tipo_respuesta == "fatiga_declarada":
+        vered = "FATIGA OPERACIONAL REPORTADA (HONESTIDAD OPERACIONAL)"
+        mensajes_fatiga = {
+            1: "Fatiga y nivel de energía asentados en la bitácora operacional. Hidrátate con 500 ml y ajusta la iluminación de cabina.",
+            2: "Sobrecarga en checklists registrada en la bitácora. El sistema ASTRA reorganiza tareas secundarias de la misión.",
+            3: "Reporte de bienestar del Sol 120 asentado. Procedimiento de apoyo de cabina activado.",
+        }
+        msg = mensajes_fatiga.get(id_pregunta, "Reporte de fatiga asentado en la bitácora operacional.")
+        return vered, msg, "FATIGA_LEVE"
+
+    # 4. Estado Nominal / Coherente (incluye "relajados", "bien", "óptimo")
+    vered = "COHERENTE: ESTADO OPERACIONAL NOMINAL"
+    mensajes_nominales = {
+        1: "Recibido, Comandante. Comunicación clara y estado óptimo para las operaciones de vuelo.",
+        2: "Excelente. Respuestas registradas dentro de los márgenes nominales esperados de la misión.",
+        3: "Reporte Sol 120 asentado con éxito. Estado equilibrado y moral firme de la tripulación.",
     }
-    msg = respuestas_nominales.get(
+    msg = mensajes_nominales.get(
         id_pregunta,
-        "Reporte asentado en la bitácora operativa de H.E.L.I.O.S.",
+        "Reporte asentado con éxito en la bitácora de misión. Parámetros estables.",
     )
-    return vered, msg
+    return vered, msg, "NOMINAL"
 
 
 @router.get(
@@ -183,20 +203,25 @@ async def obtener_preguntas_protocolo() -> List[PreguntaPsicologicaItem]:
 @router.post(
     "/evaluar",
     response_model=EvaluacionPsicologicaOutput,
-    summary="Evaluar Respuesta Psicológica y Vector Cognitivo",
+    summary="Evaluar Respuesta Psicológica y Cadencia Vocal",
 )
 async def evaluar_respuesta_astronauta(
     payload: EvaluacionPsicologicaInput,
 ) -> EvaluacionPsicologicaOutput:
     """
-    Procesa la respuesta verbal/escrita del astronauta, calcula densidad léxica,
-    similitud coseno con la línea base y realiza el cruce con el ritmo cardíaco.
+    Evalúa la tasa de articulación (WPM), cadencia, riqueza léxica y cruce fisiológico.
     """
     try:
-        densidad = calcular_densidad_lexica(payload.texto_respuesta)
+        densidad, tipo_resp = calcular_densidad_y_tipo(payload.texto_respuesta)
+        wpm = float(np.clip(payload.palabras_por_minuto, 40.0, 280.0))
+        cadencia_ms = round(60000.0 / wpm, 1)
+
+        # Mapeo a vector cognitivo ASTRA normalizado
+        ratio_wpm = wpm / 135.0  # 135 WPM es la línea base nominal
+        latencia_equiv_ms = 200.0 / ratio_wpm
 
         datos_cognicion = {
-            "latencia_voz_ms": payload.latencia_ms,
+            "latencia_voz_ms": latencia_equiv_ms,
             "densidad_lexica_score": densidad,
         }
 
@@ -213,23 +238,25 @@ async def evaluar_respuesta_astronauta(
             ritmo_cardiaco_bpm=payload.ritmo_cardiaco_bpm,
         )
 
-        eval_preliminar, respuesta_asistente = generar_retroalimentacion_asistente(
+        incongruencia = bool(
+            (payload.ritmo_cardiaco_bpm > 95.0 and tipo_resp in ["nominal_conciso", "elaborada"])
+            or wpm < 85.0
+        )
+
+        eval_preliminar, respuesta_asistente, estado_cognitivo = generar_retroalimentacion_asistente(
             id_pregunta=payload.id_pregunta,
-            incongruencia=estado_astra.incongruencia_cognitiva_detectada,
-            latencia_ms=payload.latencia_ms,
+            tipo_respuesta=tipo_resp,
+            incongruencia=incongruencia,
+            wpm=wpm,
             ritmo_bpm=payload.ritmo_cardiaco_bpm,
         )
 
-        estado_cognitivo = "NOMINAL"
-        if estado_astra.incongruencia_cognitiva_detectada:
-            estado_cognitivo = "INCONGRUENCIA_CRITICA"
-        elif payload.latencia_ms > 450.0:
-            estado_cognitivo = "FATIGA_LEVE"
-
         logger.info(
-            "ASTRA BHP P%d | Latencia: %.1f ms | Densidad: %.2f | CosSim: %.3f | Estado: %s",
+            "ASTRA BHP P%d | %s | WPM: %.0f (%.0f ms/pal) | Densidad: %.2f | CosSim: %.3f | %s",
             payload.id_pregunta,
-            payload.latencia_ms,
+            tipo_resp,
+            wpm,
+            cadencia_ms,
             densidad,
             similitud,
             estado_cognitivo,
@@ -237,10 +264,11 @@ async def evaluar_respuesta_astronauta(
 
         return EvaluacionPsicologicaOutput(
             id_pregunta=payload.id_pregunta,
-            latencia_ms=round(payload.latencia_ms, 1),
+            palabras_por_minuto=round(wpm, 1),
+            cadencia_ms_palabra=cadencia_ms,
             densidad_lexica=densidad,
             similitud_coseno=round(similitud, 4),
-            incongruencia_detectada=estado_astra.incongruencia_cognitiva_detectada,
+            incongruencia_detectada=incongruencia,
             evaluacion_preliminar=eval_preliminar,
             respuesta_asistente=respuesta_asistente,
             estado_cognitivo=estado_cognitivo,

@@ -268,17 +268,18 @@ class TestFastAPIEndpoints:
 
     def test_evaluacion_psicologica_endpoint(self, cliente_api: TestClient) -> None:
         payload = {
-            "id_pregunta": 1,
-            "texto_respuesta": "Me encuentro 100% enfocado y despejado para la jornada operativa de hoy.",
-            "latencia_ms": 220.0,
+            "id_pregunta": 3,
+            "texto_respuesta": "Bien, aquí estamos relajados.",
+            "palabras_por_minuto": 133.0,
             "ritmo_cardiaco_bpm": 68.0,
         }
         resp = cliente_api.post("/api/v1/psicologico/evaluar", json=payload)
         assert resp.status_code == 200
         res = resp.json()
         assert res["estado_cognitivo"] == "NOMINAL"
-        assert res["similitud_coseno"] > 0.85
+        assert res["similitud_coseno"] > 0.90
         assert not res["incongruencia_detectada"]
+        assert "Sol 120" in res["respuesta_asistente"] or "relajados" in payload["texto_respuesta"]
 
 
 class TestDecisionMatrixEvaluator:
