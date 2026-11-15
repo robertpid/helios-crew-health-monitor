@@ -95,6 +95,7 @@ class DashboardAssembler:
         modal_login = self.leer_componente("modal_login.html")
         modal_games = self.leer_componente("modal_games.html")
         modal_oftalmico = self.leer_componente("modal_oftalmico.html")
+        modal_sonar = self.leer_componente("modal_sonar.html")
         footer_html = self.leer_componente("footer.html")
         version_tag = int(time.time())
 
@@ -150,6 +151,8 @@ class DashboardAssembler:
 
   {modal_oftalmico}
 
+  {modal_sonar}
+
   {footer_html}
 
   <!-- ========================================================================= -->
@@ -164,6 +167,7 @@ class DashboardAssembler:
   <script src="/static/js/services/hologram_service.js?v={version_tag}"></script>
   <script src="/static/js/services/fit_service.js?v={version_tag}"></script>
   <script src="/static/js/services/oftalmico_service.js?v={version_tag}"></script>
+  <script src="/static/js/services/sonar_service.js?v={version_tag}"></script>
   <script src="/static/js/controllers/wellness_controller.js?v={version_tag}"></script>
   <script src="/static/js/controllers/games_controller.js?v={version_tag}"></script>
   <script src="/static/js/controllers/sleep_controller.js?v={version_tag}"></script>

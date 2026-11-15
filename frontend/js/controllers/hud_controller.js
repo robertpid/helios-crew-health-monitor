@@ -351,7 +351,8 @@ class HudController {
 
   async _cargarCatalogoMatriz() {
     const reglas = await this._telemetry.obtenerCatalogoMatriz();
-    window.viewportController?.setRules(reglas || []);
+    const extras = window.sonarService?.obtenerReglasAcusticas?.() || [];
+    window.viewportController?.setRules([...(reglas || []), ...extras]);
   }
 
   _setTxt(id, val) { const el = document.getElementById(id); if (el) el.innerText = val; }
