@@ -1,152 +1,152 @@
 """
-Generador de telemetría de biometría fisiológica (Cerebro 2).
+Physiological biometrics telemetry generator (Brain 2).
 
-Modela la respuesta hemodinámica, ciclos de sueño circadiano y pérdida de masa ósea
-por descondicionamiento musculoesquelético según los estudios de la NASA.
+Models the hemodynamic response, circadian sleep cycles and bone mass loss from
+musculoskeletal deconditioning per NASA studies.
 """
 
 import logging
-from helios_simulator.config import LimitesNasaConfig
-from helios_simulator.domain.models import BiometriaModel
+from helios_simulator.config import NasaLimitsConfig
+from helios_simulator.domain.models import BiometricsModel
 from helios_simulator.services.math_noise import (
-    calcular_perdida_osea_acumulada,
-    evaluar_probabilidad_evento,
-    generar_ruido_gaussiano,
-    redondear_telemetria,
+    compute_cumulative_bone_loss,
+    evaluate_event_probability,
+    generate_gaussian_noise,
+    round_telemetry,
 )
 
 logger = logging.getLogger(__name__)
 
 
-class GeneradorBiometria:
+class BiometricsGenerator:
     """
-    Servicio de modelado fisiológico del astronauta.
-    Mantiene el seguimiento de ciclos circadianos continuos y desmineralización ósea.
+    Astronaut physiological modeling service.
+    Tracks continuous circadian cycles and bone demineralization.
     """
 
     def __init__(
         self,
-        config_limites: LimitesNasaConfig | None = None,
-        dia_mision_inicial: int = 120,
+        limits_config: NasaLimitsConfig | None = None,
+        initial_mission_day: int = 120,
     ) -> None:
         """
-        Inicializa el generador biomédico.
+        Initializes the biomedical generator.
 
         Args:
-            config_limites: Parámetros normativos y umbrales biológicos.
-            dia_mision_inicial: Día actual de la expedición en espacio profundo.
+            limits_config: Normative parameters and biological thresholds.
+            initial_mission_day: Current day of the deep space expedition.
         """
-        self._config = config_limites or LimitesNasaConfig()
-        self._dia_mision = dia_mision_inicial
-        self._ciclos_insuficientes = 0
-        self._horas_sueno_actual = 6.0
-        self._contador_muestras_ciclo = 0
+        self._config = limits_config or NasaLimitsConfig()
+        self._mission_day = initial_mission_day
+        self._insufficient_cycles = 0
+        self._current_sleep_hours = 6.0
+        self._cycle_sample_counter = 0
 
-    def simular_nuevo_ciclo_sueno(self, horas_dormidas: float) -> None:
+    def simulate_new_sleep_cycle(self, hours_slept: float) -> None:
         """
-        Registra la conclusión de un ciclo circadiano de sueño para actualizar fatiga.
+        Records the completion of a circadian sleep cycle to update fatigue.
 
         Args:
-            horas_dormidas: Duración registrada en el actígrafo inteligente.
+            hours_slept: Duration recorded by the smart actigraph.
         """
-        self._horas_sueno_actual = horas_dormidas
-        if horas_dormidas < self._config.umbral_horas_sueno_riesgo:
-            self._ciclos_insuficientes += 1
+        self._current_sleep_hours = hours_slept
+        if hours_slept < self._config.sleep_hours_risk_threshold:
+            self._insufficient_cycles += 1
             logger.warning(
-                "Ciclo de descanso insuficiente detectado (%.1fh < %.1fh). Ciclos acumulados: %d",
-                horas_dormidas,
-                self._config.umbral_horas_sueno_riesgo,
-                self._ciclos_insuficientes,
+                "Insufficient rest cycle detected (%.1fh < %.1fh). Cumulative cycles: %d",
+                hours_slept,
+                self._config.sleep_hours_risk_threshold,
+                self._insufficient_cycles,
             )
         else:
-            self._ciclos_insuficientes = max(0, self._ciclos_insuficientes - 1)
+            self._insufficient_cycles = max(0, self._insufficient_cycles - 1)
 
-    def generar_lectura(
+    def generate_reading(
         self,
-        estres_ambiental: bool = False,
-        forzar_deficiencia_sueno: bool = False,
-        forzar_taquicardia: bool = False,
-    ) -> BiometriaModel:
+        environmental_stress: bool = False,
+        force_sleep_deficit: bool = False,
+        force_tachycardia: bool = False,
+    ) -> BiometricsModel:
         """
-        Produce una lectura instantánea de signos vitales.
+        Produces an instantaneous vital signs reading.
 
         Args:
-            estres_ambiental: Indica condiciones ambientales hostiles (CO2 alto o Tormenta Solar).
-            forzar_deficiencia_sueno: Fuerza acumulación de sueño < 6.0h.
-            forzar_taquicardia: Fuerza ritmo cardiaco elevado (> 95 bpm).
+            environmental_stress: Indicates hostile environmental conditions (high CO2 or Solar Storm).
+            force_sleep_deficit: Forces accumulation of sleep < 6.0h.
+            force_tachycardia: Forces an elevated heart rate (> 95 bpm).
 
         Returns:
-            Instancia validada de BiometriaModel.
+            Validated BiometricsModel instance.
         """
-        self._contador_muestras_ciclo += 1
+        self._cycle_sample_counter += 1
 
-        # Simulación de alternancia o persistencia de ciclos de sueño (ej. cada 15 muestras avanza ciclo o fluctúa)
-        if self._contador_muestras_ciclo % 15 == 0 or forzar_deficiencia_sueno:
-            if forzar_deficiencia_sueno:
-                horas_simuladas = generar_ruido_gaussiano(5.2, 0.4, 4.0, 5.8)
+        # Simulates alternating or persistent sleep cycles (e.g. every 15 samples the cycle advances or fluctuates)
+        if self._cycle_sample_counter % 15 == 0 or force_sleep_deficit:
+            if force_sleep_deficit:
+                simulated_hours = generate_gaussian_noise(5.2, 0.4, 4.0, 5.8)
             else:
-                # Estudio The Lancet Neurology (2014): promedio ~6h por noche
-                horas_simuladas = generar_ruido_gaussiano(
-                    valor_medio=self._config.horas_sueno_promedio,
-                    desviacion_estandar=0.9,
-                    limite_inferior=4.2,
-                    limite_superior=8.0,
+                # The Lancet Neurology study (2014): average ~6h per night
+                simulated_hours = generate_gaussian_noise(
+                    mean_value=self._config.average_sleep_hours,
+                    standard_deviation=0.9,
+                    lower_bound=4.2,
+                    upper_bound=8.0,
                 )
-            self.simular_nuevo_ciclo_sueno(horas_simuladas)
+            self.simulate_new_sleep_cycle(simulated_hours)
 
-        # 1. Ritmo cardiaco (ritmo_cardiaco_bpm): Base 65 +/- 5 bpm
-        media_ritmo = self._config.ritmo_cardiaco_base_bpm
-        if estres_ambiental:
-            media_ritmo += 18.0
-        if forzar_taquicardia:
-            media_ritmo = 98.0
+        # 1. Heart rate (heart_rate_bpm): Base 65 +/- 5 bpm
+        rate_mean = self._config.base_heart_rate_bpm
+        if environmental_stress:
+            rate_mean += 18.0
+        if force_tachycardia:
+            rate_mean = 98.0
 
-        ritmo_val = generar_ruido_gaussiano(
-            valor_medio=media_ritmo,
-            desviacion_estandar=self._config.ritmo_cardiaco_desviacion_bpm,
-            limite_inferior=50.0,
-            limite_superior=130.0,
+        rate_val = generate_gaussian_noise(
+            mean_value=rate_mean,
+            standard_deviation=self._config.heart_rate_deviation_bpm,
+            lower_bound=50.0,
+            upper_bound=130.0,
         )
 
-        # 2. Bandera de alerta por riesgo de fatiga (si cae a <6h durante 3 ciclos)
-        alerta_fatiga = self._ciclos_insuficientes >= self._config.consecutivos_sueno_para_alerta
+        # 2. Fatigue risk alert flag (if it drops below 6h for 3 cycles)
+        fatigue_alert = self._insufficient_cycles >= self._config.consecutive_sleep_for_alert
 
-        # 3. Pérdida ósea acumulada (perdida_osea_pct): (dia_mision / 30) * 1.5%
-        perdida_osea = calcular_perdida_osea_acumulada(
-            dia_mision=self._dia_mision,
-            tasa_mensual_pct=self._config.tasa_perdida_osea_mensual_pct,
+        # 3. Cumulative bone loss (bone_loss_pct): (mission_day / 30) * 1.5%
+        bone_loss = compute_cumulative_bone_loss(
+            mission_day=self._mission_day,
+            monthly_rate_pct=self._config.monthly_bone_loss_rate_pct,
         )
 
-        # 4. Parámetros hemodinámicos complementarios (Presión arterial y SpO2)
-        base_sistolica = 120.0 + (12.0 if estres_ambiental or ritmo_val > 90 else 0.0)
-        sistolica = generar_ruido_gaussiano(base_sistolica, 4.0, 100.0, 160.0)
-        diastolica = generar_ruido_gaussiano(sistolica * 0.65, 3.0, 60.0, 95.0)
+        # 4. Complementary hemodynamic parameters (Blood pressure and SpO2)
+        base_systolic = 120.0 + (12.0 if environmental_stress or rate_val > 90 else 0.0)
+        systolic = generate_gaussian_noise(base_systolic, 4.0, 100.0, 160.0)
+        diastolic = generate_gaussian_noise(systolic * 0.65, 3.0, 60.0, 95.0)
 
-        spo2 = generar_ruido_gaussiano(98.2, 0.6, 94.0, 100.0)
+        spo2 = generate_gaussian_noise(98.2, 0.6, 94.0, 100.0)
 
-        # 5. Sensores de la prenda inteligente Bio-Monitor / Astroskin (CSA)
-        temp_piel = generar_ruido_gaussiano(34.8 + (0.5 if estres_ambiental else 0.0), 0.3, 33.0, 37.0)
-        resp_rate = generar_ruido_gaussiano(14.0 + (3.5 if estres_ambiental else 0.0), 1.2, 10.0, 26.0)
-        # HRV (variabilidad cardíaca): disminuye fisiológicamente bajo estrés
-        hrv_ms = generar_ruido_gaussiano(42.0 - (15.0 if estres_ambiental or ritmo_val > 90 else 0.0), 4.0, 15.0, 75.0)
+        # 5. Bio-Monitor / Astroskin smart garment sensors (CSA)
+        skin_temp = generate_gaussian_noise(34.8 + (0.5 if environmental_stress else 0.0), 0.3, 33.0, 37.0)
+        resp_rate = generate_gaussian_noise(14.0 + (3.5 if environmental_stress else 0.0), 1.2, 10.0, 26.0)
+        # HRV (heart rate variability): physiologically decreases under stress
+        hrv_ms = generate_gaussian_noise(42.0 - (15.0 if environmental_stress or rate_val > 90 else 0.0), 4.0, 15.0, 75.0)
 
-        dolor_cabeza = estres_ambiental and evaluar_probabilidad_evento(0.40)
-        actividad_fisica = generar_ruido_gaussiano(120.0, 15.0, 45.0, 150.0)
-        escala_estres = min(10, max(1, int(3 + (4 if estres_ambiental else 0) + (2 if alerta_fatiga else 0))))
+        headache = environmental_stress and evaluate_event_probability(0.40)
+        physical_activity = generate_gaussian_noise(120.0, 15.0, 45.0, 150.0)
+        stress_scale = min(10, max(1, int(3 + (4 if environmental_stress else 0) + (2 if fatigue_alert else 0))))
 
-        return BiometriaModel(
-            ritmo_cardiaco_bpm=redondear_telemetria(ritmo_val, 1),
-            horas_sueno_ultimo_ciclo=redondear_telemetria(self._horas_sueno_actual, 2),
-            ciclos_sueno_insuficiente_consecutivos=self._ciclos_insuficientes,
-            alerta_riesgo_fatiga=alerta_fatiga,
-            perdida_osea_pct=redondear_telemetria(perdida_osea, 2),
-            presion_sistolica_mmHg=redondear_telemetria(sistolica, 1),
-            presion_diastolica_mmHg=redondear_telemetria(diastolica, 1),
-            spo2_pct=redondear_telemetria(spo2, 1),
-            temperatura_piel_c=redondear_telemetria(temp_piel, 2),
-            frecuencia_respiratoria_rpm=redondear_telemetria(resp_rate, 1),
-            variabilidad_cardiaca_hrv_ms=redondear_telemetria(hrv_ms, 1),
-            dolor_cabeza_sintoma=dolor_cabeza,
-            actividad_fisica_minutos=redondear_telemetria(actividad_fisica, 1),
-            escala_estres_autorreporte=escala_estres,
+        return BiometricsModel(
+            heart_rate_bpm=round_telemetry(rate_val, 1),
+            last_cycle_sleep_hours=round_telemetry(self._current_sleep_hours, 2),
+            consecutive_insufficient_sleep_cycles=self._insufficient_cycles,
+            fatigue_risk_alert=fatigue_alert,
+            bone_loss_pct=round_telemetry(bone_loss, 2),
+            systolic_pressure_mmHg=round_telemetry(systolic, 1),
+            diastolic_pressure_mmHg=round_telemetry(diastolic, 1),
+            spo2_pct=round_telemetry(spo2, 1),
+            skin_temperature_c=round_telemetry(skin_temp, 2),
+            respiratory_rate_rpm=round_telemetry(resp_rate, 1),
+            heart_rate_variability_hrv_ms=round_telemetry(hrv_ms, 1),
+            headache_symptom=headache,
+            physical_activity_minutes=round_telemetry(physical_activity, 1),
+            self_reported_stress_scale=stress_scale,
         )

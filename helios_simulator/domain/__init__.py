@@ -1,24 +1,24 @@
 """
-Exportaciones de la capa de dominio de helios_simulator.
+Exports of the helios_simulator domain layer.
 """
 
-from helios_simulator.domain.enums import EntornoMision, EstadoConexion, NivelAlerta, PeligroRidge
+from helios_simulator.domain.enums import AlertLevel, ConnectionState, MissionEnvironment, RidgeHazard
 from helios_simulator.domain.models import (
-    AlertaEvaluacionPreliminar,
-    BiometriaModel,
-    CognicionModel,
-    EntornoModel,
-    TelemetriaPayload,
+    BiometricsModel,
+    CognitionModel,
+    EnvironmentModel,
+    PreliminaryAssessmentAlert,
+    TelemetryPayload,
 )
 
 __all__ = [
-    "EntornoMision",
-    "EstadoConexion",
-    "NivelAlerta",
-    "PeligroRidge",
-    "AlertaEvaluacionPreliminar",
-    "BiometriaModel",
-    "CognicionModel",
-    "EntornoModel",
-    "TelemetriaPayload",
+    "MissionEnvironment",
+    "ConnectionState",
+    "AlertLevel",
+    "RidgeHazard",
+    "PreliminaryAssessmentAlert",
+    "BiometricsModel",
+    "CognitionModel",
+    "EnvironmentModel",
+    "TelemetryPayload",
 ]

@@ -1,9 +1,9 @@
 """
-Módulo helios_simulator.
+helios_simulator module.
 
-Simulador de telemetría sintética de soporte vital y monitoreo biomédico para
-misiones de espacio profundo, fundamentado en los estándares de la NASA
-(NASA-STD-3001) y el marco de los cinco peligros del vuelo espacial (RIDGE).
+Synthetic life support and biomedical monitoring telemetry simulator for deep
+space missions, grounded in the NASA standards (NASA-STD-3001) and the framework
+of the five human spaceflight hazards (RIDGE).
 """
 
 __version__: str = "2.1.0"

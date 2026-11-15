@@ -1,4 +1,4 @@
-"""Servicios del motor de inferencia central."""
+"""Services of the central inference engine."""
 
 from helios_inference.services.inference_engine import InferenceEngine
 

@@ -1,178 +1,178 @@
 """
-Libro de códigos de telemetría de H.E.L.I.O.S. (fuente única de verdad textual).
+H.E.L.I.O.S. telemetry codebook (single source of textual truth).
 
-Fundamento
-----------
-Un sistema de inferencia en el borde debe REDUCIR el caudal hacia tierra, no
-amplificarlo. El reporte consolidado repite en cada ciclo las mismas cadenas
-descriptivas (dictámenes, contramedidas, estándares base), que son invariantes
-del catálogo: no son datos de la misión, son plantillas.
+Rationale
+---------
+An edge inference system must REDUCE the downlink volume, not amplify it. The
+consolidated report repeats the same descriptive strings every cycle (findings,
+countermeasures, base standards), which are catalog invariants: they are not
+mission data, they are templates.
 
-Este módulo extrae esas invariantes a un libro de códigos que se descarga UNA
-sola vez. El flujo persistido transporta únicamente:
+This module extracts those invariants into a codebook that is downloaded ONCE.
+The persisted stream carries only:
 
-    - códigos estables  (CO2_ELEV, CX-03, KR03, ...)
-    - valores numéricos (3.40, 5.8, 9.2, ...)
+    - stable codes   (CO2_ELEV, CX-03, KR03, ...)
+    - numeric values (3.40, 5.8, 9.2, ...)
 
-y el HUD reconstruye el texto localmente. El catálogo de reglas y los nombres de
-las aristas se IMPORTAN de sus módulos de origen, de modo que el libro de
-códigos no puede desincronizarse de la lógica de inferencia.
+and the HUD reconstructs the text locally. The rule catalog and the edge names
+are IMPORTED from their source modules, so the codebook cannot drift out of sync
+with the inference logic.
 
-Las plantillas usan marcadores `{0}`, `{1}`... posicionales sobre los valores
-numéricos que acompañan a cada código.
+Templates use positional `{0}`, `{1}`... markers over the numeric values that
+accompany each code.
 """
 
 from typing import Any, Final
 
-from helios_inference.cerebros.cerebro_3_grafo_fusion import CerebroGrafoFusion
-from helios_inference.domain.decision_rules import CATALOGO_REGLAS_CRITICAS
+from helios_inference.brains.brain_3_fusion_graph import FusionGraphBrain
+from helios_inference.domain.decision_rules import CRITICAL_RULES_CATALOG
 
-VERSION_ESQUEMA: Final[int] = 1
+SCHEMA_VERSION: Final[int] = 1
 
 # ======================================================================================
-# ORDEN CANÓNICO DEL VECTOR DE MÉTRICAS
-# El registro compacto transporta un array posicional sin claves; este orden es el
-# contrato entre el compactador y el HUD.
+# CANONICAL ORDER OF THE METRICS VECTOR
+# The compact record carries a positional array without keys; this order is the
+# contract between the compactor and the HUD.
 # ======================================================================================
-ORDEN_METRICAS: Final[tuple[str, ...]] = (
+METRIC_ORDER: Final[tuple[str, ...]] = (
     "co2_mmHg",
-    "radiacion_acumulada_mSv",
-    "presion_cabina_kpa",
-    "ritmo_cardiaco_bpm",
-    "horas_sueno_ultimo_ciclo",
-    "perdida_osea_pct",
-    "latencia_voz_ms",
-    "densidad_lexica_score",
+    "cumulative_radiation_mSv",
+    "cabin_pressure_kpa",
+    "heart_rate_bpm",
+    "last_cycle_sleep_hours",
+    "bone_loss_pct",
+    "voice_latency_ms",
+    "lexical_density_score",
 )
 
-# Índices dentro de ORDEN_METRICAS, para que las plantillas referencien posiciones.
+# Indices within METRIC_ORDER, so templates can reference positions.
 IDX_CO2: Final[int] = 0
 IDX_RAD: Final[int] = 1
 IDX_PRES: Final[int] = 2
-IDX_PULSO: Final[int] = 3
-IDX_SUENO: Final[int] = 4
-IDX_OSEA: Final[int] = 5
+IDX_PULSE: Final[int] = 3
+IDX_SLEEP: Final[int] = 4
+IDX_BONE: Final[int] = 5
 
 # ======================================================================================
-# CÓDIGOS DEL CEREBRO 1 (AMBIENTAL) — orden del vector en R^3
+# BRAIN 1 CODES (ENVIRONMENTAL) — vector order in R^3
 # ======================================================================================
-CODIGOS_AMBIENTAL: Final[tuple[dict[str, Any], ...]] = (
+ENVIRONMENTAL_CODES: Final[tuple[dict[str, Any], ...]] = (
     {
-        "codigo": "CO2_ELEV",
-        "metrica": IDX_CO2,
-        "plantilla": "ALERTA_CO2_ELEVADO: {0:.2f} mmHg (Límite: 3.0 mmHg)",
-        "estandar": "NASA-STD-3001 [V2 6004]",
+        "code": "CO2_ELEV",
+        "metric": IDX_CO2,
+        "template": "ELEVATED_CO2_ALERT: {0:.2f} mmHg (Limit: 3.0 mmHg)",
+        "standard": "NASA-STD-3001 [V2 6004]",
     },
     {
-        "codigo": "RAD_CRIT",
-        "metrica": IDX_RAD,
-        "plantilla": "ALERTA_RADIACION_CRITICA: Dosis carrera {0:.1f} mSv",
-        "plantilla_evento": "ALERTA_RADIACION_CRITICA: Tormenta Solar Activa (SPE)",
-        "estandar": "NASA-STD-3001 [V1 4030]; NOAA SWPC",
+        "code": "RAD_CRIT",
+        "metric": IDX_RAD,
+        "template": "CRITICAL_RADIATION_ALERT: Career dose {0:.1f} mSv",
+        "event_template": "CRITICAL_RADIATION_ALERT: Solar Storm Active (SPE)",
+        "standard": "NASA-STD-3001 [V1 4030]; NOAA SWPC",
     },
     {
-        "codigo": "PRES_ANOM",
-        "metrica": IDX_PRES,
-        "plantilla": "ALERTA_PRESION_CABINA_ANOMALA: {0:.2f} kPa",
-        "estandar": "NASA-STD-3001 (rango 95-103 kPa)",
-    },
-)
-
-# ======================================================================================
-# CÓDIGOS DEL CEREBRO 2 (BIOMÉTRICO) — orden del vector en R^4
-# ======================================================================================
-CODIGOS_BIOMETRICO: Final[tuple[dict[str, Any], ...]] = (
-    {
-        "codigo": "PULSO_ANOM",
-        "metrica": IDX_PULSO,
-        "plantilla": "ALERTA_PULSO_ANOMALO: {0:.1f} bpm",
-    },
-    {
-        "codigo": "SUENO_DEF",
-        "metrica": IDX_SUENO,
-        "plantilla": "ALERTA_DEFICIT_SUENO: {0:.1f} horas",
-    },
-    {
-        "codigo": "OSEO_RIESGO",
-        "metrica": IDX_OSEA,
-        "plantilla": "ALERTA_RIESGO_OSEO: Día {dia} ({0:.2f}% de pérdida)",
-    },
-    {
-        "codigo": "SANS_ACT",
-        "metrica": None,
-        "plantilla": "ALERTA_SANS_ACTIVA: Alteración neuro-ocular",
+        "code": "PRES_ANOM",
+        "metric": IDX_PRES,
+        "template": "ABNORMAL_CABIN_PRESSURE_ALERT: {0:.2f} kPa",
+        "standard": "NASA-STD-3001 (range 95-103 kPa)",
     },
 )
 
 # ======================================================================================
-# CÓDIGOS DEL CEREBRO 3 (ARISTAS DE KRONECKER) — KR00..KR11
-# Los nombres se importan del cerebro para impedir la divergencia.
+# BRAIN 2 CODES (BIOMETRIC) — vector order in R^4
 # ======================================================================================
-PLANTILLA_FUSION: Final[str] = (
-    "Evaluación preliminar de interacción cruzada: Arista '{arista}' activada "
-    "con severidad {severidad:.1f}/9.5."
-)
-PLANTILLA_FUSION_SEVERA: Final[str] = (
-    " ALERTA: Nivel de peligro supera el umbral seguro. "
-    "Se confirma estrés fisiológico severo por acoplamiento ambiente-humano."
-)
-CODIGO_FUSION_NOMINAL: Final[str] = "KR_NOM"
-TEXTO_FUSION_NOMINAL: Final[str] = (
-    "Evaluación preliminar: Parámetros cruzados dentro de la envolvente de seguridad."
+BIOMETRIC_CODES: Final[tuple[dict[str, Any], ...]] = (
+    {
+        "code": "PULSE_ANOM",
+        "metric": IDX_PULSE,
+        "template": "ABNORMAL_PULSE_ALERT: {0:.1f} bpm",
+    },
+    {
+        "code": "SLEEP_DEF",
+        "metric": IDX_SLEEP,
+        "template": "SLEEP_DEFICIT_ALERT: {0:.1f} hours",
+    },
+    {
+        "code": "BONE_RISK",
+        "metric": IDX_BONE,
+        "template": "BONE_RISK_ALERT: Day {day} ({0:.2f}% loss)",
+    },
+    {
+        "code": "SANS_ACT",
+        "metric": None,
+        "template": "SANS_ACTIVE_ALERT: Neuro-ocular alteration",
+    },
 )
 
 # ======================================================================================
-# CÓDIGO DEL CEREBRO 4 (ASTRA)
+# BRAIN 3 CODES (KRONECKER EDGES) — KR00..KR11
+# The names are imported from the brain to prevent divergence.
 # ======================================================================================
-CODIGO_ASTRA_INCONGRUENCIA: Final[str] = "ASTRA_INC"
-TEXTO_ASTRA_INCONGRUENCIA: Final[str] = (
-    "Incongruencia Cognitiva Detectada. Evaluación preliminar: Posible ocultamiento de fatiga."
+FUSION_TEMPLATE: Final[str] = (
+    "Preliminary cross-interaction assessment: Edge '{edge}' activated "
+    "with severity {severity:.1f}/9.5."
+)
+SEVERE_FUSION_TEMPLATE: Final[str] = (
+    " ALERT: Hazard level exceeds the safe threshold. "
+    "Severe physiological stress from environment-human coupling is confirmed."
+)
+NOMINAL_FUSION_CODE: Final[str] = "KR_NOM"
+NOMINAL_FUSION_TEXT: Final[str] = (
+    "Preliminary assessment: Cross parameters within the safety envelope."
 )
 
 # ======================================================================================
-# METADATOS DE EJECUCIÓN (constantes: viajaban íntegros en cada ciclo)
+# BRAIN 4 CODE (ASTRA)
 # ======================================================================================
-METADATOS_EDGE_ESTATICOS: Final[dict[str, str]] = {
-    "motor": "H.E.L.I.O.S. Pure-NumPy Inference Engine",
-    "algebra_lineal": "np.kron + np.dot + np.argmax",
+ASTRA_INCONGRUENCE_CODE: Final[str] = "ASTRA_INC"
+ASTRA_INCONGRUENCE_TEXT: Final[str] = (
+    "Cognitive Incongruence Detected. Preliminary assessment: Possible fatigue masking."
+)
+
+# ======================================================================================
+# EXECUTION METADATA (constants: they used to travel in full every cycle)
+# ======================================================================================
+STATIC_EDGE_METADATA: Final[dict[str, str]] = {
+    "engine": "H.E.L.I.O.S. Pure-NumPy Inference Engine",
+    "linear_algebra": "np.kron + np.dot + np.argmax",
     "hardware_target": "Deep Space Radiation-Tolerant Single Board Computer",
 }
 
 
-def construir_codebook() -> dict[str, Any]:
+def build_codebook() -> dict[str, Any]:
     """
-    Ensambla el libro de códigos completo que el HUD descarga una única vez.
+    Assembles the complete codebook that the HUD downloads once.
 
     Returns:
-        Diccionario serializable con todas las plantillas, el catálogo de reglas
-        y el orden canónico de métricas.
+        Serializable dictionary with every template, the rule catalog and the
+        canonical metric order.
     """
     return {
-        "version_esquema": VERSION_ESQUEMA,
-        "orden_metricas": list(ORDEN_METRICAS),
-        "ambiental": [dict(c) for c in CODIGOS_AMBIENTAL],
-        "biometrico": [dict(c) for c in CODIGOS_BIOMETRICO],
-        "aristas_kronecker": [
-            {"codigo": f"KR{i:02d}", "nombre": nombre}
-            for i, nombre in enumerate(CerebroGrafoFusion.NOMBRES_ARISTAS_GRAFO)
+        "schema_version": SCHEMA_VERSION,
+        "metric_order": list(METRIC_ORDER),
+        "environmental": [dict(c) for c in ENVIRONMENTAL_CODES],
+        "biometric": [dict(c) for c in BIOMETRIC_CODES],
+        "kronecker_edges": [
+            {"code": f"KR{i:02d}", "name": name}
+            for i, name in enumerate(FusionGraphBrain.GRAPH_EDGE_NAMES)
         ],
-        "plantilla_fusion": PLANTILLA_FUSION,
-        "plantilla_fusion_severa": PLANTILLA_FUSION_SEVERA,
-        "fusion_nominal": {"codigo": CODIGO_FUSION_NOMINAL, "texto": TEXTO_FUSION_NOMINAL},
-        "astra": {"codigo": CODIGO_ASTRA_INCONGRUENCIA, "texto": TEXTO_ASTRA_INCONGRUENCIA},
-        "metadatos_edge": dict(METADATOS_EDGE_ESTATICOS),
-        "reglas": [
+        "fusion_template": FUSION_TEMPLATE,
+        "severe_fusion_template": SEVERE_FUSION_TEMPLATE,
+        "fusion_nominal": {"code": NOMINAL_FUSION_CODE, "text": NOMINAL_FUSION_TEXT},
+        "astra": {"code": ASTRA_INCONGRUENCE_CODE, "text": ASTRA_INCONGRUENCE_TEXT},
+        "edge_metadata": dict(STATIC_EDGE_METADATA),
+        "rules": [
             {
-                "codigo": r.id_regla,
-                "dominio": r.dominio.value,
-                "nivel": r.nivel.value,
-                "evaluacion_preliminar": r.evaluacion_preliminar,
-                "contramedidas": list(r.contramedidas),
-                "destinatarios": [d.value for d in r.destinatarios],
-                "estandar_base": r.base_evidencia,
-                "ventana_tiempo": r.ventana_persistencia,
-                "prioridad": r.prioridad_jerarquica,
+                "code": r.rule_id,
+                "domain": r.domain.value,
+                "level": r.level.value,
+                "preliminary_assessment": r.preliminary_assessment,
+                "countermeasures": list(r.countermeasures),
+                "recipients": [d.value for d in r.recipients],
+                "base_standard": r.evidence_base,
+                "time_window": r.persistence_window,
+                "priority": r.hierarchical_priority,
             }
-            for r in CATALOGO_REGLAS_CRITICAS
+            for r in CRITICAL_RULES_CATALOG
         ],
     }
