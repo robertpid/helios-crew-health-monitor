@@ -40,14 +40,14 @@ class ViewportController {
     const panels = {
       biomedical: ['anatomy', 'vitals', 'ecg'],
       environmental: ['habitat', 'environment', 'synergy', 'actions'],
-      matrix: ['sleep', 'tasks', 'progress', 'hydration'],
+      matrix: ['sleep', 'tasks', 'games', 'hydration'],
       support: ['assistant', 'exams', 'mail', 'rules']
     };
     if (narrow) return (key === 'support' ? ['assistant', 'protocol', 'exams', 'mail', 'rules'] : panels[key]).map(p => [p]);
-    if (compact || (key === 'environmental' && window.innerWidth < 1100)) return {
+    if (compact || (['environmental', 'matrix'].includes(key) && window.innerWidth < 1100)) return {
       biomedical: [['anatomy', 'vitals'], ['ecg']],
       environmental: [['habitat', 'environment'], ['synergy', 'actions']],
-      matrix: [['sleep', 'tasks'], ['progress', 'hydration']],
+      matrix: [['sleep', 'tasks'], ['games', 'hydration']],
       support: [['assistant'], ['exams', 'mail'], ['rules']]
     }[key];
     return key === 'support' ? [['assistant', 'exams', 'mail'], ['rules']] : [panels[key]];

@@ -1,6 +1,6 @@
 /**
  * CAPA DE CONTROLADORES: WellnessController
- * Maneja la interacción de la Ventana 3: Bienestar, Rutinas, Asistente y Gamificación.
+ * Maneja la interacción de la Ventana 3: Bienestar, Rutinas, Asistente.
  * Protocolo interactivo de Evaluación Psicológica y Cognitiva ASTRA (NASA BHP).
  * Rigurosamente bajo 400 líneas (Clean Code & SRP).
  */
@@ -9,7 +9,6 @@ class WellnessController {
   constructor(soundService = null) {
     this._sound = soundService || window.soundService;
     this._tareasEstado = { meditacion: 100, estiramiento: 100, ejercicio: 60, hidratacion: 80 };
-    this._gamificacion = { nivel: 6, exp: 1320, expMax: 1500 };
     this._temporizadorRespiracion = null;
     this._respirando = false;
 
@@ -51,23 +50,6 @@ class WellnessController {
     const tagBar = document.getElementById(`taskBar${cap}`);
     if (tagVal) tagVal.innerText = `${act}%`;
     if (tagBar) tagBar.style.width = `${act}%`;
-    this.sumarExp(25);
-  }
-
-  sumarExp(pts) {
-    this._gamificacion.exp += pts;
-    if (this._gamificacion.exp >= this._gamificacion.expMax) {
-      this._gamificacion.nivel += 1;
-      this._gamificacion.exp -= this._gamificacion.expMax;
-      this._gamificacion.expMax = Math.round(this._gamificacion.expMax * 1.25);
-      this._sound?.reproducirNominal?.();
-    }
-    const lvlTag = document.getElementById("userLevelTag");
-    const expTag = document.getElementById("userExpTag");
-    const expBar = document.getElementById("userExpBar");
-    if (lvlTag) lvlTag.innerText = `NIVEL ${this._gamificacion.nivel}`;
-    if (expTag) expTag.innerHTML = `EXP <strong style="color:var(--neon-green);">${this._gamificacion.exp}</strong> / ${this._gamificacion.expMax}`;
-    if (expBar) expBar.style.width = `${Math.min(100, Math.round((this._gamificacion.exp / this._gamificacion.expMax) * 100))}%`;
   }
 
   iniciarExamenOftalmico() {
@@ -161,7 +143,7 @@ class WellnessController {
 
     setTimeout(() => {
       this._agregarMensaje("SISTEMA ASTRA", res.respuesta_asistente, res.incongruencia_detectada ? "alerta" : "nominal");
-      this.sumarExp(25);
+
       this._evaluando = false;
 
       if (this._preguntaActual < 3) {
@@ -303,7 +285,7 @@ class WellnessController {
       } else if (fase === "exhala") {
         if (text) text.innerHTML = '<strong style="color:var(--neon-green);">EXHALA LENTAMENTE...</strong><br>Libera tensión muscular';
         if (circle) circle.style.transform = `scale(${Math.max(1, 1.32 - (6 - seg) * 0.053)})`;
-        if (seg <= 0) { fase = "inhala"; seg = 4; this.sumarExp(15); }
+        if (seg <= 0) { fase = "inhala"; seg = 4;  }
       }
       seg--;
     };

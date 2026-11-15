@@ -87,10 +87,13 @@ class DashboardAssembler:
         toolbar_html = self.leer_componente("toolbar.html")
         view_biomedical = self.leer_componente("view_biomedical.html")
         view_environmental = self.leer_componente("view_environmental.html")
-        view_wellness = self.leer_componente("view_wellness.html")
+        view_wellness = self.leer_componente("view_wellness.html").replace(
+            "<!-- PANEL_SLEEP -->", self.leer_componente("panel_sleep.html")
+        ).replace("<!-- PANEL_GAMES -->", self.leer_componente("panel_games.html"))
         view_support = self.leer_componente("view_support.html")
         modal_alert = self.leer_componente("modal_alert.html")
         modal_login = self.leer_componente("modal_login.html")
+        modal_games = self.leer_componente("modal_games.html")
         footer_html = self.leer_componente("footer.html")
         version_tag = int(time.time())
 
@@ -142,6 +145,8 @@ class DashboardAssembler:
 
   {modal_login}
 
+  {modal_games}
+
   {footer_html}
 
   <!-- ========================================================================= -->
@@ -155,6 +160,8 @@ class DashboardAssembler:
   <script src="/static/js/services/ecg_service.js?v={version_tag}"></script>
   <script src="/static/js/services/hologram_service.js?v={version_tag}"></script>
   <script src="/static/js/controllers/wellness_controller.js?v={version_tag}"></script>
+  <script src="/static/js/controllers/games_controller.js?v={version_tag}"></script>
+  <script src="/static/js/controllers/sleep_controller.js?v={version_tag}"></script>
   <script src="/static/js/controllers/viewport_controller.js?v={version_tag}"></script>
   <script src="/static/js/controllers/hud_controller.js?v={version_tag}"></script>
 
@@ -186,6 +193,10 @@ class DashboardAssembler:
       );
       window.viewportController = new ViewportController();
       window.viewportController.inicializar();
+      window.gamesController = new GamesController(window.stateManager);
+      window.gamesController.inicializar();
+      window.sleepController = new SleepController(window.stateManager);
+      window.sleepController.inicializar();
       window.hudController.inicializar();
     }});
   </script>

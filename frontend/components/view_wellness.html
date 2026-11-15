@@ -1,89 +1,12 @@
 <div id="viewMatrix" class="view-container viewport-view"><div class="view-pager"><strong>3 · BIENESTAR</strong><div class="pager-controls"><button type="button" class="btn-hud page-prev" aria-label="Panel anterior">‹ Anterior</button><span class="page-label" aria-live="polite"></span><button type="button" class="btn-hud page-next" aria-label="Panel siguiente">Siguiente ›</button></div></div>
-<div class="wellness-column" data-column="left"><div class="hud-panel screen-panel" data-panel="sleep">
-      <div class="panel-header">
-        <div class="panel-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-          HORAS DE SUEÑO / DÍA
-        </div>
-        <div class="panel-subtitle">HISTORIAL CIRCADIANO SEMANAL · NASA-STD-3001 META 8H</div>
-      </div>
-
-      <div class="sleep-chart-panel" style="padding: 18px 20px 10px 20px; background: rgba(5, 12, 26, 0.7); border-radius: 8px; border: 1px solid rgba(0, 240, 255, 0.15);">
-        <div class="sleep-bars-wrapper" style="position:relative; height:150px; display:flex; align-items:flex-end; justify-content:space-between; padding-top:28px;">
-          <div class="sleep-meta-line" style="position:absolute; top:28px; left:0; right:0; border-top:2px dashed var(--c-red); box-shadow:0 0 8px rgba(255,34,85,0.6); z-index:10; pointer-events:none;"></div>
-          
-          <div class="sleep-bar-col" style="flex:1; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end;" title="Lunes: 6.8 h (REM: 1.8h)">
-            <div class="sleep-bar-rect" style="width:78%; height:75%; background:var(--c-cyan); border-radius:4px 4px 0 0; box-shadow:0 0 10px rgba(0,240,255,0.4); transition:all 0.3s ease;"></div>
-            <span class="sleep-bar-day" style="font-family:var(--font-hud); font-size:12px; color:var(--text-secondary); margin-top:8px;">L</span>
-          </div>
-          <div class="sleep-bar-col" style="flex:1; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end;" title="Martes: 7.6 h (Óptimo)">
-            <div class="sleep-bar-rect" style="width:78%; height:86%; background:var(--c-green); border-radius:4px 4px 0 0; box-shadow:0 0 10px rgba(0,255,136,0.4); transition:all 0.3s ease;"></div>
-            <span class="sleep-bar-day" style="font-family:var(--font-hud); font-size:12px; color:var(--text-secondary); margin-top:8px;">M</span>
-          </div>
-          <div class="sleep-bar-col" style="flex:1; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end;" title="Miércoles: 5.6 h (Déficit)">
-            <div class="sleep-bar-rect" style="width:78%; height:62%; background:#f59e0b; border-radius:4px 4px 0 0; box-shadow:0 0 10px rgba(245,158,11,0.4); transition:all 0.3s ease;"></div>
-            <span class="sleep-bar-day" style="font-family:var(--font-hud); font-size:12px; color:var(--text-secondary); margin-top:8px;">X</span>
-          </div>
-          <div class="sleep-bar-col" style="flex:1; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end;" title="Jueves: 7.8 h (Recuperación)">
-            <div class="sleep-bar-rect" style="width:78%; height:89%; background:var(--c-cyan); border-radius:4px 4px 0 0; box-shadow:0 0 10px rgba(0,240,255,0.4); transition:all 0.3s ease;"></div>
-            <span class="sleep-bar-day" style="font-family:var(--font-hud); font-size:12px; color:var(--text-secondary); margin-top:8px;">J</span>
-          </div>
-          <div class="sleep-bar-col" style="flex:1; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end;" title="Viernes: 6.5 h">
-            <div class="sleep-bar-rect" style="width:78%; height:73%; background:var(--c-green); border-radius:4px 4px 0 0; box-shadow:0 0 10px rgba(0,255,136,0.4); transition:all 0.3s ease;"></div>
-            <span class="sleep-bar-day" style="font-family:var(--font-hud); font-size:12px; color:var(--text-secondary); margin-top:8px;">V</span>
-          </div>
-          <div class="sleep-bar-col" style="flex:1; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end;" title="Sábado: 8.2 h (Meta superada)">
-            <div class="sleep-bar-rect" style="width:78%; height:96%; background:#ffb703; border-radius:4px 4px 0 0; box-shadow:0 0 10px rgba(255,183,3,0.5); transition:all 0.3s ease;"></div>
-            <span class="sleep-bar-day" style="font-family:var(--font-hud); font-size:12px; color:var(--text-secondary); margin-top:8px;">S</span>
-          </div>
-          <div class="sleep-bar-col" style="flex:1; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end;" title="Domingo: 7.3 h">
-            <div class="sleep-bar-rect" style="width:78%; height:82%; background:var(--c-cyan); border-radius:4px 4px 0 0; box-shadow:0 0 10px rgba(0,240,255,0.4); transition:all 0.3s ease;"></div>
-            <span class="sleep-bar-day" style="font-family:var(--font-hud); font-size:12px; color:var(--text-secondary); margin-top:8px;">D</span>
-          </div>
-        </div>
-        <div style="font-family:var(--font-data); font-size:12px; color:var(--text-muted); margin-top:14px; text-align:left;">
-          <span style="color:#ff4466; font-weight:bold;">Línea roja = meta 8 h</span> &nbsp;·&nbsp; L M X J V S D
-        </div>
-      </div>
-    </div>
-<div class="hud-panel screen-panel" data-panel="progress">
-      <div class="panel-header">
-        <div class="panel-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
-          PUNTAJE DE GAMIFICACIÓN
-        </div>
-        <div class="panel-subtitle">PROGRESO OPERATIVO Y MEDALLAS DE MISIÓN · SOL 120</div>
-      </div>
-      <div style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:18px 20px;">
-        <div style="display:flex; align-items:center; gap:18px; margin-bottom:14px;">
-          <div style="font-size:38px; line-height:1; filter:drop-shadow(0 0 10px rgba(255,183,3,0.7));">🏆</div>
-          <div style="flex:1;">
-            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;">
-              <span id="userLevelTag" style="font-family:var(--font-hud); font-size:18px; font-weight:900; color:#ffffff; letter-spacing:1px;">NIVEL 6</span>
-              <span id="userExpTag" style="font-family:var(--font-data); font-size:13px; color:var(--c-cyan-ink);">EXP 1320 / 1500</span>
-            </div>
-            <div class="hud-progress-track" style="height:8px; background:#040814; border-radius:4px; overflow:hidden;">
-              <div id="userExpBar" class="hud-progress-fill" style="width:88%; height:100%; background:linear-gradient(90deg, var(--c-cyan), var(--c-green)); box-shadow:0 0 10px rgba(0,255,136,0.6); transition:width 0.4s ease;"></div>
-            </div>
-          </div>
-        </div>
-        <div class="medals-row" style="display:flex; gap:12px; font-size:22px; padding-top:10px; border-top:1px solid rgba(0,240,255,0.15);">
-          <span title="Medalla Oro: 30 Días de Sueño Óptimo">🥇</span>
-          <span title="Medalla Plata: Ejercicio Cardiovascular Diario">🥈</span>
-          <span title="Medalla Bronce: Estabilidad Cognitiva en ASTRA">🥉</span>
-          <span title="Misión: Hidratación Perfecta" style="opacity:0.35; filter:grayscale(1);">⬡</span>
-          <span title="Misión: Cero Taquicardia en Sol 120" style="opacity:0.35; filter:grayscale(1);">⬡</span>
-          <span title="Misión: Inferencia Edge 100% Nominal" style="opacity:0.35; filter:grayscale(1);">⬡</span>
-        </div>
-      </div>
-    </div></div>
+<div class="wellness-column" data-column="left"><!-- PANEL_SLEEP --></div>
 <div class="wellness-column" data-column="right"><div class="hud-panel screen-panel" data-panel="tasks">
       <div class="panel-header">
         <div class="panel-title">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
           TAREAS DIARIAS (clic para avanzar)
         </div>
-        <div class="panel-subtitle">PROTOCOLO PREVENTIVO AEROESPACIAL · CLIC SUMA +20% Y +25 EXP</div>
+        <div class="panel-subtitle">PROTOCOLO PREVENTIVO AEROESPACIAL · CLIC SUMA +20%</div>
       </div>
 
       <div class="tasks-list-container" style="display:flex; flex-direction:column; gap:10px;">
@@ -145,5 +68,6 @@
           <span id="lblCritico" style="color:#64748b;">Crítico</span>
         </div>
       </div>
-    </div></div>
+    </div>
+<!-- PANEL_GAMES --></div>
 </div>

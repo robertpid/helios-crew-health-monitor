@@ -1,0 +1,32 @@
+<dialog id="modalGames" class="arcade-modal" aria-labelledby="gamesTitle">
+  <header class="arcade-header">
+    <div><div class="arcade-eyebrow">HELIOS · ZONA DE JUEGOS</div><h2 id="gamesTitle">Elige tu próxima partida</h2></div>
+    <button type="button" class="btn-hud arcade-close" id="btnCloseGames" aria-label="Cerrar juegos">✕</button>
+  </header>
+  <div id="gamesCatalog" class="arcade-catalog-view">
+    <p class="arcade-catalog-intro">Ocho juegos para una pausa. Elige uno para comenzar.</p>
+    <div id="gamesCatalogGrid" class="arcade-catalog-grid"></div>
+    <p id="gamesLoadMessage" class="arcade-catalog-note" role="status">Controles táctiles y teclado. Tu partida se pausa al salir de la ventana.</p>
+  </div>
+  <div id="gamesPlay" class="arcade-play-view" hidden>
+    <div class="arcade-play-toolbar">
+      <button type="button" class="btn-hud" id="btnGamesBack">‹ Todos los juegos</button>
+      <span id="gameScore" class="arcade-score"></span>
+      <button type="button" class="btn-hud" id="btnGamesRestart">Reiniciar</button>
+    </div>
+    <div class="arcade-play-layout">
+      <div class="arcade-board-space" id="gameBoard"></div>
+      <aside class="arcade-controls">
+        <h3>Cómo jugar</h3><p id="gameInstructions"></p>
+        <div id="gameStatus" class="arcade-game-status" role="status" aria-live="polite"></div>
+        <button type="button" class="btn-hud arcade-start" id="btnGamesPause">Iniciar</button>
+        <div class="arcade-dpad" id="gameDpad" role="group" aria-label="Dirección del juego">
+          <button type="button" class="btn-hud" data-game-direction="up" aria-label="Arriba">▲</button>
+          <button type="button" class="btn-hud" data-game-direction="left" aria-label="Izquierda">◀</button>
+          <button type="button" class="btn-hud" data-game-direction="down" aria-label="Abajo">▼</button>
+          <button type="button" class="btn-hud" data-game-direction="right" aria-label="Derecha">▶</button>
+        </div>
+      </aside>
+    </div>
+  </div>
+</dialog>
