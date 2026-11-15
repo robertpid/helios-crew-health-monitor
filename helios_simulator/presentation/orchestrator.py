@@ -1,8 +1,8 @@
 """
-Orquestador del bucle principal de telemetría (Capa de Presentación / Main).
+Orchestrator of the main telemetry loop (Presentation / Main layer).
 
-Aplica Inversión de Dependencias (DIP) al recibir el publicador de infraestructura
-por inyección y coordina los servicios de generación y evaluación preliminar.
+Applies Dependency Inversion (DIP) by receiving the infrastructure publisher via
+injection and coordinates the generation and preliminary assessment services.
 """
 
 from datetime import datetime, timezone
@@ -11,271 +11,271 @@ import signal
 import time
 from typing import Any
 
-from helios_simulator.config import LimitesNasaConfig, MisionConfig
-from helios_simulator.domain.enums import EstadoConexion
-from helios_simulator.domain.models import TelemetriaPayload
+from helios_simulator.config import MissionConfig, NasaLimitsConfig
+from helios_simulator.domain.enums import ConnectionState
+from helios_simulator.domain.models import TelemetryPayload
 from helios_simulator.infrastructure.publisher_interface import TelemetryPublisherInterface
-from helios_simulator.services.biometrics_generator import GeneradorBiometria
-from helios_simulator.services.cognition_generator import GeneradorCognicion
-from helios_simulator.services.correlation_evaluator import EvaluadorCorrelacionService
-from helios_simulator.services.environment_generator import GeneradorEntorno
-from helios_simulator.services.math_noise import redondear_telemetria
+from helios_simulator.services.biometrics_generator import BiometricsGenerator
+from helios_simulator.services.cognition_generator import CognitionGenerator
+from helios_simulator.services.correlation_evaluator import CorrelationEvaluatorService
+from helios_simulator.services.environment_generator import EnvironmentGenerator
+from helios_simulator.services.math_noise import round_telemetry
 
 logger = logging.getLogger(__name__)
 
 
-class TelemetriaOrchestrator:
+class TelemetryOrchestrator:
     """
-    Orquestador del productor de telemetría de soporte vital HELIOS.
-    Coordina la generación periódica cada 2 segundos y la emisión al buzón de Tierra.
+    Orchestrator of the HELIOS life support telemetry producer.
+    Coordinates periodic generation every 2 seconds and emission to the Earth mailbox.
     """
 
     def __init__(
         self,
-        publicador: TelemetryPublisherInterface,
-        config_mision: MisionConfig | None = None,
-        config_limites: LimitesNasaConfig | None = None,
-        generador_entorno: GeneradorEntorno | None = None,
-        generador_biometria: GeneradorBiometria | None = None,
-        generador_cognicion: GeneradorCognicion | None = None,
-        evaluador_correlacion: EvaluadorCorrelacionService | None = None,
+        publisher: TelemetryPublisherInterface,
+        mission_config: MissionConfig | None = None,
+        limits_config: NasaLimitsConfig | None = None,
+        environment_generator: EnvironmentGenerator | None = None,
+        biometrics_generator: BiometricsGenerator | None = None,
+        cognition_generator: CognitionGenerator | None = None,
+        correlation_evaluator: CorrelationEvaluatorService | None = None,
     ) -> None:
         """
-        Constructor con Inyección de Dependencias (DIP).
+        Constructor with Dependency Injection (DIP).
 
         Args:
-            publicador: Implementación concreta del publicador de telemetría (ej. Redis).
-            config_mision: Configuración de identificación y tiempos de misión.
-            config_limites: Normativas y umbrales de referencia NASA.
-            generador_entorno: Servicio de simulación ambiental (Cerebro 1).
-            generador_biometria: Servicio de signos vitales y fatiga (Cerebro 2).
-            generador_cognicion: Servicio de cognición y lenguaje (Cerebro 4).
-            evaluador_correlacion: Motor de evaluación preliminar y cruce de riesgos.
+            publisher: Concrete telemetry publisher implementation (e.g. Redis).
+            mission_config: Mission identification and timing configuration.
+            limits_config: NASA reference standards and thresholds.
+            environment_generator: Environmental simulation service (Brain 1).
+            biometrics_generator: Vital signs and fatigue service (Brain 2).
+            cognition_generator: Cognition and language service (Brain 4).
+            correlation_evaluator: Preliminary assessment and risk crossover engine.
         """
-        self._publicador = publicador
-        self._config_mision = config_mision or MisionConfig()
-        self._config_limites = config_limites or LimitesNasaConfig()
+        self._publisher = publisher
+        self._mission_config = mission_config or MissionConfig()
+        self._limits_config = limits_config or NasaLimitsConfig()
 
-        self._dia_mision = self._config_mision.dia_mision_default
-        self._generador_entorno = generador_entorno or GeneradorEntorno(
-            config_limites=self._config_limites,
-            dia_mision_inicial=self._dia_mision,
+        self._mission_day = self._mission_config.default_mission_day
+        self._environment_generator = environment_generator or EnvironmentGenerator(
+            limits_config=self._limits_config,
+            initial_mission_day=self._mission_day,
         )
-        self._generador_biometria = generador_biometria or GeneradorBiometria(
-            config_limites=self._config_limites,
-            dia_mision_inicial=self._dia_mision,
+        self._biometrics_generator = biometrics_generator or BiometricsGenerator(
+            limits_config=self._limits_config,
+            initial_mission_day=self._mission_day,
         )
-        self._generador_cognicion = generador_cognicion or GeneradorCognicion(
-            config_limites=self._config_limites,
+        self._cognition_generator = cognition_generator or CognitionGenerator(
+            limits_config=self._limits_config,
         )
-        self._evaluador_correlacion = evaluador_correlacion or EvaluadorCorrelacionService(
-            config_limites=self._config_limites,
+        self._correlation_evaluator = correlation_evaluator or CorrelationEvaluatorService(
+            limits_config=self._limits_config,
         )
 
-        self._en_ejecucion = False
-        self._ciclo_actual = 0
+        self._running = False
+        self._current_cycle = 0
 
-    def inicializar_enlaces(self) -> bool:
+    def initialize_links(self) -> bool:
         """
-        Inicia los componentes de comunicación hacia el buzón de telemetría.
+        Starts the communication components toward the telemetry mailbox.
 
         Returns:
-            True si el publicador se conectó de inmediato, False si inició en modo resiliente.
+            True if the publisher connected immediately, False if it started in resilient mode.
         """
-        if self._publicador.obtener_estado_conexion() == EstadoConexion.CONECTADO:
+        if self._publisher.get_connection_state() == ConnectionState.CONNECTED:
             return True
 
         logger.info(
-            "Iniciando subsistema HELIOS v2.1 para la misión %s (Tripulante: %s, Sol: %d)...",
-            self._config_mision.id_mision,
-            self._config_mision.astronauta_id,
-            self._dia_mision,
+            "Starting HELIOS v2.1 subsystem for mission %s (Crew member: %s, Sol: %d)...",
+            self._mission_config.mission_id,
+            self._mission_config.astronaut_id,
+            self._mission_day,
         )
-        return self._publicador.conectar()
+        return self._publisher.connect()
 
-    def producir_muestra(
+    def produce_sample(
         self,
-        forzar_pico_co2: bool = False,
-        forzar_tormenta_solar: bool = False,
-        forzar_deficiencia_sueno: bool = False,
-        forzar_taquicardia: bool = False,
-        forzar_incongruencia: bool = False,
-    ) -> TelemetriaPayload:
+        force_co2_peak: bool = False,
+        force_solar_storm: bool = False,
+        force_sleep_deficit: bool = False,
+        force_tachycardia: bool = False,
+        force_incongruence: bool = False,
+    ) -> TelemetryPayload:
         """
-        Ejecuta un ciclo completo de cálculo multivariado y genera el payload consolidado.
+        Runs a full multivariate computation cycle and generates the consolidated payload.
 
         Args:
-            forzar_pico_co2: Inyecta pico anómalo de CO2 > 3.0 mmHg.
-            forzar_tormenta_solar: Inyecta evento de Tormenta Solar (+20 mSv).
-            forzar_deficiencia_sueno: Fuerza registro de sueño < 6.0h.
-            forzar_taquicardia: Fuerza ritmo cardiaco elevado.
-            forzar_incongruencia: Fuerza estrés cognitivo oculto.
+            force_co2_peak: Injects an anomalous CO2 peak > 3.0 mmHg.
+            force_solar_storm: Injects a Solar Storm event (+20 mSv).
+            force_sleep_deficit: Forces a sleep record < 6.0h.
+            force_tachycardia: Forces an elevated heart rate.
+            force_incongruence: Forces hidden cognitive stress.
 
         Returns:
-            Instancia completa de TelemetriaPayload lista para transmisión.
+            Complete TelemetryPayload instance ready for transmission.
         """
-        self._ciclo_actual += 1
+        self._current_cycle += 1
 
-        # 1. Simulación Cerebro 1: Entorno de cabina
-        entorno = self._generador_entorno.generar_lectura(
-            forzar_pico_co2=forzar_pico_co2,
-            forzar_tormenta_solar=forzar_tormenta_solar,
+        # 1. Brain 1 simulation: Cabin environment
+        environment = self._environment_generator.generate_reading(
+            force_co2_peak=force_co2_peak,
+            force_solar_storm=force_solar_storm,
         )
 
-        # 2. Simulación Cerebro 2: Fisiología y Biometría
-        estres_ambiental = (
-            entorno.co2_mmHg >= self._config_limites.co2_umbral_sintomas_mmhg
-            or entorno.evento_solar_activo
+        # 2. Brain 2 simulation: Physiology and Biometrics
+        environmental_stress = (
+            environment.co2_mmHg >= self._limits_config.co2_symptom_threshold_mmhg
+            or environment.solar_event_active
         )
-        biometria = self._generador_biometria.generar_lectura(
-            estres_ambiental=estres_ambiental,
-            forzar_deficiencia_sueno=forzar_deficiencia_sueno,
-            forzar_taquicardia=forzar_taquicardia,
-        )
-
-        # 3. Simulación Cerebro 4: Psicología y Cognición (ASTRA)
-        cognicion = self._generador_cognicion.generar_lectura(
-            co2_mmhg=entorno.co2_mmHg,
-            horas_sueno=biometria.horas_sueno_ultimo_ciclo,
-            ritmo_cardiaco_bpm=biometria.ritmo_cardiaco_bpm,
-            evento_solar_activo=entorno.evento_solar_activo,
-            forzar_incongruencia=forzar_incongruencia,
+        biometrics = self._biometrics_generator.generate_reading(
+            environmental_stress=environmental_stress,
+            force_sleep_deficit=force_sleep_deficit,
+            force_tachycardia=force_tachycardia,
         )
 
-        # 4. Evaluación Preliminar y Cruce Normativo NASA-STD-3001
-        evaluaciones = self._evaluador_correlacion.evaluar_estado_sistemico(
-            entorno=entorno,
-            biometria=biometria,
-            cognicion=cognicion,
+        # 3. Brain 4 simulation: Psychology and Cognition (ASTRA)
+        cognition = self._cognition_generator.generate_reading(
+            co2_mmhg=environment.co2_mmHg,
+            sleep_hours=biometrics.last_cycle_sleep_hours,
+            heart_rate_bpm=biometrics.heart_rate_bpm,
+            solar_event_active=environment.solar_event_active,
+            force_incongruence=force_incongruence,
         )
 
-        # 5. Cálculo del presupuesto de radiación de carrera consumido (% de 600 mSv)
-        presupuesto_radiacion_pct = (
-            entorno.radiacion_acumulada_mSv / self._config_limites.radiacion_limite_carrera_msv
+        # 4. Preliminary assessment and NASA-STD-3001 normative crossover
+        assessments = self._correlation_evaluator.evaluate_systemic_state(
+            environment=environment,
+            biometrics=biometrics,
+            cognition=cognition,
+        )
+
+        # 5. Computation of the consumed career radiation budget (% of 600 mSv)
+        radiation_budget_pct = (
+            environment.cumulative_radiation_mSv / self._limits_config.career_radiation_limit_msv
         ) * 100.0
 
-        metadatos: dict[str, Any] = {
-            "modulo_productor": "helios_simulator",
-            "arquitectura": "Edge AI N-Capas",
-            "frecuencia_muestreo_hz": 0.5,
-            "intervalo_segundos": self._config_mision.intervalo_emision_segundos,
-            "ciclo_muestra_id": self._ciclo_actual,
-            "canal_redis": "buzon_telemetria_tierra",
-            "enlace_estado": self._publicador.obtener_estado_conexion().value,
+        metadata: dict[str, Any] = {
+            "producer_module": "helios_simulator",
+            "architecture": "N-Layer Edge AI",
+            "sampling_frequency_hz": 0.5,
+            "interval_seconds": self._mission_config.emission_interval_seconds,
+            "sample_cycle_id": self._current_cycle,
+            "redis_channel": "earth_telemetry_mailbox",
+            "link_status": self._publisher.get_connection_state().value,
         }
 
-        payload = TelemetriaPayload(
+        payload = TelemetryPayload(
             timestamp=datetime.now(timezone.utc),
-            id_mision=self._config_mision.id_mision,
-            dia_mision=self._dia_mision,
-            astronauta_id=self._config_mision.astronauta_id,
-            entorno=entorno,
-            biometria=biometria,
-            cognicion=cognicion,
-            evaluaciones_preliminares=evaluaciones,
-            porcentaje_presupuesto_radiacion_carrera=redondear_telemetria(presupuesto_radiacion_pct, 2),
-            metadatos_sistema=metadatos,
+            mission_id=self._mission_config.mission_id,
+            mission_day=self._mission_day,
+            astronaut_id=self._mission_config.astronaut_id,
+            environment=environment,
+            biometrics=biometrics,
+            cognition=cognition,
+            preliminary_assessments=assessments,
+            career_radiation_budget_pct=round_telemetry(radiation_budget_pct, 2),
+            system_metadata=metadata,
         )
 
         return payload
 
-    def ejecutar_bucle(self, max_ciclos: int | None = None) -> None:
+    def run_loop(self, max_cycles: int | None = None) -> None:
         """
-        Bucle de producción continua de telemetría.
-        Emite una muestra cada 2 segundos hacia la capa de infraestructura.
+        Continuous telemetry production loop.
+        Emits one sample every 2 seconds toward the infrastructure layer.
 
         Args:
-            max_ciclos: Límite opcional de iteraciones (ideal para pruebas y ejecuciones acotadas).
+            max_cycles: Optional iteration limit (ideal for tests and bounded runs).
         """
-        self._en_ejecucion = True
-        self._configurar_manejador_senales()
-        self.inicializar_enlaces()
+        self._running = True
+        self._configure_signal_handler()
+        self.initialize_links()
 
         logger.info(
-            "Iniciando transmisión continua hacia 'buzon_telemetria_tierra' cada %.1f segundos...",
-            self._config_mision.intervalo_emision_segundos,
+            "Starting continuous transmission to 'earth_telemetry_mailbox' every %.1f seconds...",
+            self._mission_config.emission_interval_seconds,
         )
 
         try:
-            while self._en_ejecucion:
-                inicio_ciclo = time.time()
+            while self._running:
+                cycle_start = time.time()
 
-                payload = self.producir_muestra()
-                self._publicador.publicar_telemetria(payload)
+                payload = self.produce_sample()
+                self._publisher.publish_telemetry(payload)
 
-                # Formateo detallado de telemetría de signos y variables para visualización en vivo
+                # Detailed formatting of sign and variable telemetry for live display
                 logger.info(
-                    "MUESTRA #%d [Día %d - %s] | ENTORNO: CO2=%.2f mmHg | Rad.Acum=%.2f mSv (%.1f%%) | Presión=%.1f kPa | Temp=%.1f°C | Hum=%.1f%% | SPE=%s",
-                    self._ciclo_actual,
-                    payload.dia_mision,
-                    payload.astronauta_id,
-                    payload.entorno.co2_mmHg,
-                    payload.entorno.radiacion_acumulada_mSv,
-                    payload.porcentaje_presupuesto_radiacion_carrera,
-                    payload.entorno.presion_cabina_kpa,
-                    payload.entorno.temperatura_cabina_c,
-                    payload.entorno.humedad_relativa_pct,
-                    "SI" if payload.entorno.evento_solar_activo else "NO",
+                    "SAMPLE #%d [Day %d - %s] | ENVIRONMENT: CO2=%.2f mmHg | Cum.Rad=%.2f mSv (%.1f%%) | Pressure=%.1f kPa | Temp=%.1f°C | Hum=%.1f%% | SPE=%s",
+                    self._current_cycle,
+                    payload.mission_day,
+                    payload.astronaut_id,
+                    payload.environment.co2_mmHg,
+                    payload.environment.cumulative_radiation_mSv,
+                    payload.career_radiation_budget_pct,
+                    payload.environment.cabin_pressure_kpa,
+                    payload.environment.cabin_temperature_c,
+                    payload.environment.relative_humidity_pct,
+                    "YES" if payload.environment.solar_event_active else "NO",
                 )
                 logger.info(
-                    "             [BIOMETRÍA]: FC=%.1f bpm | SpO2=%.1f%% | PA=%.1f/%.1f | Piel=%.1f°C | Resp=%.1f rpm | HRV=%.1f ms | Sueño=%.1fh | P.Ósea=%.2f%% | Cefalea=%s",
-                    payload.biometria.ritmo_cardiaco_bpm,
-                    payload.biometria.spo2_pct,
-                    payload.biometria.presion_sistolica_mmHg,
-                    payload.biometria.presion_diastolica_mmHg,
-                    payload.biometria.temperatura_piel_c,
-                    payload.biometria.frecuencia_respiratoria_rpm,
-                    payload.biometria.variabilidad_cardiaca_hrv_ms,
-                    payload.biometria.horas_sueno_ultimo_ciclo,
-                    payload.biometria.perdida_osea_pct,
-                    "SI" if payload.biometria.dolor_cabeza_sintoma else "NO",
+                    "             [BIOMETRICS]: HR=%.1f bpm | SpO2=%.1f%% | BP=%.1f/%.1f | Skin=%.1f°C | Resp=%.1f rpm | HRV=%.1f ms | Sleep=%.1fh | BoneLoss=%.2f%% | Headache=%s",
+                    payload.biometrics.heart_rate_bpm,
+                    payload.biometrics.spo2_pct,
+                    payload.biometrics.systolic_pressure_mmHg,
+                    payload.biometrics.diastolic_pressure_mmHg,
+                    payload.biometrics.skin_temperature_c,
+                    payload.biometrics.respiratory_rate_rpm,
+                    payload.biometrics.heart_rate_variability_hrv_ms,
+                    payload.biometrics.last_cycle_sleep_hours,
+                    payload.biometrics.bone_loss_pct,
+                    "YES" if payload.biometrics.headache_symptom else "NO",
                 )
                 logger.info(
-                    "             [COGNICIÓN]: Lat.Voz=%.1f ms | Densidad=%.2f | EstrésOculto=%s | SANS(Visión)=%s | Fatiga=%s",
-                    payload.cognicion.latencia_voz_ms,
-                    payload.cognicion.densidad_lexica_score,
-                    "SI" if payload.cognicion.incongruencia_estres_oculto else "NO",
-                    "SI" if payload.cognicion.sans_sintoma_vision else "NO",
-                    "ALERTA" if payload.biometria.alerta_riesgo_fatiga else "NOMINAL",
+                    "             [COGNITION]: VoiceLat=%.1f ms | Density=%.2f | HiddenStress=%s | SANS(Vision)=%s | Fatigue=%s",
+                    payload.cognition.voice_latency_ms,
+                    payload.cognition.lexical_density_score,
+                    "YES" if payload.cognition.hidden_stress_incongruence else "NO",
+                    "YES" if payload.cognition.sans_vision_symptom else "NO",
+                    "ALERT" if payload.biometrics.fatigue_risk_alert else "NOMINAL",
                 )
 
-                if payload.evaluaciones_preliminares:
-                    for alerta in payload.evaluaciones_preliminares:
+                if payload.preliminary_assessments:
+                    for alert in payload.preliminary_assessments:
                         logger.warning(
-                            "   >>> [%s] %s: %s (Estándar: %s)",
-                            alerta.nivel.value,
-                            alerta.codigo,
-                            alerta.descripcion,
-                            alerta.estandar_referencia,
+                            "   >>> [%s] %s: %s (Standard: %s)",
+                            alert.level.value,
+                            alert.code,
+                            alert.description,
+                            alert.reference_standard,
                         )
 
-                if max_ciclos is not None and self._ciclo_actual >= max_ciclos:
-                    logger.info("Alcanzado el número máximo de ciclos solicitado (%d). Deteniendo...", max_ciclos)
+                if max_cycles is not None and self._current_cycle >= max_cycles:
+                    logger.info("Reached the requested maximum number of cycles (%d). Stopping...", max_cycles)
                     break
 
-                tiempo_transcurrido = time.time() - inicio_ciclo
-                tiempo_pausa = max(0.0, self._config_mision.intervalo_emision_segundos - tiempo_transcurrido)
-                time.sleep(tiempo_pausa)
+                elapsed_time = time.time() - cycle_start
+                pause_time = max(0.0, self._mission_config.emission_interval_seconds - elapsed_time)
+                time.sleep(pause_time)
         except KeyboardInterrupt:
-            logger.info("Interrupción voluntaria del operador de misión detectada.")
+            logger.info("Voluntary interruption by the mission operator detected.")
         finally:
-            self.detener()
+            self.stop()
 
-    def detener(self) -> None:
-        """Detiene de manera controlada la emisión y libera los recursos del publicador."""
-        self._en_ejecucion = False
-        logger.info("Deteniendo orquestador de telemetría HELIOS...")
-        self._publicador.cerrar()
+    def stop(self) -> None:
+        """Stops the emission in a controlled manner and releases the publisher resources."""
+        self._running = False
+        logger.info("Stopping the HELIOS telemetry orchestrator...")
+        self._publisher.close()
 
-    def _configurar_manejador_senales(self) -> None:
-        """Configura los interceptores de señales POSIX/Windows para salida limpia."""
+    def _configure_signal_handler(self) -> None:
+        """Configures POSIX/Windows signal interceptors for a clean exit."""
         try:
-            signal.signal(signal.SIGINT, self._manejador_interrupcion)
-            signal.signal(signal.SIGTERM, self._manejador_interrupcion)
+            signal.signal(signal.SIGINT, self._interrupt_handler)
+            signal.signal(signal.SIGTERM, self._interrupt_handler)
         except (ValueError, AttributeError):
             pass
 
-    def _manejador_interrupcion(self, signum: int, frame: Any) -> None:
-        """Callback invocado al interceptar SIGINT o SIGTERM."""
-        logger.info("Señal de terminación recibida (%d). Concluyendo ciclo...", signum)
-        self.detener()
+    def _interrupt_handler(self, signum: int, frame: Any) -> None:
+        """Callback invoked when SIGINT or SIGTERM is intercepted."""
+        logger.info("Termination signal received (%d). Concluding cycle...", signum)
+        self.stop()

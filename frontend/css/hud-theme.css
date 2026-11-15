@@ -1,21 +1,23 @@
 /* ==========================================================================
-   H.E.L.I.O.S. - TEMA CONSOLIDADO (ARQUITECTURA N-CAPAS MODULAR)
-   Cada módulo subsidiario se mantiene estrictamente por debajo de 300 líneas:
-   1. hud-base.css      : Tokens de diseño, reset, cabecera, barra y pie
-   2. hud-panels.css    : Paneles, tiles de métrica, ECG y modal de alerta
-   3. hud-hologram.css  : Marco holográfico, rótulos y foco interactivo
-   4. hud-matrix.css    : Matriz de Kronecker, Ventana 3 y responsive táctil
-   5. hud-wellness.css  : Complementos de la ventana de bienestar
+   H.E.L.I.O.S. - CONSOLIDATED THEME (MODULAR N-LAYER ARCHITECTURE)
+   Each subsidiary module stays strictly under 300 lines:
+   1. hud-base.css      : Design tokens, reset, header, toolbar and footer
+   2. hud-panels.css    : Panels, metric tiles, ECG and alert modal
+   3. hud-hologram.css  : Holographic frame, callouts and interactive focus
+   4. hud-matrix.css    : Kronecker matrix, View 3 and touch responsive rules
+   5. hud-wellness.css  : Wellbeing view add-ons
    ========================================================================== */
 
 @import url('./hud-base.css?v=20261115_v4');
 @import url('./hud-panels.css?v=20261115_spacing');
 @import url('./hud-hologram.css?v=20261115_v4');
 @import url('./hud-matrix.css?v=20261115_v4');
-@import url('./hud-wellness.css?v=20261115_v4');
+@import url('./hud-wellness.css?v=20261115_games_spacing');
 
 @import url('./hud-viewport.css?v=20261115_compact_panels');
 
-@import url('./hud-sleep.css?v=20261115_sleep');
+@import url('./hud-sleep.css?v=20261115_sleep_cyan');
 
-@import url('./hud-games.css?v=20261115_games');
+@import url('./hud-games.css?v=20261115_games_spacing');
+
+@import url('./hud-habitat-images.css?v=20261115_alpha');

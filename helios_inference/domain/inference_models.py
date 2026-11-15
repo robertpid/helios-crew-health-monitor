@@ -1,142 +1,142 @@
 """
-Modelos de datos para el motor de inferencia H.E.L.I.O.S.
+Data models for the H.E.L.I.O.S. inference engine.
 
-Estructuras tipadas con Pydantic v2 para representar los estados vectoriales de los 4 cerebros,
-el resultado de la fusión topológica y las evaluaciones preliminares operacionales.
+Typed Pydantic v2 structures representing the vector states of the 4 brains, the
+result of the topological fusion and the operational preliminary assessments.
 """
 
 from datetime import datetime, timezone
 from typing import Any
 from pydantic import BaseModel, Field, ConfigDict
 
-from helios_inference.domain.decision_rules import AlertaReglaMatriz
+from helios_inference.domain.decision_rules import MatrixRuleAlert
 
 
-class EstadoAmbientalInferencia(BaseModel):
-    """Resultado del procesamiento del Cerebro 1 (Motor Ambiental)."""
+class EnvironmentalInferenceState(BaseModel):
+    """Result of Brain 1 processing (Environmental Engine)."""
 
     model_config = ConfigDict(frozen=True)
 
-    vector_ambiental: list[float] = Field(
+    environmental_vector: list[float] = Field(
         ...,
-        description="Vector de estado ambiental [alerta_co2, alerta_radiacion, alerta_presion]."
+        description="Environmental state vector [co2_alert, radiation_alert, pressure_alert]."
     )
-    etiquetas_activadas: list[str] = Field(
+    activated_labels: list[str] = Field(
         default_factory=list,
-        description="Etiquetas operacionales de peligros ambientales activos."
+        description="Operational labels of active environmental hazards."
     )
-    co2_excedido: bool = Field(..., description="Indica si el CO2 supera el límite normativo de 3.0 mmHg.")
-    radiacion_critica: bool = Field(..., description="Indica si la radiación supera 600 mSv o hay evento solar.")
-    presion_anomala: bool = Field(..., description="Indica si la presión de cabina está fuera del rango 95-103 kPa.")
+    co2_exceeded: bool = Field(..., description="Indicates whether CO2 exceeds the normative limit of 3.0 mmHg.")
+    critical_radiation: bool = Field(..., description="Indicates whether radiation exceeds 600 mSv or a solar event is active.")
+    abnormal_pressure: bool = Field(..., description="Indicates whether cabin pressure is outside the 95-103 kPa range.")
 
 
-class EstadoBiometricoInferencia(BaseModel):
-    """Resultado del procesamiento del Cerebro 2 (Motor Biométrico)."""
+class BiometricInferenceState(BaseModel):
+    """Result of Brain 2 processing (Biometric Engine)."""
 
     model_config = ConfigDict(frozen=True)
 
-    vector_biometrico: list[float] = Field(
+    biometric_vector: list[float] = Field(
         ...,
-        description="Vector de estado fisiológico [alerta_pulso, alerta_sueno, alerta_osea, alerta_sans]."
+        description="Physiological state vector [pulse_alert, sleep_alert, bone_alert, sans_alert]."
     )
-    etiquetas_activadas: list[str] = Field(
+    activated_labels: list[str] = Field(
         default_factory=list,
-        description="Etiquetas de anomalías fisiológicas detectadas."
+        description="Labels of detected physiological anomalies."
     )
-    metricas_fisicas_normales: bool = Field(
+    normal_physical_metrics: bool = Field(
         ...,
-        description="Indica si todos los signos físicos se encuentran dentro de los límites nominales."
+        description="Indicates whether all physical signs are within nominal limits."
     )
-    cuerpo_en_panico: bool = Field(
+    body_in_panic: bool = Field(
         ...,
-        description="Indica taquicardia o estrés fisiológico agudo (ej. ritmo cardíaco > 95 bpm)."
+        description="Indicates tachycardia or acute physiological stress (e.g. heart rate > 95 bpm)."
     )
 
 
-class EstadoFusionKroneckerInferencia(BaseModel):
-    """Resultado de la fusión matricial del Cerebro 3 (Grafo de Decisiones)."""
+class KroneckerFusionInferenceState(BaseModel):
+    """Result of the matrix fusion of Brain 3 (Decision Graph)."""
 
     model_config = ConfigDict(frozen=True)
 
-    vector_kronecker_dimension: int = Field(
+    kronecker_vector_dimension: int = Field(
         ...,
-        description="Dimensión del vector tensorial resultante (ej. 12 para 3 ambientales x 4 biométricos)."
+        description="Dimension of the resulting tensor vector (e.g. 12 for 3 environmental x 4 biometric)."
     )
-    arista_sinergica_critica: str = Field(
+    critical_synergy_edge: str = Field(
         ...,
-        description="Descripción de la interacción o arista del grafo con mayor ponderación activada."
+        description="Description of the interaction or graph edge with the highest activated weight."
     )
-    indice_argmax: int = Field(
+    argmax_index: int = Field(
         ...,
-        description="Índice del componente de máxima severidad sinérgica en el espacio vectorial tensorial."
+        description="Index of the component with maximum synergistic severity in the tensor vector space."
     )
-    puntaje_severidad_maximo: float = Field(
+    max_severity_score: float = Field(
         ...,
-        description="Puntuación ponderada calculada para la arista crítica activa."
+        description="Weighted score computed for the active critical edge."
     )
-    estres_fisiologico_severo: bool = Field(
+    severe_physiological_stress: bool = Field(
         ...,
-        description="Bandera de peligro levantada si la interacción sinérgica supera el umbral crítico."
+        description="Hazard flag raised if the synergistic interaction exceeds the critical threshold."
     )
-    evaluacion_preliminar_fusion: str | None = Field(
+    fusion_preliminary_assessment: str | None = Field(
         default=None,
-        description="Dictamen de evaluación preliminar sobre el acoplamiento ambiente-tripulante."
+        description="Preliminary assessment finding on the environment-crew coupling."
     )
 
 
-class EstadoAstraInferencia(BaseModel):
-    """Resultado del procesamiento del Cerebro 4 (Subsistema ASTRA - Psicología y Cognición)."""
+class AstraInferenceState(BaseModel):
+    """Result of Brain 4 processing (ASTRA Subsystem - Psychology and Cognition)."""
 
     model_config = ConfigDict(frozen=True)
 
-    similitud_coseno_linea_base: float = Field(
+    baseline_cosine_similarity: float = Field(
         ...,
-        description="Coeficiente de similitud coseno entre el vector actual y la línea base dinámica."
+        description="Cosine similarity coefficient between the current vector and the dynamic baseline."
     )
-    incongruencia_cognitiva_detectada: bool = Field(
+    cognitive_incongruence_detected: bool = Field(
         ...,
-        description="Indica si se detecta discordancia entre estado físico y conducta comunicacional."
+        description="Indicates whether a mismatch between physical state and communicative behavior is detected."
     )
-    alerta_astra: str | None = Field(
+    astra_alert: str | None = Field(
         default=None,
-        description="Mensaje formal de evaluación preliminar emitido ante detección de incongruencia."
+        description="Formal preliminary assessment message emitted upon incongruence detection."
     )
 
 
-class ReporteInferenciaConsolidado(BaseModel):
-    """Reporte consolidado generado por los 4 Cerebros de H.E.L.I.O.S."""
+class ConsolidatedInferenceReport(BaseModel):
+    """Consolidated report generated by the 4 H.E.L.I.O.S. Brains."""
 
     model_config = ConfigDict(frozen=True)
 
-    timestamp_inferencia: datetime = Field(
+    inference_timestamp: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
-        description="Marca de tiempo UTC del ciclo de inferencia."
+        description="UTC timestamp of the inference cycle."
     )
-    id_mision: str = Field(..., description="Identificador de la misión espacial.")
-    dia_mision: int = Field(..., description="Día operacional de misión.")
-    astronauta_id: str = Field(..., description="Identificador del astronauta analizado.")
-    cerebro_1_ambiental: EstadoAmbientalInferencia
-    cerebro_2_biometrico: EstadoBiometricoInferencia
-    cerebro_3_grafo_fusion: EstadoFusionKroneckerInferencia
-    cerebro_4_astra: EstadoAstraInferencia
-    evaluaciones_preliminares_activas: list[str] = Field(
+    mission_id: str = Field(..., description="Identifier of the space mission.")
+    mission_day: int = Field(..., description="Operational mission day.")
+    astronaut_id: str = Field(..., description="Identifier of the analyzed astronaut.")
+    brain_1_environmental: EnvironmentalInferenceState
+    brain_2_biometric: BiometricInferenceState
+    brain_3_fusion_graph: KroneckerFusionInferenceState
+    brain_4_astra: AstraInferenceState
+    active_preliminary_assessments: list[str] = Field(
         default_factory=list,
-        description="Lista de todas las evaluaciones preliminares y alertas emitidas en el ciclo."
+        description="List of all preliminary assessments and alerts emitted in the cycle."
     )
-    alertas_matriz_decisiones: list[AlertaReglaMatriz] = Field(
+    decision_matrix_alerts: list[MatrixRuleAlert] = Field(
         default_factory=list,
-        description="Cruces críticos activos de la matriz de decisiones de la NASA con contramedidas."
+        description="Active critical crossovers of the NASA decision matrix with countermeasures."
     )
-    contramedidas_priorizadas: list[str] = Field(
+    prioritized_countermeasures: list[str] = Field(
         default_factory=list,
         max_length=3,
-        description="Hasta 3 acciones inmediatas consolidadas de mayor impacto para el dashboard."
+        description="Up to 3 consolidated highest-impact immediate actions for the dashboard."
     )
-    tiempo_computo_ms: float = Field(
+    compute_time_ms: float = Field(
         ...,
-        description="Tiempo de ejecución del ciclo completo de inferencia en milisegundos."
+        description="Execution time of the full inference cycle in milliseconds."
     )
-    metadatos_edge: dict[str, Any] = Field(
+    edge_metadata: dict[str, Any] = Field(
         default_factory=dict,
-        description="Detalles de ejecución del runtime ligero de Edge AI."
+        description="Execution details of the lightweight Edge AI runtime."
     )

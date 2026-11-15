@@ -1,9 +1,9 @@
 """
-Consumidor asíncrono de telemetría espacial mediante Redis (redis.asyncio).
+Asynchronous space telemetry consumer over Redis (redis.asyncio).
 
-Extrae mensajes de la cola de telemetría de espacio profundo utilizando operaciones RPOP
-sin bloquear el hilo de ejecución principal de FastAPI. Aplica reconexión automática y
-tolerancia a fallos de enlace.
+Pulls messages from the deep space telemetry queue using RPOP operations without
+blocking the main FastAPI execution thread. Applies automatic reconnection and
+link fault tolerance.
 """
 
 import asyncio
@@ -13,7 +13,7 @@ from typing import Any, Callable
 import redis.asyncio as aioredis
 from redis.exceptions import ConnectionError as RedisConnectionError, RedisError
 
-from helios_inference.domain.inference_models import ReporteInferenciaConsolidado
+from helios_inference.domain.inference_models import ConsolidatedInferenceReport
 from helios_inference.services.inference_engine import InferenceEngine
 
 logger = logging.getLogger(__name__)
@@ -21,85 +21,85 @@ logger = logging.getLogger(__name__)
 
 class AsyncRedisTelemetryConsumer:
     """
-    Consumidor asíncrono no bloqueante para ingesta de telemetría desde colas Redis.
-    Desacopla la capa de red del procesamiento analítico de los 4 cerebros.
+    Non-blocking asynchronous consumer for telemetry ingestion from Redis queues.
+    Decouples the network layer from the analytical processing of the 4 brains.
     """
 
     def __init__(
         self,
-        motor_inferencia: InferenceEngine,
+        inference_engine: InferenceEngine,
         host: str = "127.0.0.1",
         port: int = 6379,
         db: int = 0,
-        colas: list[str] | None = None,
-        intervalo_sondeo_segundos: float = 0.5,
-        intervalo_reintento_segundos: float = 3.0,
-        callback_reporte: Callable[[ReporteInferenciaConsolidado], None] | None = None,
+        queues: list[str] | None = None,
+        polling_interval_seconds: float = 0.5,
+        retry_interval_seconds: float = 3.0,
+        report_callback: Callable[[ConsolidatedInferenceReport], None] | None = None,
     ) -> None:
         """
-        Inicializa el consumidor asíncrono.
+        Initializes the asynchronous consumer.
 
         Args:
-            motor_inferencia: Instancia del orquestador central con los 4 cerebros.
-            host: Dirección de red del servidor Redis.
-            port: Puerto del servicio Redis.
-            db: Base de datos lógica en Redis.
-            colas: Lista priorizada de colas donde buscar mensajes con RPOP.
-            intervalo_sondeo_segundos: Pausa entre comprobaciones cuando la cola está vacía.
-            intervalo_reintento_segundos: Tiempo de espera ante interrupciones de enlace.
-            callback_reporte: Función opcional invocada con cada reporte consolidado producido.
+            inference_engine: Instance of the central orchestrator with the 4 brains.
+            host: Network address of the Redis server.
+            port: Port of the Redis service.
+            db: Logical database in Redis.
+            queues: Prioritized list of queues to poll for messages with RPOP.
+            polling_interval_seconds: Pause between checks when the queue is empty.
+            retry_interval_seconds: Wait time on link interruptions.
+            report_callback: Optional function invoked with each consolidated report produced.
         """
-        self._motor = motor_inferencia
+        self._engine = inference_engine
         self._host = host
         self._port = port
         self._db = db
-        self._colas = colas or ["buzon_telemetria_tierra", "buzon_telemetria_tierra_queue"]
-        self._intervalo_sondeo = intervalo_sondeo_segundos
-        self._intervalo_reintento = intervalo_reintento_segundos
-        self._callback = callback_reporte
+        self._queues = queues or ["earth_telemetry_mailbox", "earth_telemetry_mailbox_queue"]
+        self._polling_interval = polling_interval_seconds
+        self._retry_interval = retry_interval_seconds
+        self._callback = report_callback
 
-        self._cliente: aioredis.Redis | None = None
-        self._activo: bool = False
-        self._tarea_background: asyncio.Task[None] | None = None
-        self._ultimo_reporte: ReporteInferenciaConsolidado | None = None
-        self._ultimo_payload: dict[str, Any] | None = None
-        self._contador_procesados: int = 0
-        self._conectado: bool = False
-
-    @property
-    def conectado(self) -> bool:
-        """Indica si el enlace con Redis está actualmente operativo."""
-        return self._conectado
+        self._client: aioredis.Redis | None = None
+        self._active: bool = False
+        self._background_task: asyncio.Task[None] | None = None
+        self._last_report: ConsolidatedInferenceReport | None = None
+        self._last_payload: dict[str, Any] | None = None
+        self._processed_counter: int = 0
+        self._connected: bool = False
 
     @property
-    def contador_procesados(self) -> int:
-        """Número de payloads de telemetría procesados desde el inicio."""
-        return self._contador_procesados
+    def connected(self) -> bool:
+        """Indicates whether the Redis link is currently operational."""
+        return self._connected
 
     @property
-    def ultimo_reporte(self) -> ReporteInferenciaConsolidado | None:
-        """Último reporte de inferencia generado por el motor."""
-        return self._ultimo_reporte
+    def processed_counter(self) -> int:
+        """Number of telemetry payloads processed since startup."""
+        return self._processed_counter
 
     @property
-    def ultimo_payload(self) -> dict[str, Any] | None:
+    def last_report(self) -> ConsolidatedInferenceReport | None:
+        """Latest inference report generated by the engine."""
+        return self._last_report
+
+    @property
+    def last_payload(self) -> dict[str, Any] | None:
         """
-        Telemetría cruda que originó el último reporte.
+        Raw telemetry that produced the latest report.
 
-        El compactador la requiere para emitir los valores numéricos del registro
-        de enlace sin tener que parsear las cadenas descriptivas del reporte.
+        The compactor requires it to emit the numeric values of the link record
+        without having to parse the descriptive strings of the report.
         """
-        return self._ultimo_payload
+        return self._last_payload
 
-    async def conectar(self) -> bool:
+    async def connect(self) -> bool:
         """
-        Establece el enlace asíncrono con el servidor Redis.
+        Establishes the asynchronous link with the Redis server.
 
         Returns:
-            True si el servidor responde a PING, False si la conexión falla.
+            True if the server responds to PING, False if the connection fails.
         """
         try:
-            self._cliente = aioredis.Redis(
+            self._client = aioredis.Redis(
                 host=self._host,
                 port=self._port,
                 db=self._db,
@@ -107,96 +107,96 @@ class AsyncRedisTelemetryConsumer:
                 socket_connect_timeout=2.0,
                 decode_responses=True,
             )
-            await self._cliente.ping()
-            self._conectado = True
-            logger.info("Consumidor asíncrono conectado exitosamente a Redis en %s:%d", self._host, self._port)
+            await self._client.ping()
+            self._connected = True
+            logger.info("Asynchronous consumer successfully connected to Redis at %s:%d", self._host, self._port)
             return True
         except (RedisConnectionError, RedisError, OSError) as error:
-            self._conectado = False
+            self._connected = False
             logger.info(
-                "Redis no disponible en %s:%d (%s). El consumidor continuará reintentando en background.",
+                "Redis unavailable at %s:%d (%s). The consumer will keep retrying in the background.",
                 self._host,
                 self._port,
                 str(error),
             )
             return False
 
-    async def iniciar(self) -> None:
-        """Inicia el bucle asíncrono de consumo en segundo plano."""
-        if self._activo:
+    async def start(self) -> None:
+        """Starts the asynchronous consumption loop in the background."""
+        if self._active:
             return
-        self._activo = True
-        self._tarea_background = asyncio.create_task(self._bucle_consumo())
-        logger.info("Tarea de consumo en background iniciada.")
+        self._active = True
+        self._background_task = asyncio.create_task(self._consume_loop())
+        logger.info("Background consumption task started.")
 
-    async def detener(self) -> None:
-        """Detiene de forma ordenada el bucle asíncrono y cierra el socket de Redis."""
-        self._activo = False
-        if self._tarea_background:
-            self._tarea_background.cancel()
+    async def stop(self) -> None:
+        """Gracefully stops the asynchronous loop and closes the Redis socket."""
+        self._active = False
+        if self._background_task:
+            self._background_task.cancel()
             try:
-                await self._tarea_background
+                await self._background_task
             except asyncio.CancelledError:
                 pass
-        if self._cliente:
-            await self._cliente.aclose()
-            self._cliente = None
-        self._conectado = False
-        logger.info("Consumidor asíncrono detenido correctamente.")
+        if self._client:
+            await self._client.aclose()
+            self._client = None
+        self._connected = False
+        logger.info("Asynchronous consumer stopped correctly.")
 
-    async def _bucle_consumo(self) -> None:
-        """Bucle principal asíncrono que sondea las colas de Redis con RPOP."""
-        while self._activo:
-            if not self._conectado or self._cliente is None:
-                exito = await self.conectar()
-                if not exito:
-                    await asyncio.sleep(self._intervalo_reintento)
+    async def _consume_loop(self) -> None:
+        """Main asynchronous loop that polls the Redis queues with RPOP."""
+        while self._active:
+            if not self._connected or self._client is None:
+                success = await self.connect()
+                if not success:
+                    await asyncio.sleep(self._retry_interval)
                     continue
 
             try:
-                mensaje_crudo: str | None = None
-                cola_activa: str | None = None
+                raw_message: str | None = None
+                active_queue: str | None = None
 
-                # Revisar las colas configuradas mediante RPOP
-                for cola in self._colas:
-                    mensaje_crudo = await self._cliente.rpop(cola)
-                    if mensaje_crudo:
-                        cola_activa = cola
+                # Check the configured queues using RPOP
+                for queue in self._queues:
+                    raw_message = await self._client.rpop(queue)
+                    if raw_message:
+                        active_queue = queue
                         break
 
-                if mensaje_crudo:
-                    logger.debug("Mensaje de telemetría extraído de '%s' (%d bytes)", cola_activa, len(mensaje_crudo))
-                    self._procesar_mensaje_json(mensaje_crudo)
+                if raw_message:
+                    logger.debug("Telemetry message pulled from '%s' (%d bytes)", active_queue, len(raw_message))
+                    self._process_json_message(raw_message)
                 else:
-                    # Si no hay mensajes pendientes, esperar el intervalo de sondeo
-                    await asyncio.sleep(self._intervalo_sondeo)
+                    # If there are no pending messages, wait the polling interval
+                    await asyncio.sleep(self._polling_interval)
 
-            except (RedisConnectionError, RedisError, OSError) as error_red:
-                self._conectado = False
-                logger.error("Error en comunicación con Redis: %s. Esperando reintento...", str(error_red))
-                await asyncio.sleep(self._intervalo_reintento)
-            except Exception as error_inesperado:
-                logger.error("Excepción inesperada en bucle de consumo: %s", str(error_inesperado), exc_info=True)
-                await asyncio.sleep(self._intervalo_sondeo)
+            except (RedisConnectionError, RedisError, OSError) as network_error:
+                self._connected = False
+                logger.error("Error communicating with Redis: %s. Waiting to retry...", str(network_error))
+                await asyncio.sleep(self._retry_interval)
+            except Exception as unexpected_error:
+                logger.error("Unexpected exception in the consumption loop: %s", str(unexpected_error), exc_info=True)
+                await asyncio.sleep(self._polling_interval)
 
-    def _procesar_mensaje_json(self, mensaje_crudo: str) -> None:
+    def _process_json_message(self, raw_message: str) -> None:
         """
-        Deserializa el payload y lo envía al pipeline analítico de los 4 cerebros.
+        Deserializes the payload and sends it to the analytical pipeline of the 4 brains.
 
         Args:
-            mensaje_crudo: Cadena JSON extraída de Redis.
+            raw_message: JSON string pulled from Redis.
         """
         try:
-            payload: dict[str, Any] = json.loads(mensaje_crudo)
-            reporte = self._motor.procesar_telemetria(payload)
-            self._ultimo_reporte = reporte
-            self._ultimo_payload = payload
-            self._contador_procesados += 1
+            payload: dict[str, Any] = json.loads(raw_message)
+            report = self._engine.process_telemetry(payload)
+            self._last_report = report
+            self._last_payload = payload
+            self._processed_counter += 1
 
             if self._callback:
-                self._callback(reporte)
+                self._callback(report)
 
-        except json.JSONDecodeError as error_json:
-            logger.error("Error al decodificar JSON de telemetría: %s", str(error_json))
-        except Exception as error_inferencia:
-            logger.error("Error en el pipeline de inferencia: %s", str(error_inferencia), exc_info=True)
+        except json.JSONDecodeError as json_error:
+            logger.error("Error decoding telemetry JSON: %s", str(json_error))
+        except Exception as inference_error:
+            logger.error("Error in the inference pipeline: %s", str(inference_error), exc_info=True)

@@ -1,6 +1,6 @@
 """
-Paquete central de inferencia en el borde (Edge AI) para el sistema H.E.L.I.O.S.
-Procesamiento cognitivo, biométrico, ambiental y fusión matricial sobre hardware embarcado.
+Core edge inference package (Edge AI) for the H.E.L.I.O.S. system.
+Cognitive, biometric, environmental processing and matrix fusion on embedded hardware.
 """
 
 __version__ = "1.0.0"

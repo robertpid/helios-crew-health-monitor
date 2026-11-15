@@ -1,27 +1,27 @@
 """
-Exportaciones de la capa de servicios (Business Logic) de helios_simulator.
+Exports of the helios_simulator services layer (Business Logic).
 """
 
-from helios_simulator.services.biometrics_generator import GeneradorBiometria
-from helios_simulator.services.cognition_generator import GeneradorCognicion
-from helios_simulator.services.correlation_evaluator import EvaluadorCorrelacionService
-from helios_simulator.services.environment_generator import GeneradorEntorno
+from helios_simulator.services.biometrics_generator import BiometricsGenerator
+from helios_simulator.services.cognition_generator import CognitionGenerator
+from helios_simulator.services.correlation_evaluator import CorrelationEvaluatorService
+from helios_simulator.services.environment_generator import EnvironmentGenerator
 from helios_simulator.services.math_noise import (
-    calcular_perdida_osea_acumulada,
-    evaluar_probabilidad_evento,
-    generar_ruido_gaussiano,
-    redondear_telemetria,
+    compute_cumulative_bone_loss,
+    evaluate_event_probability,
+    generate_gaussian_noise,
+    round_telemetry,
 )
-from helios_simulator.services.multi_habitat_simulator import SimuladorMultihabitat120Dias
+from helios_simulator.services.multi_habitat_simulator import MultiHabitat120DaySimulator
 
 __all__ = [
-    "GeneradorBiometria",
-    "GeneradorCognicion",
-    "EvaluadorCorrelacionService",
-    "GeneradorEntorno",
-    "SimuladorMultihabitat120Dias",
-    "calcular_perdida_osea_acumulada",
-    "evaluar_probabilidad_evento",
-    "generar_ruido_gaussiano",
-    "redondear_telemetria",
+    "BiometricsGenerator",
+    "CognitionGenerator",
+    "CorrelationEvaluatorService",
+    "EnvironmentGenerator",
+    "MultiHabitat120DaySimulator",
+    "compute_cumulative_bone_loss",
+    "evaluate_event_probability",
+    "generate_gaussian_noise",
+    "round_telemetry",
 ]

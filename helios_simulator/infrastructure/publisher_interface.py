@@ -1,55 +1,55 @@
 """
-Contratos e interfaces de infraestructura para el envío de telemetría (DIP).
+Infrastructure contracts and interfaces for telemetry delivery (DIP).
 
-Define la interfaz abstracta del publicador para desacoplar el orquestador
-y la lógica de negocio de la tecnología de transporte subyacente.
+Defines the abstract publisher interface to decouple the orchestrator and the
+business logic from the underlying transport technology.
 """
 
 from abc import ABC, abstractmethod
-from helios_simulator.domain.enums import EstadoConexion
-from helios_simulator.domain.models import TelemetriaPayload
+from helios_simulator.domain.enums import ConnectionState
+from helios_simulator.domain.models import TelemetryPayload
 
 
 class TelemetryPublisherInterface(ABC):
     """
-    Contrato formal para cualquier componente emisor de telemetría hacia Tierra.
-    Permite el reemplazo de Redis por MQTT, ZeroMQ o stubs de pruebas sin alterar el dominio.
+    Formal contract for any component emitting telemetry toward Earth.
+    Allows replacing Redis with MQTT, ZeroMQ or test stubs without altering the domain.
     """
 
     @abstractmethod
-    def conectar(self) -> bool:
+    def connect(self) -> bool:
         """
-        Establece la conexión con el servidor o bus de mensajería.
+        Establishes the connection with the messaging server or bus.
 
         Returns:
-            True si la conexión fue exitosa, False en caso de indisponibilidad.
+            True if the connection succeeded, False if unavailable.
         """
         raise NotImplementedError
 
     @abstractmethod
-    def publicar_telemetria(self, payload: TelemetriaPayload) -> bool:
+    def publish_telemetry(self, payload: TelemetryPayload) -> bool:
         """
-        Serializa y transmite el payload al canal o cola configurada.
+        Serializes and transmits the payload to the configured channel or queue.
 
         Args:
-            payload: Instancia consolidada con los datos del tripulante y cabina.
+            payload: Consolidated instance with the crew member and cabin data.
 
         Returns:
-            True si se transmitió o encoló exitosamente, False si hubo pérdida crítica.
+            True if transmitted or enqueued successfully, False on critical loss.
         """
         raise NotImplementedError
 
     @abstractmethod
-    def cerrar(self) -> None:
-        """Libera de forma ordenada los descriptores de red y recursos de conexión."""
+    def close(self) -> None:
+        """Gracefully releases network descriptors and connection resources."""
         raise NotImplementedError
 
     @abstractmethod
-    def obtener_estado_conexion(self) -> EstadoConexion:
+    def get_connection_state(self) -> ConnectionState:
         """
-        Consulta el estado de salud actual del enlace de transporte.
+        Queries the current health state of the transport link.
 
         Returns:
-            Estado operacional (CONECTADO, DESCONECTADO o REINTENTANDO).
+            Operational state (CONNECTED, DISCONNECTED or RETRYING).
         """
         raise NotImplementedError

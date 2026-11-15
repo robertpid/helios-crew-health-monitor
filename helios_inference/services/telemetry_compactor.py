@@ -1,212 +1,212 @@
 """
-Compactador de telemetría de H.E.L.I.O.S.
+H.E.L.I.O.S. telemetry compactor.
 
-Convierte el reporte consolidado (rico en texto, para depuración) en el registro
-compacto que se persiste y se transmite, y provee la operación inversa para
-cualquier consumidor que necesite el texto en servidor.
+Converts the consolidated report (text-rich, for debugging) into the compact record
+that is persisted and transmitted, and provides the inverse operation for any
+consumer that needs the text on the server.
 
-Principio de diseño: el compactador lee ÚNICAMENTE campos estructurados
-(banderas booleanas, índices, puntajes). Nunca parsea las cadenas descriptivas
-del reporte, de modo que un cambio de redacción en los cerebros no puede romper
-la compactación ni alterar el tamaño del flujo persistido.
+Design principle: the compactor reads ONLY structured fields (boolean flags,
+indices, scores). It never parses the descriptive strings of the report, so a
+wording change in the brains cannot break the compaction or alter the size of the
+persisted stream.
 """
 
 from typing import Any
 
-from helios_inference.domain.compact_models import RegistroTelemetriaCompacto
-from helios_inference.domain.inference_models import ReporteInferenciaConsolidado
+from helios_inference.domain.compact_models import CompactTelemetryRecord
+from helios_inference.domain.inference_models import ConsolidatedInferenceReport
 from helios_inference.domain.telemetry_codebook import (
-    CODIGOS_AMBIENTAL,
-    CODIGOS_BIOMETRICO,
-    CODIGO_ASTRA_INCONGRUENCIA,
-    CODIGO_FUSION_NOMINAL,
-    METADATOS_EDGE_ESTATICOS,
-    ORDEN_METRICAS,
-    PLANTILLA_FUSION,
-    PLANTILLA_FUSION_SEVERA,
-    TEXTO_ASTRA_INCONGRUENCIA,
-    TEXTO_FUSION_NOMINAL,
-    VERSION_ESQUEMA,
+    ASTRA_INCONGRUENCE_CODE,
+    ASTRA_INCONGRUENCE_TEXT,
+    BIOMETRIC_CODES,
+    ENVIRONMENTAL_CODES,
+    FUSION_TEMPLATE,
+    METRIC_ORDER,
+    NOMINAL_FUSION_CODE,
+    NOMINAL_FUSION_TEXT,
+    SCHEMA_VERSION,
+    SEVERE_FUSION_TEMPLATE,
+    STATIC_EDGE_METADATA,
 )
-from helios_inference.cerebros.cerebro_3_grafo_fusion import CerebroGrafoFusion
+from helios_inference.brains.brain_3_fusion_graph import FusionGraphBrain
 
-SUFIJO_ESCALADA = "!"
+ESCALATION_SUFFIX = "!"
 
 
-def _extraer_metricas(payload: dict[str, Any]) -> list[float]:
+def _extract_metrics(payload: dict[str, Any]) -> list[float]:
     """
-    Aplana el payload de entrada al vector posicional de ORDEN_METRICAS.
+    Flattens the input payload into the positional vector of METRIC_ORDER.
 
     Args:
-        payload: Telemetría cruda con sub-diccionarios entorno/biometria/cognicion.
+        payload: Raw telemetry with environment/biometrics/cognition sub-dictionaries.
 
     Returns:
-        Lista de floats en el orden canónico declarado por el libro de códigos.
+        List of floats in the canonical order declared by the codebook.
     """
-    plano: dict[str, Any] = {}
-    for seccion in ("entorno", "biometria", "cognicion"):
-        datos = payload.get(seccion) or {}
-        if isinstance(datos, dict):
-            plano.update(datos)
+    flat: dict[str, Any] = {}
+    for section in ("environment", "biometrics", "cognition"):
+        data = payload.get(section) or {}
+        if isinstance(data, dict):
+            flat.update(data)
 
-    valores: list[float] = []
-    for clave in ORDEN_METRICAS:
+    values: list[float] = []
+    for key in METRIC_ORDER:
         try:
-            valores.append(round(float(plano.get(clave, 0.0)), 3))
+            values.append(round(float(flat.get(key, 0.0)), 3))
         except (TypeError, ValueError):
-            valores.append(0.0)
-    return valores
+            values.append(0.0)
+    return values
 
 
-def compactar(
-    reporte: ReporteInferenciaConsolidado,
+def compact_record(
+    report: ConsolidatedInferenceReport,
     payload: dict[str, Any],
-) -> RegistroTelemetriaCompacto:
+) -> CompactTelemetryRecord:
     """
-    Reduce un reporte consolidado a su registro compacto equivalente.
+    Reduces a consolidated report to its equivalent compact record.
 
     Args:
-        reporte: Resultado completo emitido por el motor de inferencia.
-        payload: Telemetría cruda que originó el reporte (aporta los valores numéricos).
+        report: Complete result emitted by the inference engine.
+        payload: Raw telemetry that produced the report (supplies the numeric values).
 
     Returns:
-        RegistroTelemetriaCompacto listo para persistir o transmitir.
+        CompactTelemetryRecord ready to persist or transmit.
     """
-    c1 = reporte.cerebro_1_ambiental
-    c2 = reporte.cerebro_2_biometrico
-    c3 = reporte.cerebro_3_grafo_fusion
-    c4 = reporte.cerebro_4_astra
+    b1 = report.brain_1_environmental
+    b2 = report.brain_2_biometric
+    b3 = report.brain_3_fusion_graph
+    b4 = report.brain_4_astra
 
-    entorno = payload.get("entorno") or {}
-    evento_solar = bool(entorno.get("evento_solar_activo", False)) if isinstance(entorno, dict) else False
+    environment = payload.get("environment") or {}
+    solar_event = bool(environment.get("solar_event_active", False)) if isinstance(environment, dict) else False
 
-    # Una arista sólo es significativa si hubo sinergia; el nombre nominal se codifica como -1.
-    hay_sinergia = c3.arista_sinergica_critica in CerebroGrafoFusion.NOMBRES_ARISTAS_GRAFO
-    indice_arista = c3.indice_argmax if hay_sinergia else -1
+    # An edge is only meaningful if there was synergy; the nominal name is encoded as -1.
+    has_synergy = b3.critical_synergy_edge in FusionGraphBrain.GRAPH_EDGE_NAMES
+    edge_index = b3.argmax_index if has_synergy else -1
 
-    codigos_regla = [
-        f"{alerta.id_regla}{SUFIJO_ESCALADA}" if alerta.escalada else alerta.id_regla
-        for alerta in reporte.alertas_matriz_decisiones
+    rule_codes = [
+        f"{alert.rule_id}{ESCALATION_SUFFIX}" if alert.escalation else alert.rule_id
+        for alert in report.decision_matrix_alerts
     ]
 
-    return RegistroTelemetriaCompacto(
-        v=VERSION_ESQUEMA,
-        ts=int(reporte.timestamp_inferencia.timestamp()),
-        mis=reporte.id_mision,
-        ast=reporte.astronauta_id,
-        dia=reporte.dia_mision,
-        amb=[int(x) for x in c1.vector_ambiental],
-        bio=[int(x) for x in c2.vector_biometrico],
-        sol=int(evento_solar),
-        met=_extraer_metricas(payload),
-        kr=indice_arista,
-        krs=round(c3.puntaje_severidad_maximo, 2),
-        krx=int(c3.estres_fisiologico_severo),
-        cos=round(c4.similitud_coseno_linea_base, 4),
-        inc=int(c4.incongruencia_cognitiva_detectada),
-        rg=codigos_regla,
-        ms=reporte.tiempo_computo_ms,
+    return CompactTelemetryRecord(
+        v=SCHEMA_VERSION,
+        ts=int(report.inference_timestamp.timestamp()),
+        mis=report.mission_id,
+        ast=report.astronaut_id,
+        day=report.mission_day,
+        amb=[int(x) for x in b1.environmental_vector],
+        bio=[int(x) for x in b2.biometric_vector],
+        sol=int(solar_event),
+        met=_extract_metrics(payload),
+        kr=edge_index,
+        krs=round(b3.max_severity_score, 2),
+        krx=int(b3.severe_physiological_stress),
+        cos=round(b4.baseline_cosine_similarity, 4),
+        inc=int(b4.cognitive_incongruence_detected),
+        rg=rule_codes,
+        ms=report.compute_time_ms,
     )
 
 
-def expandir(registro: RegistroTelemetriaCompacto, codebook: dict[str, Any]) -> dict[str, Any]:
+def expand(record: CompactTelemetryRecord, codebook: dict[str, Any]) -> dict[str, Any]:
     """
-    Reconstruye el texto descriptivo a partir del registro compacto y el libro de códigos.
+    Reconstructs the descriptive text from the compact record and the codebook.
 
-    Es la referencia normativa del algoritmo que ejecuta el HUD en JavaScript:
-    ambas implementaciones deben producir exactamente las mismas cadenas.
+    This is the normative reference of the algorithm the HUD runs in JavaScript:
+    both implementations must produce exactly the same strings.
 
     Args:
-        registro: Registro compacto recibido del enlace.
-        codebook: Libro de códigos descargado una única vez.
+        record: Compact record received from the link.
+        codebook: Codebook downloaded once.
 
     Returns:
-        Diccionario con las evaluaciones y contramedidas ya en texto legible.
+        Dictionary with the assessments and countermeasures already in readable text.
     """
-    evaluaciones: list[str] = []
-    met = registro.met
+    assessments: list[str] = []
+    met = record.met
 
-    # --- Cerebro 1: etiquetas ambientales ---------------------------------------
-    for i, bandera in enumerate(registro.amb):
-        if not bandera or i >= len(codebook["ambiental"]):
+    # --- Brain 1: environmental labels -------------------------------------------
+    for i, flag in enumerate(record.amb):
+        if not flag or i >= len(codebook["environmental"]):
             continue
-        entrada = codebook["ambiental"][i]
-        if entrada["codigo"] == "RAD_CRIT" and registro.sol:
-            evaluaciones.append(entrada["plantilla_evento"])
+        entry = codebook["environmental"][i]
+        if entry["code"] == "RAD_CRIT" and record.sol:
+            assessments.append(entry["event_template"])
         else:
-            idx = entrada["metrica"]
-            valor = met[idx] if idx is not None and idx < len(met) else 0.0
-            evaluaciones.append(entrada["plantilla"].format(valor))
+            idx = entry["metric"]
+            value = met[idx] if idx is not None and idx < len(met) else 0.0
+            assessments.append(entry["template"].format(value))
 
-    # --- Cerebro 2: etiquetas biométricas ---------------------------------------
-    for i, bandera in enumerate(registro.bio):
-        if not bandera or i >= len(codebook["biometrico"]):
+    # --- Brain 2: biometric labels ------------------------------------------------
+    for i, flag in enumerate(record.bio):
+        if not flag or i >= len(codebook["biometric"]):
             continue
-        entrada = codebook["biometrico"][i]
-        idx = entrada["metrica"]
-        valor = met[idx] if idx is not None and idx < len(met) else 0.0
-        evaluaciones.append(entrada["plantilla"].format(valor, dia=registro.dia))
+        entry = codebook["biometric"][i]
+        idx = entry["metric"]
+        value = met[idx] if idx is not None and idx < len(met) else 0.0
+        assessments.append(entry["template"].format(value, day=record.day))
 
-    # --- Cerebro 3: arista dominante del grafo ----------------------------------
-    if registro.kr >= 0:
-        arista = codebook["aristas_kronecker"][registro.kr]["nombre"]
-        texto_fusion = codebook["plantilla_fusion"].format(arista=arista, severidad=registro.krs)
-        if registro.krx:
-            texto_fusion += codebook["plantilla_fusion_severa"]
-            evaluaciones.append(texto_fusion)
-        arista_critica = arista
+    # --- Brain 3: dominant graph edge ---------------------------------------------
+    if record.kr >= 0:
+        edge = codebook["kronecker_edges"][record.kr]["name"]
+        fusion_text = codebook["fusion_template"].format(edge=edge, severity=record.krs)
+        if record.krx:
+            fusion_text += codebook["severe_fusion_template"]
+            assessments.append(fusion_text)
+        critical_edge = edge
     else:
-        texto_fusion = codebook["fusion_nominal"]["texto"]
-        arista_critica = "ESTADO_NOMINAL_SIN_SINERGIAS_ADVERSAS"
+        fusion_text = codebook["fusion_nominal"]["text"]
+        critical_edge = "NOMINAL_STATE_NO_ADVERSE_SYNERGIES"
 
-    # --- Cerebro 4: ASTRA --------------------------------------------------------
-    alerta_astra = codebook["astra"]["texto"] if registro.inc else None
-    if alerta_astra:
-        evaluaciones.append(alerta_astra)
+    # --- Brain 4: ASTRA ------------------------------------------------------------
+    astra_alert = codebook["astra"]["text"] if record.inc else None
+    if astra_alert:
+        assessments.append(astra_alert)
 
-    # --- Matriz de decisiones ----------------------------------------------------
-    mapa_reglas = {r["codigo"]: r for r in codebook["reglas"]}
-    escalado = {"PRECAUCION": "ALERTA", "ALERTA": "CRITICA", "CRITICA": "CRITICA"}
+    # --- Decision matrix -----------------------------------------------------------
+    rule_map = {r["code"]: r for r in codebook["rules"]}
+    escalated = {"CAUTION": "ALERT", "ALERT": "CRITICAL", "CRITICAL": "CRITICAL"}
 
-    alertas: list[dict[str, Any]] = []
-    contramedidas: list[str] = []
-    for codigo_bruto in registro.rg:
-        escalada = codigo_bruto.endswith(SUFIJO_ESCALADA)
-        codigo = codigo_bruto.rstrip(SUFIJO_ESCALADA)
-        regla = mapa_reglas.get(codigo)
-        if regla is None:
+    alerts: list[dict[str, Any]] = []
+    countermeasures: list[str] = []
+    for raw_code in record.rg:
+        escalation = raw_code.endswith(ESCALATION_SUFFIX)
+        code = raw_code.rstrip(ESCALATION_SUFFIX)
+        rule = rule_map.get(code)
+        if rule is None:
             continue
-        nivel = escalado[regla["nivel"]] if escalada else regla["nivel"]
-        evaluaciones.append(f"[{codigo} - {nivel}] {regla['evaluacion_preliminar']}")
-        alertas.append({
-            "id_regla": codigo,
-            "dominio": regla["dominio"],
-            "nivel": nivel,
-            "evaluacion_preliminar": regla["evaluacion_preliminar"],
-            "contramedidas_sugeridas": regla["contramedidas"],
-            "destinatarios": regla["destinatarios"],
-            "estandar_base": regla["estandar_base"],
-            "ventana_tiempo": regla["ventana_tiempo"],
-            "escalada": escalada,
+        level = escalated[rule["level"]] if escalation else rule["level"]
+        assessments.append(f"[{code} - {level}] {rule['preliminary_assessment']}")
+        alerts.append({
+            "rule_id": code,
+            "domain": rule["domain"],
+            "level": level,
+            "preliminary_assessment": rule["preliminary_assessment"],
+            "suggested_countermeasures": rule["countermeasures"],
+            "recipients": rule["recipients"],
+            "base_standard": rule["base_standard"],
+            "time_window": rule["time_window"],
+            "escalation": escalation,
         })
-        for accion in regla["contramedidas"]:
-            if accion not in contramedidas and len(contramedidas) < 3:
-                contramedidas.append(accion)
+        for action in rule["countermeasures"]:
+            if action not in countermeasures and len(countermeasures) < 3:
+                countermeasures.append(action)
 
     return {
-        "timestamp_inferencia": registro.ts,
-        "id_mision": registro.mis,
-        "astronauta_id": registro.ast,
-        "dia_mision": registro.dia,
-        "evaluaciones_preliminares_activas": evaluaciones,
-        "arista_sinergica_critica": arista_critica,
-        "evaluacion_preliminar_fusion": texto_fusion,
-        "estres_fisiologico_severo": bool(registro.krx),
-        "similitud_coseno_linea_base": registro.cos,
-        "incongruencia_cognitiva_detectada": bool(registro.inc),
-        "alerta_astra": alerta_astra,
-        "alertas_matriz_decisiones": alertas,
-        "contramedidas_priorizadas": contramedidas,
-        "tiempo_computo_ms": registro.ms,
-        "metadatos_edge": dict(METADATOS_EDGE_ESTATICOS),
+        "inference_timestamp": record.ts,
+        "mission_id": record.mis,
+        "astronaut_id": record.ast,
+        "mission_day": record.day,
+        "active_preliminary_assessments": assessments,
+        "critical_synergy_edge": critical_edge,
+        "fusion_preliminary_assessment": fusion_text,
+        "severe_physiological_stress": bool(record.krx),
+        "baseline_cosine_similarity": record.cos,
+        "cognitive_incongruence_detected": bool(record.inc),
+        "astra_alert": astra_alert,
+        "decision_matrix_alerts": alerts,
+        "prioritized_countermeasures": countermeasures,
+        "compute_time_ms": record.ms,
+        "edge_metadata": dict(STATIC_EDGE_METADATA),
     }

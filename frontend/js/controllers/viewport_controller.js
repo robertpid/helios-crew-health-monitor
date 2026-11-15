@@ -10,31 +10,31 @@ class ViewportController {
     this._ids = { biomedical: 'viewBiomedical', environmental: 'viewEnvironmental', matrix: 'viewMatrix', support: 'viewSupport', surgeon: 'viewSurgeon' };
   }
 
-  inicializar() {
+  initialize() {
     document.querySelectorAll('.viewport-view').forEach(view => {
       const key = Object.keys(this._ids).find(k => this._ids[k] === view.id);
-      view.querySelector('.page-prev').onclick = () => this._mover(key, -1);
-      view.querySelector('.page-next').onclick = () => this._mover(key, 1);
+      view.querySelector('.page-prev').onclick = () => this._move(key, -1);
+      view.querySelector('.page-next').onclick = () => this._move(key, 1);
     });
-    document.getElementById('rulePrev').onclick = () => this._moverRegla(-1);
-    document.getElementById('ruleNext').onclick = () => this._moverRegla(1);
-    document.getElementById('ruleDetailPrev').onclick = () => this._moverDetalle(-1);
-    document.getElementById('ruleDetailNext').onclick = () => this._moverDetalle(1);
-    document.getElementById('chatPrev').onclick = () => this._moverChat(-1);
-    document.getElementById('chatNext').onclick = () => this._moverChat(1);
+    document.getElementById('rulePrev').onclick = () => this._moveRule(-1);
+    document.getElementById('ruleNext').onclick = () => this._moveRule(1);
+    document.getElementById('ruleDetailPrev').onclick = () => this._moveDetail(-1);
+    document.getElementById('ruleDetailNext').onclick = () => this._moveDetail(1);
+    document.getElementById('chatPrev').onclick = () => this._moveChat(-1);
+    document.getElementById('chatNext').onclick = () => this._moveChat(1);
     const chat = document.getElementById('assistantChatBox');
     new MutationObserver(() => {
       this._chatIndex = Math.max(0, chat.children.length - 1);
       this._renderChat();
     }).observe(chat, { childList: true });
-    new ResizeObserver(() => this.actualizarVista(this._view)).observe(document.querySelector('.main-viewport'));
-    window.addEventListener('resize', () => this.actualizarVista(this._view));
-    this.actualizarVista(this._view);
+    new ResizeObserver(() => this.updateView(this._view)).observe(document.querySelector('.main-viewport'));
+    window.addEventListener('resize', () => this.updateView(this._view));
+    this.updateView(this._view);
     this._renderChat();
     this._renderRule();
   }
 
-  _grupos(key) {
+  _groups(key) {
     const narrow = window.innerWidth < 900;
     const compact = document.querySelector('.main-viewport').clientHeight < 590;
     const panels = {
@@ -45,7 +45,8 @@ class ViewportController {
       surgeon: ['surgeon_dashboard']
     };
     if (narrow) return (key === 'support' ? ['assistant', 'protocol', 'exams', 'mail', 'rules'] : (key === 'surgeon' ? ['surgeon_dashboard'] : panels[key])).map(p => [p]);
-    if (compact || (['environmental', 'matrix'].includes(key) && window.innerWidth < 1100)) return {
+    const compactWellness = key === 'matrix' && (window.innerWidth < 1200 || document.querySelector('.main-viewport').clientHeight < 620);
+    if (compact || compactWellness || (key === 'environmental' && window.innerWidth < 1100)) return {
       biomedical: [['anatomy', 'vitals'], ['ecg']],
       environmental: [['habitat', 'environment'], ['synergy', 'actions']],
       matrix: [['sleep', 'tasks'], ['games', 'hydration']],
@@ -55,7 +56,7 @@ class ViewportController {
     return key === 'support' ? [['assistant', 'exams', 'mail'], ['rules']] : (key === 'surgeon' ? [['surgeon_dashboard']] : [panels[key]]);
   }
 
-  actualizarVista(key) {
+  updateView(key) {
     if (!this._ids[key]) return;
     this._view = key;
     const main = document.querySelector('.main-viewport');
@@ -74,7 +75,7 @@ class ViewportController {
       this._renderRule();
     }
     const view = document.getElementById(this._ids[key]);
-    const groups = this._grupos(key);
+    const groups = this._groups(key);
     const index = Math.min(this._pages[key] || 0, groups.length - 1);
     this._pages[key] = index;
     view.dataset.layout = groups[index].length === 1 ? 'single' : (groups[index].length === 2 ? 'pair' : 'full');
@@ -88,20 +89,20 @@ class ViewportController {
     requestAnimationFrame(() => window.dispatchEvent(new Event('helios:layout')));
   }
 
-  _mover(key, step) {
-    this._pages[key] = Math.max(0, Math.min(this._grupos(key).length - 1, (this._pages[key] || 0) + step));
-    this.actualizarVista(key);
+  _move(key, step) {
+    this._pages[key] = Math.max(0, Math.min(this._groups(key).length - 1, (this._pages[key] || 0) + step));
+    this.updateView(key);
   }
 
-  mostrarReglas() {
-    window.hudController.cambiarVista('support');
-    this._pages.support = this._grupos('support').findIndex(g => g.includes('rules'));
-    this.actualizarVista('support');
+  showRules() {
+    window.hudController.changeView('support');
+    this._pages.support = this._groups('support').findIndex(g => g.includes('rules'));
+    this.updateView('support');
   }
 
-  mostrarAsistente() {
+  showAssistant() {
     this._pages.support = 0;
-    this.actualizarVista('support');
+    this.updateView('support');
   }
 
   setRules(rules) {
@@ -110,13 +111,13 @@ class ViewportController {
     this._renderRule();
   }
 
-  _moverRegla(step) {
+  _moveRule(step) {
     this._ruleIndex = Math.max(0, Math.min(this._rules.length - 1, this._ruleIndex + step));
     this._ruleSection = 0;
     this._renderRule();
   }
 
-  _moverDetalle(step) {
+  _moveDetail(step) {
     this._ruleSection = Math.max(0, Math.min(2, this._ruleSection + step));
     this._renderRule();
   }
@@ -127,21 +128,21 @@ class ViewportController {
     const rule = this._rules[this._ruleIndex];
     const narrow = window.innerWidth < 900;
     document.querySelector('.rule-detail-navigation').hidden = !narrow || !rule;
-    document.getElementById('ruleDetailPosition').textContent = `Detalle ${this._ruleSection + 1} / 3`;
+    document.getElementById('ruleDetailPosition').textContent = `Detail ${this._ruleSection + 1} / 3`;
     document.getElementById('ruleDetailPrev').disabled = this._ruleSection === 0;
     document.getElementById('ruleDetailNext').disabled = this._ruleSection === 2;
-    document.getElementById('rulePosition').textContent = rule ? `${this._ruleIndex + 1} / ${this._rules.length}` : 'Sin datos';
+    document.getElementById('rulePosition').textContent = rule ? `${this._ruleIndex + 1} / ${this._rules.length}` : 'No data';
     document.getElementById('rulePrev').disabled = this._ruleIndex === 0;
     document.getElementById('ruleNext').disabled = !rule || this._ruleIndex === this._rules.length - 1;
     if (!rule) {
-      target.textContent = 'Catálogo no disponible. Se cargará cuando se restablezca el enlace.';
+      target.textContent = 'Catalog unavailable. It will load once the link is restored.';
       return;
     }
     const fields = [
-      ['Regla / nivel', `${rule.id_regla} · ${rule.nivel}`], ['Dominio', rule.dominio],
-      ['Evaluación preliminar', rule.evaluacion_preliminar],
-      ['Contramedidas priorizadas', rule.contramedidas.join(' · ')],
-      ['Destinatarios', rule.destinatarios.join(', ')], ['Base de evidencia', rule.base_evidencia]
+      ['Rule / level', `${rule.rule_id} · ${rule.level}`], ['Domain', rule.domain],
+      ['Preliminary assessment', rule.preliminary_assessment],
+      ['Prioritized countermeasures', rule.countermeasures.join(' · ')],
+      ['Recipients', rule.recipients.join(', ')], ['Evidence base', rule.evidence_base]
     ];
     (narrow ? fields.slice(this._ruleSection * 2, this._ruleSection * 2 + 2) : fields).forEach(([label, value]) => {
       const item = document.createElement('div');
@@ -154,7 +155,7 @@ class ViewportController {
     });
   }
 
-  _moverChat(step) {
+  _moveChat(step) {
     const count = document.getElementById('assistantChatBox').children.length;
     this._chatIndex = Math.max(0, Math.min(count - 1, this._chatIndex + step));
     this._renderChat();

@@ -1,0 +1,334 @@
+<!-- ========================================================================= -->
+<!-- MODAL COMPONENT: PRELIMINARY OPHTHALMOLOGICAL ASSESSMENT (SANS PROTOCOL)  -->
+<!-- Based on NASA SANS standards and a 5-stage clinical battery              -->
+<!-- Strictly under 400 lines (Clean Code & SRP)                              -->
+<!-- ========================================================================= -->
+
+<div id="modalOphthalmic" class="modal-backdrop" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(3, 7, 18, 0.88); backdrop-filter:blur(8px); z-index:9999; align-items:center; justify-content:center;">
+  <div class="hud-panel" style="width:92%; max-width:760px; max-height:92vh; background:#07101e; border:1px solid var(--neon-cyan); box-shadow:0 0 30px rgba(0,240,255,0.25); border-radius:10px; display:flex; flex-direction:column; overflow:hidden;">
+
+    <!-- Modal header -->
+    <div style="padding:14px 20px; background:rgba(0,240,255,0.06); border-bottom:1px solid rgba(0,240,255,0.2); display:flex; align-items:center; justify-content:space-between;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-size:20px;">👁️</span>
+        <div>
+          <h2 style="font-size:14px; font-weight:700; color:var(--neon-cyan); letter-spacing:1px; margin:0;">
+            PRELIMINARY OPHTHALMOLOGICAL ASSESSMENT (SANS)
+          </h2>
+          <span style="font-size:10px; color:#64748b; letter-spacing:0.5px;">NASA JSC PROTOCOL · VISUAL HEALTH CHECK IN MICROGRAVITY</span>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span id="ophthProgressTag" class="badge-status" style="font-size:11px; padding:3px 10px; border-color:var(--neon-cyan); color:var(--neon-cyan);">
+          INSPECTION
+        </span>
+        <button class="btn-hud" onclick="window.ophthalmicService?.closeModal()" style="padding:4px 10px; font-size:12px; border-color:#64748b; color:#94a3b8;" title="Close modal">
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- Top progress bar -->
+    <div style="width:100%; height:3px; background:rgba(255,255,255,0.08);">
+      <div id="ophthProgressBar" style="width:0%; height:100%; background:var(--neon-cyan); transition:width 0.3s ease;"></div>
+    </div>
+
+    <!-- Interactive modal body (dynamic views) -->
+    <div id="ophthContent" style="padding:24px; overflow-y:auto; flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+
+      <!-- VIEW 0: Preliminary instructions -->
+      <div id="ophthStepIntro" style="max-width:580px;">
+        <h3 style="color:#f8fafc; font-size:18px; margin-bottom:14px;">Instructions for the In-Cabin Exam</h3>
+        <p style="color:#94a3b8; font-size:13px; line-height:1.6; margin-bottom:20px;">
+          Orbital flight alters ocular morphology and the optic disc. Per the remote calibration protocol,
+          <strong>you must have a crew mate act as an assistant</strong> to enter the answers on screen while you stay in position:
+        </p>
+        <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; margin-bottom:24px;">
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:12px 8px;">
+            <div style="font-size:22px; margin-bottom:6px;">📏</div>
+            <div style="font-size:11px; color:#cbd5e1; font-weight:600;">1 m distance</div>
+            <div style="font-size:10px; color:#64748b; margin-top:4px;">Position yourself ~1 meter from the screen</div>
+          </div>
+          <div style="background:rgba(0,240,255,0.04); border:1px solid rgba(0,240,255,0.2); border-radius:6px; padding:12px 8px;">
+            <div style="font-size:22px; margin-bottom:6px;">🤝</div>
+            <div style="font-size:11px; color:var(--neon-cyan); font-weight:600;">Assistant</div>
+            <div style="font-size:10px; color:#cbd5e1; margin-top:4px;">A crew mate operates the console</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:12px 8px;">
+            <div style="font-size:22px; margin-bottom:6px;">👓</div>
+            <div style="font-size:11px; color:#cbd5e1; font-weight:600;">Prescription lenses</div>
+            <div style="font-size:10px; color:#64748b; margin-top:4px;">Do not remove your usual glasses</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:6px; padding:12px 8px;">
+            <div style="font-size:22px; margin-bottom:6px;">👁️</div>
+            <div style="font-size:11px; color:#cbd5e1; font-weight:600;">Occlusion</div>
+            <div style="font-size:10px; color:#64748b; margin-top:4px;">Cover the eye as instructed</div>
+          </div>
+        </div>
+        <button class="btn-hud" onclick="window.ophthalmicService?.startStage1()" style="padding:12px 30px; font-size:13px; font-weight:700; border-color:var(--neon-cyan); color:var(--neon-cyan); letter-spacing:1px;">
+          START ASSESSMENT (5 STAGES)
+        </button>
+      </div>
+
+      <!-- VIEW 1: Visual acuity (Tumbling E) -->
+      <div id="ophthStepAcuity" style="display:none; width:100%; max-width:480px;">
+        <div id="ophthAcuityEyeTag" style="font-size:12px; color:var(--neon-cyan); letter-spacing:1px; margin-bottom:8px; font-weight:600;">
+          RIGHT EYE (Cover your left eye)
+        </div>
+        <div style="font-size:13px; color:#ffffff; font-weight:600; margin-bottom:4px;">
+          Which direction do the legs of the letter <strong>E</strong> point?
+        </div>
+        <div style="font-size:11px; color:#94a3b8; margin-bottom:16px;">
+          Plate <span id="ophthAcuityIndex">1</span> / 10 (Random orientation) · You can tap or use the keyboard arrows
+        </div>
+        <div style="display:flex; justify-content:center; align-items:center; height:180px; margin-bottom:20px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); border-radius:8px;">
+          <div id="ophthTumblingE" style="font-size:64px; font-weight:900; color:#ffffff; font-family:monospace; line-height:1; user-select:none; transition:all 0.2s;">
+            E
+          </div>
+        </div>
+        <!-- Cross-shaped buttons with clear text and icons -->
+        <div style="display:grid; grid-template-columns: repeat(3, 90px); grid-template-rows: repeat(3, 44px); gap:8px; justify-content:center; margin:0 auto;">
+          <div></div>
+          <button class="btn-hud" onclick="window.ophthalmicService?.answerAcuity('up')" style="font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:4px;">▲ Up</button>
+          <div></div>
+          <button class="btn-hud" onclick="window.ophthalmicService?.answerAcuity('left')" style="font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:4px;">◀ Left</button>
+          <div></div>
+          <button class="btn-hud" onclick="window.ophthalmicService?.answerAcuity('right')" style="font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:4px;">Right ▶</button>
+          <div></div>
+          <button class="btn-hud" onclick="window.ophthalmicService?.answerAcuity('down')" style="font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:4px;">▼ Down</button>
+          <div></div>
+        </div>
+      </div>
+
+      <!-- VIEW 2: Astigmatism (Fan dial 1-7) -->
+      <div id="ophthStepAstigmatism" style="display:none; width:100%; max-width:520px;">
+        <div id="ophthAstigEyeTag" style="font-size:12px; color:var(--neon-cyan); letter-spacing:1px; margin-bottom:8px; font-weight:600;">
+          RIGHT EYE (Cover your left eye)
+        </div>
+        <div style="font-size:11px; color:#94a3b8; margin-bottom:16px;">
+          Look at the radiating dial. Do you see any line (1 to 7) noticeably <strong>darker or sharper</strong> than the others?
+        </div>
+        <!-- Sharp, ultra-light SVG vector fan -->
+        <div style="display:flex; justify-content:center; align-items:center; height:200px; margin-bottom:20px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); border-radius:8px;">
+          <svg width="340" height="170" viewBox="0 0 340 170" style="overflow:visible;">
+            <g transform="translate(170, 160)">
+              <!-- Radiating lines with 3 parallel strokes each -->
+              <!-- 1: 180 deg (horizontal left) -->
+              <g transform="rotate(-90)">
+                <line x1="-3" y1="-30" x2="-3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="0" y1="-30" x2="0" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="3" y1="-30" x2="3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <text x="0" y="-142" fill="#cbd5e1" font-size="12" text-anchor="middle" font-weight="bold">1</text>
+              </g>
+              <!-- 2: 150 deg -->
+              <g transform="rotate(-60)">
+                <line x1="-3" y1="-30" x2="-3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="0" y1="-30" x2="0" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="3" y1="-30" x2="3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <text x="0" y="-142" fill="#cbd5e1" font-size="12" text-anchor="middle" font-weight="bold">2</text>
+              </g>
+              <!-- 3: 120 deg -->
+              <g transform="rotate(-30)">
+                <line x1="-3" y1="-30" x2="-3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="0" y1="-30" x2="0" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="3" y1="-30" x2="3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <text x="0" y="-142" fill="#cbd5e1" font-size="12" text-anchor="middle" font-weight="bold">3</text>
+              </g>
+              <!-- 4: 90 deg (vertical) -->
+              <g transform="rotate(0)">
+                <line x1="-3" y1="-30" x2="-3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="0" y1="-30" x2="0" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="3" y1="-30" x2="3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <text x="0" y="-142" fill="#cbd5e1" font-size="12" text-anchor="middle" font-weight="bold">4</text>
+              </g>
+              <!-- 5: 60 deg -->
+              <g transform="rotate(30)">
+                <line x1="-3" y1="-30" x2="-3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="0" y1="-30" x2="0" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="3" y1="-30" x2="3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <text x="0" y="-142" fill="#cbd5e1" font-size="12" text-anchor="middle" font-weight="bold">5</text>
+              </g>
+              <!-- 6: 30 deg -->
+              <g transform="rotate(60)">
+                <line x1="-3" y1="-30" x2="-3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="0" y1="-30" x2="0" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="3" y1="-30" x2="3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <text x="0" y="-142" fill="#cbd5e1" font-size="12" text-anchor="middle" font-weight="bold">6</text>
+              </g>
+              <!-- 7: 0 deg (horizontal right) -->
+              <g transform="rotate(90)">
+                <line x1="-3" y1="-30" x2="-3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="0" y1="-30" x2="0" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <line x1="3" y1="-30" x2="3" y2="-130" stroke="#f8fafc" stroke-width="2" />
+                <text x="0" y="-142" fill="#cbd5e1" font-size="12" text-anchor="middle" font-weight="bold">7</text>
+              </g>
+            </g>
+          </svg>
+        </div>
+        <div style="display:flex; justify-content:center; gap:20px;">
+          <button class="btn-hud" onclick="window.ophthalmicService?.answerAstigmatism(true)" style="padding:10px 32px; font-size:13px; border-color:#f59e0b; color:#f59e0b;">
+            YES (I see one darker/sharper)
+          </button>
+          <button class="btn-hud" onclick="window.ophthalmicService?.answerAstigmatism(false)" style="padding:10px 32px; font-size:13px; border-color:var(--neon-green); color:var(--neon-green);">
+            NO (They all look uniform)
+          </button>
+        </div>
+      </div>
+
+      <!-- VIEW 3: Light sensitivity / Contrast (Landolt C) -->
+      <div id="ophthStepContrast" style="display:none; width:100%; max-width:480px;">
+        <div style="font-size:12px; color:var(--neon-cyan); letter-spacing:1px; margin-bottom:8px; font-weight:600;">
+          CONTRAST AND LIGHT SENSITIVITY (LANDOLT C RING)
+        </div>
+        <div style="font-size:13px; color:#ffffff; font-weight:600; margin-bottom:4px;">
+          Which direction is the GAP (opening / cut) of the ring facing?
+        </div>
+        <div style="font-size:11px; color:#94a3b8; margin-bottom:16px;">
+          Indicate the side the ring is open on · Plate <span id="ophthContrastIndex">1</span> / 8 (or use the keyboard arrows)
+        </div>
+        <div style="display:flex; justify-content:center; align-items:center; height:180px; margin-bottom:20px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.06); border-radius:8px;">
+          <svg id="ophthLandoltSvg" width="84" height="84" viewBox="0 0 100 100" style="transition:opacity 0.2s, transform 0.2s;">
+            <!-- Official ISO Landolt C ring with a flat, sharp gap -->
+            <circle cx="50" cy="50" r="32" fill="none" stroke="#ffffff" stroke-width="15" stroke-linecap="butt" stroke-dasharray="162 39" stroke-dashoffset="-19.5" />
+          </svg>
+        </div>
+        <!-- Cross-shaped buttons with clear text and icons -->
+        <div style="display:grid; grid-template-columns: repeat(3, 90px); grid-template-rows: repeat(3, 44px); gap:8px; justify-content:center; margin:0 auto;">
+          <div></div>
+          <button class="btn-hud" onclick="window.ophthalmicService?.answerContrast('up')" style="font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:4px;">▲ Up</button>
+          <div></div>
+          <button class="btn-hud" onclick="window.ophthalmicService?.answerContrast('left')" style="font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:4px;">◀ Left</button>
+          <div></div>
+          <button class="btn-hud" onclick="window.ophthalmicService?.answerContrast('right')" style="font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:4px;">Right ▶</button>
+          <div></div>
+          <button class="btn-hud" onclick="window.ophthalmicService?.answerContrast('down')" style="font-size:12px; font-weight:600; display:flex; align-items:center; justify-content:center; gap:4px;">▼ Down</button>
+          <div></div>
+        </div>
+      </div>
+
+      <!-- VIEW 4: Near vision (SANS flattening) -->
+      <div id="ophthStepNearVision" style="display:none; width:100%; max-width:540px;">
+        <div style="font-size:12px; color:var(--neon-cyan); letter-spacing:1px; margin-bottom:8px; font-weight:600;">
+          NEAR VISION (SANS HYPEROPIC SHIFT DETECTION)
+        </div>
+        <div style="font-size:11px; color:#94a3b8; margin-bottom:14px;">
+          Read the following text at the cabin's operational reading distance:
+        </div>
+        <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:18px; margin-bottom:16px; text-align:left;">
+          <p style="font-size:15px; color:#ffffff; margin:0 0 8px 0; font-weight:600;">
+            Being able to see well at any distance without constantly fiddling with your glasses...
+          </p>
+          <p style="font-size:12px; color:#cbd5e1; margin:0 0 8px 0;">
+            is important for studying, working and maintaining safety in habitat operations.
+          </p>
+          <p style="font-size:10px; color:#94a3b8; margin:0 0 6px 0;">
+            With progressive lenses, astronauts can compensate for the posterior flattening of the eyeball...
+          </p>
+          <p style="font-size:8px; color:#64748b; margin:0; letter-spacing:0.5px;">
+            enjoying the same level of visual acuity as always on the space mission.
+          </p>
+        </div>
+        <!-- Reduced Snellen optotype sub-test, row 8 -->
+        <div style="background:rgba(0,240,255,0.04); border:1px solid rgba(0,240,255,0.15); border-radius:6px; padding:10px; margin-bottom:18px;">
+          <span style="font-size:10px; color:var(--neon-cyan); display:block; margin-bottom:4px;">ROW 8 CHECK (REDUCED SNELLEN):</span>
+          <span style="font-family:monospace; font-size:15px; letter-spacing:4px; font-weight:700; color:#fff;">D E F P O T E C</span>
+        </div>
+        <div style="font-size:12px; color:#cbd5e1; margin-bottom:14px;">Could you read every line sharply, including the smallest one?</div>
+        <div style="display:flex; justify-content:center; gap:16px;">
+          <button class="btn-hud" onclick="window.ophthalmicService?.answerNearVision('full')" style="padding:10px 24px; font-size:12px; border-color:var(--neon-green); color:var(--neon-green);">
+            YES (All legible)
+          </button>
+          <button class="btn-hud" onclick="window.ophthalmicService?.answerNearVision('partial')" style="padding:10px 24px; font-size:12px; border-color:#f59e0b; color:#f59e0b;">
+            Difficulty only on the smallest
+          </button>
+          <button class="btn-hud" onclick="window.ophthalmicService?.answerNearVision('hard')" style="padding:10px 24px; font-size:12px; border-color:var(--neon-red); color:var(--neon-red);">
+            NO (Blurry on several)
+          </button>
+        </div>
+      </div>
+
+      <!-- VIEW 5: Color vision (Ishihara) -->
+      <div id="ophthStepColorVision" style="display:none; width:100%; max-width:480px;">
+        <div style="font-size:12px; color:var(--neon-cyan); letter-spacing:1px; margin-bottom:8px; font-weight:600;">
+          COLOR VISION (ISHIHARA TEST)
+        </div>
+        <div style="font-size:11px; color:#94a3b8; margin-bottom:14px;">
+          What number do you see inside the circle? (Plate <span id="ophthColorIndex">1</span> / 7)
+        </div>
+        <div style="display:flex; justify-content:center; align-items:center; margin-bottom:20px;">
+          <div style="width:212px; height:212px; border-radius:50%; padding:6px; background:radial-gradient(circle, rgba(0,240,255,0.08) 0%, rgba(3,7,18,0.7) 70%); border:1px solid rgba(0,240,255,0.3); box-shadow:0 0 25px rgba(0,240,255,0.18); display:flex; align-items:center; justify-content:center;">
+            <img id="ophthIshiharaImg" src="/static/assets/ophthalmic/ishihara_1.webp" alt="Ishihara plate" style="width:196px; height:196px; border-radius:50%; object-fit:contain; display:block;" />
+          </div>
+        </div>
+        <div id="ophthIshiharaOptions" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; max-width:320px; margin:0 auto;">
+          <!-- Generated dynamically -->
+        </div>
+      </div>
+
+      <!-- VIEW 6: Official H.E.L.I.O.S. results panel -->
+      <div id="ophthStepResults" style="display:none; width:100%; max-width:640px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:10px;">
+          <div style="text-align:left;">
+            <h3 style="color:#ffffff; font-size:16px; margin:0 0 4px 0; font-weight:700;">OPHTHALMOLOGICAL MODULE</h3>
+            <span style="font-size:11px; color:#64748b;">SOL 120 VISUAL HEALTH RECORD</span>
+          </div>
+          <span class="badge-status" style="border-color:var(--neon-green); color:var(--neon-green); font-size:12px; padding:4px 12px;">
+            ASSESSMENT COMPLETED
+          </span>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:24px; text-align:left;">
+          <!-- Acuity -->
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:14px;">
+            <div style="font-size:11px; color:#94a3b8; margin-bottom:4px;">Visual acuity</div>
+            <div id="resAcuityVal" style="font-size:24px; font-weight:800; color:#fff;">9/10</div>
+            <span id="resAcuityBadge" style="display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:4px; margin-top:6px; background:rgba(0,255,136,0.15); color:var(--neon-green);">
+              Stable
+            </span>
+          </div>
+          <!-- Astigmatism -->
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:14px;">
+            <div style="font-size:11px; color:#94a3b8; margin-bottom:4px;">Astigmatism</div>
+            <div id="resAstigVal" style="font-size:24px; font-weight:800; color:#fff;">OD / OS</div>
+            <span id="resAstigBadge" style="display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:4px; margin-top:6px; background:rgba(0,255,136,0.15); color:var(--neon-green);">
+              Stable
+            </span>
+          </div>
+          <!-- Contrast -->
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:14px;">
+            <div style="font-size:11px; color:#94a3b8; margin-bottom:4px;">Contrast vision</div>
+            <div id="resContrastVal" style="font-size:24px; font-weight:800; color:#fff;">7/8</div>
+            <span id="resContrastBadge" style="display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:4px; margin-top:6px; background:rgba(0,255,136,0.15); color:var(--neon-green);">
+              Stable
+            </span>
+          </div>
+          <!-- Near vision -->
+          <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:14px;">
+            <div style="font-size:11px; color:#94a3b8; margin-bottom:4px;">Near vision</div>
+            <div id="resNearVisionVal" style="font-size:24px; font-weight:800; color:#fff;">Full</div>
+            <span id="resNearVisionBadge" style="display:inline-block; font-size:10px; font-weight:700; padding:2px 8px; border-radius:4px; margin-top:6px; background:rgba(0,255,136,0.15); color:var(--neon-green);">
+              Stable
+            </span>
+          </div>
+          <!-- Color vision -->
+          <div style="grid-column:1 / span 2; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:8px; padding:14px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <div style="font-size:11px; color:#94a3b8; margin-bottom:4px;">Color vision</div>
+              <div id="resColorVisionVal" style="font-size:24px; font-weight:800; color:#fff;">7/7</div>
+            </div>
+            <span id="resColorVisionBadge" style="display:inline-block; font-size:10px; font-weight:700; padding:4px 12px; border-radius:4px; background:rgba(0,255,136,0.15); color:var(--neon-green);">
+              Stable
+            </span>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:12px;">
+          <button class="btn-hud" onclick="window.ophthalmicService?.saveAndTransmit()" style="padding:12px 28px; font-size:12px; font-weight:700; border-color:var(--neon-green); color:var(--neon-green); letter-spacing:1px;">
+            📡 TRANSMIT REPORT TO HOUSTON (+50 XP)
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

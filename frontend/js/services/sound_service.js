@@ -1,38 +1,38 @@
 /**
- * SoundService - Sistema de Audio Sintetizado Procedural (Web Audio API)
- * 
- * Genera efectos sonoros futuristas y sirena de alarma de emergencia en tiempo real
- * sin descargar archivos externos (0 KB de descargas, latencia < 2 ms).
- * Cumple con el estándar de alarma Master Alarm de misiones tripuladas de espacio profundo.
+ * SoundService - Procedural Synthesized Audio System (Web Audio API)
+ *
+ * Generates futuristic sound effects and the emergency alarm siren in real time
+ * without downloading external files (0 KB of downloads, latency < 2 ms).
+ * Complies with the Master Alarm standard of crewed deep space missions.
  */
 class SoundService {
   constructor() {
     this._audioCtx = null;
     this._muted = false;
-    this._volumenGeneral = 0.09; // Nivel calibrado para ser claro pero no ensordecedor
-    this._alarmaActiva = false;
-    this._alarmaLoopId = null;
+    this._masterVolume = 0.09; // Level calibrated to be clear but not deafening
+    this._alarmActive = false;
+    this._alarmLoopId = null;
 
-    // Desbloquear AudioContext en la primera interacción del usuario con el DOM
-    this._vincularDesbloqueoPorInteraccion();
+    // Unlock the AudioContext on the user's first interaction with the DOM
+    this._bindInteractionUnlock();
   }
 
-  _vincularDesbloqueoPorInteraccion() {
-    const desbloquear = () => {
-      this._obtenerContexto();
-      window.removeEventListener("click", desbloquear);
-      window.removeEventListener("keydown", desbloquear);
-      window.removeEventListener("touchstart", desbloquear);
+  _bindInteractionUnlock() {
+    const unlock = () => {
+      this._getContext();
+      window.removeEventListener("click", unlock);
+      window.removeEventListener("keydown", unlock);
+      window.removeEventListener("touchstart", unlock);
     };
-    window.addEventListener("click", desbloquear, { once: true });
-    window.addEventListener("keydown", desbloquear, { once: true });
-    window.addEventListener("touchstart", desbloquear, { once: true });
+    window.addEventListener("click", unlock, { once: true });
+    window.addEventListener("keydown", unlock, { once: true });
+    window.addEventListener("touchstart", unlock, { once: true });
   }
 
   /**
-   * Obtiene o reanuda el AudioContext activo.
+   * Gets or resumes the active AudioContext.
    */
-  _obtenerContexto() {
+  _getContext() {
     if (this._muted) return null;
     if (!this._audioCtx) {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
@@ -47,10 +47,10 @@ class SoundService {
   }
 
   /**
-   * Alterna entre sonido activado y silenciado.
-   * @returns {boolean} Estado actual de silenciado.
+   * Toggles between sound enabled and muted.
+   * @returns {boolean} Current muted state.
    */
-  toggleSilencio() {
+  toggleMute() {
     this._muted = !this._muted;
     if (this._muted && this._audioCtx && this._audioCtx.state === "running") {
       this._audioCtx.suspend();
@@ -60,53 +60,53 @@ class SoundService {
     return this._muted;
   }
 
-  estaSilenciado() {
+  isMuted() {
     return this._muted;
   }
 
-  estaAlarmaActiva() {
-    return this._alarmaActiva;
+  isAlarmActive() {
+    return this._alarmActive;
   }
 
   /**
-   * Inicia la sirena de alarma de emergencia cíclica en bucle.
-   * Continúa sonando rítmicamente hasta que la emergencia se resuelve o el usuario silencia el audio.
+   * Starts the cyclic emergency alarm siren in a loop.
+   * It keeps sounding rhythmically until the emergency resolves or the user mutes the audio.
    */
-  iniciarAlarmaEmergencia() {
-    if (this._alarmaActiva) return;
-    this._alarmaActiva = true;
+  startEmergencyAlarm() {
+    if (this._alarmActive) return;
+    this._alarmActive = true;
 
-    // Ejecutar inmediatamente el primer ciclo de alarma
-    this._ejecutarPulsoAlarma();
+    // Run the first alarm cycle immediately
+    this._runAlarmPulse();
 
-    // Repetición periódica rítmica cada 1300 ms (cadencia estándar de contingencia aeroespacial)
-    if (this._alarmaLoopId) clearInterval(this._alarmaLoopId);
-    this._alarmaLoopId = setInterval(() => {
-      if (this._alarmaActiva && !this._muted) {
-        this._ejecutarPulsoAlarma();
+    // Rhythmic periodic repetition every 1300 ms (standard aerospace contingency cadence)
+    if (this._alarmLoopId) clearInterval(this._alarmLoopId);
+    this._alarmLoopId = setInterval(() => {
+      if (this._alarmActive && !this._muted) {
+        this._runAlarmPulse();
       }
     }, 1300);
   }
 
   /**
-   * Detiene de inmediato la sirena de emergencia.
+   * Immediately stops the emergency siren.
    */
-  detenerAlarmaEmergencia() {
-    this._alarmaActiva = false;
-    if (this._alarmaLoopId) {
-      clearInterval(this._alarmaLoopId);
-      this._alarmaLoopId = null;
+  stopEmergencyAlarm() {
+    this._alarmActive = false;
+    if (this._alarmLoopId) {
+      clearInterval(this._alarmLoopId);
+      this._alarmLoopId = null;
     }
   }
 
   /**
-   * Genera un pulso bitonal de alarma táctica de cabina (estilo Master Alarm de la NASA).
-   * Tono 1: 940 Hz (urgencia alta, 140 ms)
-   * Tono 2: 720 Hz (aviso de contingencia, 140 ms)
-   * Tono 3: 940 Hz (reiteración de impacto, 140 ms)
+   * Generates a bitonal cabin tactical alarm pulse (NASA Master Alarm style).
+   * Tone 1: 940 Hz (high urgency, 140 ms)
+   * Tone 2: 720 Hz (contingency notice, 140 ms)
+   * Tone 3: 940 Hz (impact restatement, 140 ms)
    */
-  _ejecutarPulsoAlarma() {
-    const ctx = this._obtenerContexto();
+  _runAlarmPulse() {
+    const ctx = this._getContext();
     if (!ctx) return;
 
     try {
@@ -115,20 +115,20 @@ class SoundService {
       const gain = ctx.createGain();
       const filter = ctx.createBiquadFilter();
 
-      // Forma de onda diente de sierra con filtro pasa-bajas para sonido de cabina presurizada
+      // Sawtooth waveform with a low-pass filter for a pressurized cabin sound
       osc.type = "sawtooth";
       filter.type = "lowpass";
       filter.frequency.setValueAtTime(1700, t);
 
-      // Bitonalidad urgente: 940 Hz -> 720 Hz -> 940 Hz
+      // Urgent bitonality: 940 Hz -> 720 Hz -> 940 Hz
       osc.frequency.setValueAtTime(940, t);
       osc.frequency.setValueAtTime(720, t + 0.12);
       osc.frequency.setValueAtTime(940, t + 0.24);
 
-      // Envolvente de volumen (ataque inmediato, sostenido con caída exponencial)
-      gain.gain.setValueAtTime(this._volumenGeneral * 1.4, t);
-      gain.gain.setValueAtTime(this._volumenGeneral * 1.2, t + 0.12);
-      gain.gain.setValueAtTime(this._volumenGeneral * 1.4, t + 0.24);
+      // Volume envelope (immediate attack, sustained with exponential decay)
+      gain.gain.setValueAtTime(this._masterVolume * 1.4, t);
+      gain.gain.setValueAtTime(this._masterVolume * 1.2, t + 0.12);
+      gain.gain.setValueAtTime(this._masterVolume * 1.4, t + 0.24);
       gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.42);
 
       osc.connect(filter);
@@ -141,10 +141,10 @@ class SoundService {
   }
 
   /**
-   * Beep sutil de interfaz de usuario para botones y pestañas (40 ms).
+   * Subtle user interface beep for buttons and tabs (40 ms).
    */
-  reproducirClick() {
-    const ctx = this._obtenerContexto();
+  playClick() {
+    const ctx = this._getContext();
     if (!ctx) return;
 
     try {
@@ -156,7 +156,7 @@ class SoundService {
       osc.frequency.setValueAtTime(1100, t);
       osc.frequency.exponentialRampToValueAtTime(1600, t + 0.035);
 
-      gain.gain.setValueAtTime(this._volumenGeneral * 0.7, t);
+      gain.gain.setValueAtTime(this._masterVolume * 0.7, t);
       gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.04);
 
       osc.connect(gain);
@@ -168,10 +168,10 @@ class SoundService {
   }
 
   /**
-   * Pulso ultrasónico muy sutil (25 ms) al colocar el mouse sobre un órgano holográfico.
+   * Very subtle ultrasonic pulse (25 ms) when hovering a holographic organ.
    */
-  reproducirHover() {
-    const ctx = this._obtenerContexto();
+  playHover() {
+    const ctx = this._getContext();
     if (!ctx) return;
 
     try {
@@ -183,7 +183,7 @@ class SoundService {
       osc.frequency.setValueAtTime(1400, t);
       osc.frequency.exponentialRampToValueAtTime(2200, t + 0.022);
 
-      gain.gain.setValueAtTime(this._volumenGeneral * 0.35, t);
+      gain.gain.setValueAtTime(this._masterVolume * 0.35, t);
       gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.025);
 
       osc.connect(gain);
@@ -195,10 +195,10 @@ class SoundService {
   }
 
   /**
-   * Resonancia holográfica al alternar entre hábitats espaciales (120 ms).
+   * Holographic resonance when switching between space habitats (120 ms).
    */
-  reproducirCambioHabitat() {
-    const ctx = this._obtenerContexto();
+  playHabitatChange() {
+    const ctx = this._getContext();
     if (!ctx) return;
 
     try {
@@ -216,7 +216,7 @@ class SoundService {
       osc2.frequency.setValueAtTime(780, t);
       osc2.frequency.exponentialRampToValueAtTime(1560, t + 0.10);
 
-      gain.gain.setValueAtTime(this._volumenGeneral * 0.8, t);
+      gain.gain.setValueAtTime(this._masterVolume * 0.8, t);
       gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
 
       osc1.connect(gain);
@@ -231,11 +231,11 @@ class SoundService {
   }
 
   /**
-   * Acorde armónico ascendente de confirmación y estado nominal (180 ms).
+   * Ascending harmonic chord for confirmation and nominal state (180 ms).
    */
-  reproducirNominal() {
-    this.detenerAlarmaEmergencia();
-    const ctx = this._obtenerContexto();
+  playNominal() {
+    this.stopEmergencyAlarm();
+    const ctx = this._getContext();
     if (!ctx) return;
     try {
       const t = ctx.currentTime;
@@ -244,7 +244,7 @@ class SoundService {
         const gain = ctx.createGain();
         osc.type = "sine";
         osc.frequency.setValueAtTime(freq, t + i * 0.05);
-        gain.gain.setValueAtTime(this._volumenGeneral * 0.7, t + i * 0.05);
+        gain.gain.setValueAtTime(this._masterVolume * 0.7, t + i * 0.05);
         gain.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.05 + 0.12);
         osc.connect(gain);
         gain.connect(ctx.destination);
@@ -255,17 +255,17 @@ class SoundService {
   }
 
   /**
-   * Dispara el protocolo sonoro de crisis espacial (Master Alarm).
+   * Triggers the space crisis sound protocol (Master Alarm).
    */
-  reproducirCrisis() {
-    this.iniciarAlarmaEmergencia();
+  playCrisis() {
+    this.startEmergencyAlarm();
   }
 
   /**
-   * Tono táctico de alerta breve para credencial errónea o advertencia (120 ms).
+   * Brief tactical alert tone for wrong credentials or a warning (120 ms).
    */
-  reproducirAlerta() {
-    const ctx = this._obtenerContexto();
+  playAlert() {
+    const ctx = this._getContext();
     if (!ctx) return;
     try {
       const t = ctx.currentTime;
@@ -274,7 +274,7 @@ class SoundService {
       osc.type = "sawtooth";
       osc.frequency.setValueAtTime(440, t);
       osc.frequency.setValueAtTime(330, t + 0.06);
-      gain.gain.setValueAtTime(this._volumenGeneral * 0.9, t);
+      gain.gain.setValueAtTime(this._masterVolume * 0.9, t);
       gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.12);
       osc.connect(gain);
       gain.connect(ctx.destination);

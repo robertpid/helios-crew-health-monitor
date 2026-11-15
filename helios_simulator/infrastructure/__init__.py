@@ -1,5 +1,5 @@
 """
-Exportaciones de la capa de infraestructura de helios_simulator.
+Exports of the helios_simulator infrastructure layer.
 """
 
 from helios_simulator.infrastructure.publisher_interface import TelemetryPublisherInterface

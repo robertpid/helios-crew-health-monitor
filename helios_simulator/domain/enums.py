@@ -1,46 +1,46 @@
 """
-Enumeraciones de dominio para el sistema de telemetría de espacio profundo.
+Domain enumerations for the deep space telemetry system.
 
-Define clasificaciones normativas de alerta y peligros del marco RIDGE de la NASA.
+Defines normative alert classifications and hazards from the NASA RIDGE framework.
 """
 
 from enum import Enum
 
 
-class NivelAlerta(str, Enum):
-    """Niveles de severidad operacional para evaluaciones preliminares y alertas."""
+class AlertLevel(str, Enum):
+    """Operational severity levels for preliminary assessments and alerts."""
 
-    INFORMATIVA = "INFORMATIVA"
-    PRECAUCION = "PRECAUCION"
-    ADVERTENCIA = "ADVERTENCIA"
-    CRITICA = "CRITICA"
-
-
-class PeligroRidge(str, Enum):
-    """Marco oficial de los 5 peligros del vuelo espacial humano (NASA HRP)."""
-
-    R_RADIACION = "R - Radiación espacial"
-    I_AISLAMIENTO = "I - Aislamiento y confinamiento"
-    D_DISTANCIA = "D - Distancia de la Tierra"
-    G_GRAVEDAD = "G - Campos de gravedad alterados"
-    E_ENTORNO_CERRADO = "E - Ambientes hostiles y cerrados"
+    INFORMATIONAL = "INFORMATIONAL"
+    CAUTION = "CAUTION"
+    WARNING = "WARNING"
+    CRITICAL = "CRITICAL"
 
 
-class EntornoMision(str, Enum):
+class RidgeHazard(str, Enum):
+    """Official framework of the 5 human spaceflight hazards (NASA HRP)."""
+
+    R_RADIATION = "R - Space radiation"
+    I_ISOLATION = "I - Isolation and confinement"
+    D_DISTANCE = "D - Distance from Earth"
+    G_GRAVITY = "G - Altered gravity fields"
+    E_CLOSED_ENVIRONMENT = "E - Hostile and closed environments"
+
+
+class MissionEnvironment(str, Enum):
     """
-    Tipos de hábitats y entornos operacionales de misión espacial.
-    Define las condiciones gravitatorias, radiológicas y de retardo de enlace.
+    Habitat and operational environment types for a space mission.
+    Defines gravity, radiological and link delay conditions.
     """
 
-    ESTACION_ESPACIAL = "estacion_espacial"
-    BASE_LUNAR = "base_lunar"
-    NAVE_ESPACIAL = "nave_espacial"
-    BASE_MARTE = "base_marte"
+    SPACE_STATION = "space_station"
+    LUNAR_BASE = "lunar_base"
+    SPACECRAFT = "spacecraft"
+    MARS_BASE = "mars_base"
 
 
-class EstadoConexion(str, Enum):
-    """Estado operativo del enlace de telemetría con la capa de infraestructura."""
+class ConnectionState(str, Enum):
+    """Operational state of the telemetry link with the infrastructure layer."""
 
-    CONECTADO = "CONECTADO"
-    DESCONECTADO = "DESCONECTADO"
-    REINTENTANDO = "REINTENTANDO"
+    CONNECTED = "CONNECTED"
+    DISCONNECTED = "DISCONNECTED"
+    RETRYING = "RETRYING"

@@ -1,8 +1,8 @@
 """
-Implementación de infraestructura para publicación en Redis con tolerancia a fallos.
+Infrastructure implementation for fault-tolerant Redis publishing.
 
-Gestiona la conexión persistente, reconexión automática y amortiguamiento local (Store-and-Forward)
-hacia el buzón de telemetría hacia Tierra ('buzon_telemetria_tierra').
+Manages the persistent connection, automatic reconnection and local buffering
+(Store-and-Forward) toward the Earth telemetry mailbox ('earth_telemetry_mailbox').
 """
 
 from collections import deque
@@ -14,8 +14,8 @@ from redis.exceptions import ConnectionError as RedisConnectionError
 from redis.exceptions import RedisError, TimeoutError as RedisTimeoutError
 
 from helios_simulator.config import RedisConfig
-from helios_simulator.domain.enums import EstadoConexion
-from helios_simulator.domain.models import TelemetriaPayload
+from helios_simulator.domain.enums import ConnectionState
+from helios_simulator.domain.models import TelemetryPayload
 from helios_simulator.infrastructure.publisher_interface import TelemetryPublisherInterface
 
 logger = logging.getLogger(__name__)
@@ -23,50 +23,50 @@ logger = logging.getLogger(__name__)
 
 class RedisTelemetryPublisher(TelemetryPublisherInterface):
     """
-    Publicador robusto de telemetría sobre Redis.
-    Aplica el principio de Responsabilidad Única (SRP): no genera datos ni evalúa reglas,
-    únicamente asegura la entrega confiable del payload serializado.
+    Robust telemetry publisher over Redis.
+    Applies the Single Responsibility Principle (SRP): it neither generates data nor
+    evaluates rules, it only ensures reliable delivery of the serialized payload.
     """
 
     def __init__(self, config: RedisConfig | None = None) -> None:
         """
-        Inicializa el publicador de Redis.
+        Initializes the Redis publisher.
 
         Args:
-            config: Parámetros de red y políticas de reintento.
+            config: Network parameters and retry policies.
         """
         self._config = config or RedisConfig()
-        self._cliente: redis.Redis | None = None
-        self._estado: EstadoConexion = EstadoConexion.DESCONECTADO
-        self._cola_buffer_memoria: deque[str] = deque(
-            maxlen=self._config.limite_cola_buffer_memoria
+        self._client: redis.Redis | None = None
+        self._state: ConnectionState = ConnectionState.DISCONNECTED
+        self._memory_buffer_queue: deque[str] = deque(
+            maxlen=self._config.memory_buffer_queue_limit
         )
-        self._ultimo_intento_reconexion: float = 0.0
+        self._last_reconnect_attempt: float = 0.0
 
-    def _probar_disponibilidad_puerto(self, timeout_segundos: float = 0.15) -> bool:
-        """Prueba preliminar rápida de apertura del socket para evitar bloqueos TCP en Windows."""
+    def _probe_port_availability(self, timeout_seconds: float = 0.15) -> bool:
+        """Fast preliminary socket open test to avoid TCP stalls on Windows."""
         try:
             with socket.create_connection(
                 (self._config.host, self._config.port),
-                timeout=timeout_segundos,
+                timeout=timeout_seconds,
             ):
                 return True
         except (OSError, socket.error):
             return False
 
-    def conectar(self) -> bool:
+    def connect(self) -> bool:
         """
-        Inicia la conexión al servidor Redis local y verifica disponibilidad mediante PING.
+        Starts the connection to the local Redis server and verifies availability via PING.
 
         Returns:
-            True si el servidor respondió satisfactoriamente, False si no está accesible.
+            True if the server responded successfully, False if unreachable.
         """
-        # Verificación preliminar inmediata sin bloqueos de red
-        if not self._probar_disponibilidad_puerto():
-            self._estado = EstadoConexion.DESCONECTADO
-            self._ultimo_intento_reconexion = time.time()
+        # Immediate preliminary check without network stalls
+        if not self._probe_port_availability():
+            self._state = ConnectionState.DISCONNECTED
+            self._last_reconnect_attempt = time.time()
             logger.info(
-                "Servidor Redis inactivo en %s:%d. Enlace en modo resiliente (Store-and-Forward activo).",
+                "Redis server inactive at %s:%d. Link in resilient mode (Store-and-Forward active).",
                 self._config.host,
                 self._config.port,
             )
@@ -74,154 +74,154 @@ class RedisTelemetryPublisher(TelemetryPublisherInterface):
 
         try:
             logger.info(
-                "Intentando establecer enlace con servidor Redis en %s:%d (Buzón: %s)...",
+                "Attempting to establish link with Redis server at %s:%d (Mailbox: %s)...",
                 self._config.host,
                 self._config.port,
-                self._config.canal_publicacion,
+                self._config.publish_channel,
             )
-            self._cliente = redis.Redis(
+            self._client = redis.Redis(
                 host=self._config.host,
                 port=self._config.port,
                 db=self._config.db,
                 password=self._config.password,
-                socket_timeout=self._config.tiempo_espera_conexion_segundos,
-                socket_connect_timeout=self._config.tiempo_espera_conexion_segundos,
+                socket_timeout=self._config.connection_timeout_seconds,
+                socket_connect_timeout=self._config.connection_timeout_seconds,
                 decode_responses=True,
             )
-            self._cliente.ping()
-            self._estado = EstadoConexion.CONECTADO
-            logger.info("Enlace establecido con éxito con Redis en %s:%d", self._config.host, self._config.port)
-            self._vaciar_buffer_memoria()
+            self._client.ping()
+            self._state = ConnectionState.CONNECTED
+            logger.info("Link successfully established with Redis at %s:%d", self._config.host, self._config.port)
+            self._flush_memory_buffer()
             return True
         except (RedisConnectionError, RedisTimeoutError, RedisError) as error:
-            self._estado = EstadoConexion.DESCONECTADO
-            self._ultimo_intento_reconexion = time.time()
+            self._state = ConnectionState.DISCONNECTED
+            self._last_reconnect_attempt = time.time()
             logger.error(
-                "No fue posible conectar con Redis en %s:%d. Modo resiliencia activado: %s",
+                "Could not connect to Redis at %s:%d. Resilience mode activated: %s",
                 self._config.host,
                 self._config.port,
                 str(error),
             )
             return False
 
-    def _intentar_reconexion_automatica(self) -> bool:
+    def _attempt_automatic_reconnect(self) -> bool:
         """
-        Evalúa si es tiempo de reintentar la conexión respetando el intervalo de enfriamiento.
+        Evaluates whether it is time to retry the connection, respecting the cooldown interval.
 
         Returns:
-            True si se restableció la conexión, False en caso contrario.
+            True if the connection was restored, False otherwise.
         """
-        ahora = time.time()
-        if ahora - self._ultimo_intento_reconexion < self._config.intervalo_reintento_reconexion_segundos:
+        now = time.time()
+        if now - self._last_reconnect_attempt < self._config.reconnect_retry_interval_seconds:
             return False
 
-        self._ultimo_intento_reconexion = ahora
-        self._estado = EstadoConexion.REINTENTANDO
-        logger.info("Reintentando reconexión automática con servidor Redis local...")
-        return self.conectar()
+        self._last_reconnect_attempt = now
+        self._state = ConnectionState.RETRYING
+        logger.info("Retrying automatic reconnection with the local Redis server...")
+        return self.connect()
 
-    def publicar_telemetria(self, payload: TelemetriaPayload) -> bool:
+    def publish_telemetry(self, payload: TelemetryPayload) -> bool:
         """
-        Serializa en JSON el payload e inyecta al canal y cola de Redis.
-        Si Redis no está accesible, retiene el mensaje en memoria interna (Store-and-Forward)
-        para su posterior despacho sin pérdida de información de la misión.
+        Serializes the payload to JSON and injects it into the Redis channel and queue.
+        If Redis is unreachable, the message is retained in internal memory (Store-and-Forward)
+        for later dispatch without losing mission information.
 
         Args:
-            payload: Instancia validada de TelemetriaPayload.
+            payload: Validated TelemetryPayload instance.
 
         Returns:
-            True si se publicó en Redis o se aseguró en el buffer local, False si hubo saturación.
+            True if published to Redis or secured in the local buffer, False on saturation.
         """
         payload_json = payload.model_dump_json()
 
-        # Si el enlace está caído, intenta reconectar
-        if self._estado != EstadoConexion.CONECTADO:
-            self._intentar_reconexion_automatica()
+        # If the link is down, try to reconnect
+        if self._state != ConnectionState.CONNECTED:
+            self._attempt_automatic_reconnect()
 
-        # Si el enlace está activo, intenta transmitir
-        if self._estado == EstadoConexion.CONECTADO and self._cliente is not None:
+        # If the link is active, try to transmit
+        if self._state == ConnectionState.CONNECTED and self._client is not None:
             try:
-                # Publicación reactiva por Pub/Sub
-                receptores_activos = self._cliente.publish(
-                    self._config.canal_publicacion,
+                # Reactive publication over Pub/Sub
+                active_receivers = self._client.publish(
+                    self._config.publish_channel,
                     payload_json,
                 )
-                # Almacenamiento persistente en cola/lista FIFO
-                self._cliente.rpush(
-                    self._config.cola_publicacion,
+                # Persistent storage in a FIFO queue/list
+                self._client.rpush(
+                    self._config.publish_queue,
                     payload_json,
                 )
                 logger.info(
-                    "Telemetría transmitida a '%s' (Subscriptores: %d, Tamaño: %d bytes). Día %d.",
-                    self._config.canal_publicacion,
-                    receptores_activos,
+                    "Telemetry transmitted to '%s' (Subscribers: %d, Size: %d bytes). Day %d.",
+                    self._config.publish_channel,
+                    active_receivers,
                     len(payload_json),
-                    payload.dia_mision,
+                    payload.mission_day,
                 )
                 return True
-            except (RedisConnectionError, RedisTimeoutError, RedisError) as error_envio:
-                self._estado = EstadoConexion.DESCONECTADO
+            except (RedisConnectionError, RedisTimeoutError, RedisError) as send_error:
+                self._state = ConnectionState.DISCONNECTED
                 logger.error(
-                    "Interrupción en la conexión de Redis durante transmisión: %s. Amortiguando en memoria...",
-                    str(error_envio),
+                    "Redis connection interrupted during transmission: %s. Buffering in memory...",
+                    str(send_error),
                 )
-                self._encolar_en_buffer(payload_json)
+                self._enqueue_in_buffer(payload_json)
                 return True
 
-        # Enlace desconectado: amortiguar en buffer local
-        self._encolar_en_buffer(payload_json)
+        # Link disconnected: buffer locally
+        self._enqueue_in_buffer(payload_json)
         return True
 
-    def _encolar_en_buffer(self, payload_json: str) -> None:
-        """Guarda un payload en la cola FIFO de seguridad en memoria."""
-        self._cola_buffer_memoria.append(payload_json)
+    def _enqueue_in_buffer(self, payload_json: str) -> None:
+        """Stores a payload in the in-memory FIFO safety queue."""
+        self._memory_buffer_queue.append(payload_json)
         logger.warning(
-            "Payload preservado en buffer local de seguridad. Mensajes en espera: %d/%d",
-            len(self._cola_buffer_memoria),
-            self._config.limite_cola_buffer_memoria,
+            "Payload preserved in the local safety buffer. Messages waiting: %d/%d",
+            len(self._memory_buffer_queue),
+            self._config.memory_buffer_queue_limit,
         )
 
-    def _vaciar_buffer_memoria(self) -> None:
-        """Transmite los mensajes represados en el buffer una vez restablecido el enlace."""
-        if not self._cola_buffer_memoria or self._cliente is None:
+    def _flush_memory_buffer(self) -> None:
+        """Transmits the messages held in the buffer once the link is restored."""
+        if not self._memory_buffer_queue or self._client is None:
             return
 
         logger.info(
-            "Restableciendo enlace: enviando %d payloads acumulados en buffer hacia Redis...",
-            len(self._cola_buffer_memoria),
+            "Restoring link: sending %d payloads accumulated in the buffer to Redis...",
+            len(self._memory_buffer_queue),
         )
-        enviados_correctos = 0
-        while self._cola_buffer_memoria:
-            mensaje = self._cola_buffer_memoria.popleft()
+        successfully_sent = 0
+        while self._memory_buffer_queue:
+            message = self._memory_buffer_queue.popleft()
             try:
-                self._cliente.publish(self._config.canal_publicacion, mensaje)
-                self._cliente.rpush(self._config.cola_publicacion, mensaje)
-                enviados_correctos += 1
+                self._client.publish(self._config.publish_channel, message)
+                self._client.rpush(self._config.publish_queue, message)
+                successfully_sent += 1
             except (RedisConnectionError, RedisTimeoutError, RedisError) as error:
-                logger.error("Fallo vaciando buffer en mensaje pendiente: %s", str(error))
-                self._cola_buffer_memoria.appendleft(mensaje)
-                self._estado = EstadoConexion.DESCONECTADO
+                logger.error("Failed flushing buffer on a pending message: %s", str(error))
+                self._memory_buffer_queue.appendleft(message)
+                self._state = ConnectionState.DISCONNECTED
                 break
 
-        logger.info("Transmisión de buffer concluida con éxito: %d mensajes procesados.", enviados_correctos)
+        logger.info("Buffer transmission completed successfully: %d messages processed.", successfully_sent)
 
-    def cerrar(self) -> None:
-        """Cierra la conexión con el servidor Redis."""
-        if self._cliente is not None:
+    def close(self) -> None:
+        """Closes the connection with the Redis server."""
+        if self._client is not None:
             try:
-                self._cliente.close()
-                logger.info("Conexión con Redis cerrada de forma ordenada.")
+                self._client.close()
+                logger.info("Redis connection closed gracefully.")
             except (RedisConnectionError, RedisTimeoutError, RedisError) as error:
-                logger.error("Error al cerrar conexión con Redis: %s", str(error))
+                logger.error("Error closing the Redis connection: %s", str(error))
             finally:
-                self._cliente = None
-                self._estado = EstadoConexion.DESCONECTADO
+                self._client = None
+                self._state = ConnectionState.DISCONNECTED
 
-    def obtener_estado_conexion(self) -> EstadoConexion:
-        """Retorna el estado de conectividad actual."""
-        return self._estado
+    def get_connection_state(self) -> ConnectionState:
+        """Returns the current connectivity state."""
+        return self._state
 
     @property
-    def mensajes_en_buffer(self) -> int:
-        """Cantidad de mensajes pendientes de envío en el buffer local."""
-        return len(self._cola_buffer_memoria)
+    def buffered_messages(self) -> int:
+        """Number of messages pending delivery in the local buffer."""
+        return len(self._memory_buffer_queue)

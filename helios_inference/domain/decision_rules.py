@@ -1,8 +1,8 @@
 """
-Modelos y catálogo de las 15 reglas críticas de la Matriz de Decisiones del Cerebro Central.
-Basado en NASA-STD-3001, OCHMO-TB-002/003/004, NOAA SWPC, Barger et al. (2014) y Law et al. (2014).
+Models and catalog of the 15 critical rules of the Central Brain Decision Matrix.
+Based on NASA-STD-3001, OCHMO-TB-002/003/004, NOAA SWPC, Barger et al. (2014) and Law et al. (2014).
 
-Define la estructura de reglas multivariadas, niveles de severidad y contramedidas (máximo 3).
+Defines the structure of multivariate rules, severity levels and countermeasures (maximum 3).
 """
 
 from enum import Enum
@@ -10,350 +10,350 @@ from typing import Any
 from pydantic import BaseModel, Field, ConfigDict
 
 
-class NivelSeveridadRegla(str, Enum):
-    """Nivel de severidad operacional de la alerta según la matriz de la NASA."""
-    PRECAUCION = "PRECAUCION"  # 🟡 Tendencia de riesgo; se corrige con hábitos (mismo día)
-    ALERTA = "ALERTA"          # 🟠 Varios factores combinados; riesgo de afectar salud (pocas horas)
-    CRITICA = "CRITICA"        # 🔴 Riesgo inmediato para la vida o misión (inmediato)
+class RuleSeverityLevel(str, Enum):
+    """Operational severity level of the alert per the NASA matrix."""
+    CAUTION = "CAUTION"    # 🟡 Risk trend; corrected with habits (same day)
+    ALERT = "ALERT"        # 🟠 Several combined factors; risk of affecting health (a few hours)
+    CRITICAL = "CRITICAL"  # 🔴 Immediate risk to life or mission (immediate)
 
 
-class DominioRegla(str, Enum):
-    """Categoría temática del riesgo aeroespacial."""
-    SEGURIDAD_INMEDIATA = "seguridad_inmediata"
-    ESTADO_ALERTA_COGNITIVO = "estado_alerta_cognitivo"
-    AMBIENTE_CABINA = "ambiente_cabina"
-    HUESO_NUTRICION = "hueso_nutricion"
-    CONDUCTA_PSICOLOGICA = "conducta_psicologica"
+class RuleDomain(str, Enum):
+    """Thematic category of the aerospace risk."""
+    IMMEDIATE_SAFETY = "immediate_safety"
+    COGNITIVE_ALERTNESS = "cognitive_alertness"
+    CABIN_ENVIRONMENT = "cabin_environment"
+    BONE_NUTRITION = "bone_nutrition"
+    PSYCHOLOGICAL_BEHAVIOR = "psychological_behavior"
 
 
-class DestinatarioNotificacion(str, Enum):
-    """Receptores designados de la alerta."""
-    ASTRONAUTA = "astronauta"
-    MEDICO_VUELO = "medico_vuelo"
-    CONTROL_MISION = "control_mision"
-    TRIPULACION_COMPLETA = "tripulacion"
+class NotificationRecipient(str, Enum):
+    """Designated receivers of the alert."""
+    ASTRONAUT = "astronaut"
+    FLIGHT_SURGEON = "flight_surgeon"
+    MISSION_CONTROL = "mission_control"
+    FULL_CREW = "crew"
 
 
-class AlertaReglaMatriz(BaseModel):
-    """Instancia de alerta generada al activarse un cruce crítico de la matriz."""
+class MatrixRuleAlert(BaseModel):
+    """Alert instance generated when a critical matrix crossover activates."""
 
     model_config = ConfigDict(frozen=True)
 
-    id_regla: str = Field(..., description="Identificador único del cruce (ej. CX-01 a CX-15).")
-    dominio: DominioRegla = Field(..., description="Categoría temática del riesgo.")
-    nivel: NivelSeveridadRegla = Field(..., description="Nivel de severidad operacional.")
-    evaluacion_preliminar: str = Field(
+    rule_id: str = Field(..., description="Unique identifier of the crossover (e.g. CX-01 to CX-15).")
+    domain: RuleDomain = Field(..., description="Thematic category of the risk.")
+    level: RuleSeverityLevel = Field(..., description="Operational severity level.")
+    preliminary_assessment: str = Field(
         ...,
-        description="Dictamen preliminar que describe el patrón de riesgo identificado."
+        description="Preliminary finding describing the identified risk pattern."
     )
-    contramedidas_sugeridas: list[str] = Field(
+    suggested_countermeasures: list[str] = Field(
         ...,
         max_length=3,
-        description="Hasta 3 acciones inmediatas priorizadas por impacto para evitar sobrecarga cognitiva."
+        description="Up to 3 immediate actions prioritized by impact to avoid cognitive overload."
     )
-    destinatarios: list[DestinatarioNotificacion] = Field(
+    recipients: list[NotificationRecipient] = Field(
         ...,
-        description="Quién debe recibir y actuar sobre la alerta."
+        description="Who must receive and act on the alert."
     )
-    estandar_base: str = Field(
+    base_standard: str = Field(
         ...,
-        description="Evidencia o estándar científico (NASA-STD-3001, NOAA, Barger et al.)."
+        description="Scientific evidence or standard (NASA-STD-3001, NOAA, Barger et al.)."
     )
-    ventana_tiempo: str = Field(
+    time_window: str = Field(
         ...,
-        description="Ventana de persistencia requerida para confirmación del cruce."
+        description="Persistence window required to confirm the crossover."
     )
-    escalada: bool = Field(
+    escalation: bool = Field(
         default=False,
-        description="Indica si la alerta escaló de nivel por persistencia sin corrección."
+        description="Indicates whether the alert escalated in level due to persistence without correction."
     )
 
 
-class ReglaDefinicion(BaseModel):
-    """Definición estática de una regla de cruce en el catálogo de decisión."""
+class RuleDefinition(BaseModel):
+    """Static definition of a crossover rule in the decision catalog."""
 
     model_config = ConfigDict(frozen=True)
 
-    id_regla: str
-    dominio: DominioRegla
-    nivel: NivelSeveridadRegla
-    evaluacion_preliminar: str
-    contramedidas: list[str] = Field(..., max_length=3)
-    destinatarios: list[DestinatarioNotificacion]
-    base_evidencia: str
-    ventana_persistencia: str
-    prioridad_jerarquica: int = Field(
+    rule_id: str
+    domain: RuleDomain
+    level: RuleSeverityLevel
+    preliminary_assessment: str
+    countermeasures: list[str] = Field(..., max_length=3)
+    recipients: list[NotificationRecipient]
+    evidence_base: str
+    persistence_window: str
+    hierarchical_priority: int = Field(
         ...,
-        description="1 = Máxima (Seguridad inmediata), 2 = Alerta tareas críticas, 3 = Salud ósea/renal, 4 = Bienestar."
+        description="1 = Maximum (Immediate safety), 2 = Critical task alertness, 3 = Bone/renal health, 4 = Wellbeing."
     )
 
 
 # ======================================================================================
-# CATÁLOGO OFICIAL DE LAS 15 REGLAS DE CRUCE DE MARTINA (NOV 2026)
+# OFFICIAL CATALOG OF MARTINA'S 15 CROSSOVER RULES (NOV 2026)
 # ======================================================================================
-CATALOGO_REGLAS_CRITICAS: list[ReglaDefinicion] = [
-    # 4.1 Seguridad Inmediata (Prioridad 1)
-    ReglaDefinicion(
-        id_regla="CX-01",
-        dominio=DominioRegla.SEGURIDAD_INMEDIATA,
-        nivel=NivelSeveridadRegla.CRITICA,
-        evaluacion_preliminar="Exposición radiológica aguda en curso (Tormenta Solar / SPE)",
-        contramedidas=[
-            "Trasladarse de inmediato al área más blindada (refugio de tormenta en nave o hábitat).",
-            "Posponer caminata espacial (EVA) o salida a la superficie marciana.",
-            "Registrar dosis dosimétrica personal cada hora hasta que el flujo baje de 10 pfu.",
+CRITICAL_RULES_CATALOG: list[RuleDefinition] = [
+    # 4.1 Immediate Safety (Priority 1)
+    RuleDefinition(
+        rule_id="CX-01",
+        domain=RuleDomain.IMMEDIATE_SAFETY,
+        level=RuleSeverityLevel.CRITICAL,
+        preliminary_assessment="Acute radiological exposure in progress (Solar Storm / SPE)",
+        countermeasures=[
+            "Move immediately to the most shielded area (storm shelter in the spacecraft or habitat).",
+            "Postpone the spacewalk (EVA) or Martian surface excursion.",
+            "Record personal dosimetric dose every hour until the flux drops below 10 pfu.",
         ],
-        destinatarios=[
-            DestinatarioNotificacion.TRIPULACION_COMPLETA,
-            DestinatarioNotificacion.MEDICO_VUELO,
-            DestinatarioNotificacion.CONTROL_MISION,
+        recipients=[
+            NotificationRecipient.FULL_CREW,
+            NotificationRecipient.FLIGHT_SURGEON,
+            NotificationRecipient.MISSION_CONTROL,
         ],
-        base_evidencia="NOAA SWPC; NASA-STD-3001 [V1 4030] SPE",
-        ventana_persistencia="Inmediata ante detección de protones >= 10 pfu",
-        prioridad_jerarquica=1,
+        evidence_base="NOAA SWPC; NASA-STD-3001 [V1 4030] SPE",
+        persistence_window="Immediate upon detection of protons >= 10 pfu",
+        hierarchical_priority=1,
     ),
-    ReglaDefinicion(
-        id_regla="CX-02",
-        dominio=DominioRegla.SEGURIDAD_INMEDIATA,
-        nivel=NivelSeveridadRegla.CRITICA,
-        evaluacion_preliminar="Patrón compatible con falla del soporte vital atmosférico de cabina",
-        contramedidas=[
-            "Aviso de emergencia atmosférica inmediata a toda la tripulación y control de misión.",
-            "Revisar el sistema de remoción de CO2 y la ventilación forzada del módulo.",
-            "Aplicar el procedimiento de emergencia atmosférica y colocación de mascarillas si aplica.",
+    RuleDefinition(
+        rule_id="CX-02",
+        domain=RuleDomain.IMMEDIATE_SAFETY,
+        level=RuleSeverityLevel.CRITICAL,
+        preliminary_assessment="Pattern consistent with a failure of the cabin atmospheric life support",
+        countermeasures=[
+            "Immediate atmospheric emergency notice to the full crew and mission control.",
+            "Inspect the CO2 removal system and the forced ventilation of the module.",
+            "Apply the atmospheric emergency procedure and don masks if applicable.",
         ],
-        destinatarios=[
-            DestinatarioNotificacion.TRIPULACION_COMPLETA,
-            DestinatarioNotificacion.MEDICO_VUELO,
-            DestinatarioNotificacion.CONTROL_MISION,
+        recipients=[
+            NotificationRecipient.FULL_CREW,
+            NotificationRecipient.FLIGHT_SURGEON,
+            NotificationRecipient.MISSION_CONTROL,
         ],
-        base_evidencia="NASA-STD-3001 [V2 6004]; SpO2 < 94% + CO2 >= 4 mmHg",
-        ventana_persistencia="Sostenida 10 minutos en 2 o más tripulantes",
-        prioridad_jerarquica=1,
-    ),
-
-    # 4.2 Estado de Alerta y Desempeño Cognitivo (Prioridad 2)
-    ReglaDefinicion(
-        id_regla="CX-03",
-        dominio=DominioRegla.ESTADO_ALERTA_COGNITIVO,
-        nivel=NivelSeveridadRegla.ALERTA,
-        evaluacion_preliminar="Incongruencia cognitiva por fatiga ambiental",
-        contramedidas=[
-            "Solicitar al control ambiental reducir CO2 y reforzar ventilación de la estación de sueño.",
-            "Bloquear 8.5 h de ciclo de descanso estricto en la agenda diaria (estándar NASA).",
-            "Realizar prueba PVT-B antes de tareas críticas; reprogramar si hay lapsos fuera de línea base.",
-        ],
-        destinatarios=[
-            DestinatarioNotificacion.ASTRONAUTA,
-            DestinatarioNotificacion.MEDICO_VUELO,
-        ],
-        base_evidencia="Barger et al. (2014); Law et al. (2014); ASTRA Protocol",
-        ventana_persistencia="3 noches con sueño < 6h + CO2 > 2.5 mmHg",
-        prioridad_jerarquica=2,
-    ),
-    ReglaDefinicion(
-        id_regla="CX-04",
-        dominio=DominioRegla.ESTADO_ALERTA_COGNITIVO,
-        nivel=NivelSeveridadRegla.PRECAUCION,
-        evaluacion_preliminar="Deuda de sueño no percibida (la persona se siente bien, pero su vigilancia empeoró)",
-        contramedidas=[
-            "Mostrar al astronauta su gráfica objetiva de lapsos PVT-B para evitar autopercepción engañosa.",
-            "Programar 2 noches continuas de sueño de recuperación de 8.5 h.",
-            "Eliminar exposición a luz azul de pantallas 60 minutos antes de dormir.",
-        ],
-        destinatarios=[DestinatarioNotificacion.ASTRONAUTA],
-        base_evidencia="Van Dongen et al. (2003); Barger et al. (2014)",
-        ventana_persistencia="Deuda > 10h en 7 días + lapsos PVT-B +50%",
-        prioridad_jerarquica=2,
-    ),
-    ReglaDefinicion(
-        id_regla="CX-05",
-        dominio=DominioRegla.ESTADO_ALERTA_COGNITIVO,
-        nivel=NivelSeveridadRegla.ALERTA,
-        evaluacion_preliminar="Riesgo de alerta reducida residual (uso previo de hipnótico)",
-        contramedidas=[
-            "Notificar al médico de vuelo sobre la proximidad de la tarea crítica.",
-            "Proponer reasignar o reprogramar la tarea crítica (atraque, robótica o EVA).",
-            "Implementar protocolo de doble verificación cruzada por otro tripulante.",
-        ],
-        destinatarios=[
-            DestinatarioNotificacion.ASTRONAUTA,
-            DestinatarioNotificacion.MEDICO_VUELO,
-        ],
-        base_evidencia="Barger et al. (2014) Lancet Neurology",
-        ventana_persistencia="Uso de hipnótico < 8h previas + tarea crítica programada",
-        prioridad_jerarquica=2,
-    ),
-    ReglaDefinicion(
-        id_regla="CX-06",
-        dominio=DominioRegla.ESTADO_ALERTA_COGNITIVO,
-        nivel=NivelSeveridadRegla.ALERTA,
-        evaluacion_preliminar="Sobrecarga fisiológica por estrés operativo continuado",
-        contramedidas=[
-            "Recomendar al planificador de misión redistribuir tareas no críticas de la jornada.",
-            "Establecer un bloque obligatorio de descanso de 2 h sin pantallas de trabajo.",
-            "Sesión de ejercicio aeróbico moderado de 20 minutos para regulación autonómica.",
-        ],
-        destinatarios=[
-            DestinatarioNotificacion.ASTRONAUTA,
-            DestinatarioNotificacion.MEDICO_VUELO,
-        ],
-        base_evidencia="NASA Behavioral Health & Performance (BHP); HRV -20%",
-        ventana_persistencia="Jornada > 12h durante 3 días + FC +10% + HRV -20%",
-        prioridad_jerarquica=2,
+        evidence_base="NASA-STD-3001 [V2 6004]; SpO2 < 94% + CO2 >= 4 mmHg",
+        persistence_window="Sustained 10 minutes in 2 or more crew members",
+        hierarchical_priority=1,
     ),
 
-    # 4.3 Ambiente de Cabina (Prioridad 2)
-    ReglaDefinicion(
-        id_regla="CX-07",
-        dominio=DominioRegla.AMBIENTE_CABINA,
-        nivel=NivelSeveridadRegla.ALERTA,
-        evaluacion_preliminar="Síntomas compatibles con exposición a concentración elevada de CO2",
-        contramedidas=[
-            "Trasladarse a un módulo de la nave o hábitat con mayor tasa de ventilación forzada.",
-            "Avisar a control ambiental para elevar el ciclo de absorción de cartuchos de CO2.",
-            "Registrar autoevaluación sintomática cada 4 horas en el sistema de salud.",
+    # 4.2 Alertness and Cognitive Performance (Priority 2)
+    RuleDefinition(
+        rule_id="CX-03",
+        domain=RuleDomain.COGNITIVE_ALERTNESS,
+        level=RuleSeverityLevel.ALERT,
+        preliminary_assessment="Cognitive incongruence from environmental fatigue",
+        countermeasures=[
+            "Ask environmental control to reduce CO2 and reinforce ventilation of the sleep station.",
+            "Block 8.5 h of strict rest cycle in the daily schedule (NASA standard).",
+            "Run a PVT-B test before critical tasks; reschedule if there are lapses outside the baseline.",
         ],
-        destinatarios=[
-            DestinatarioNotificacion.ASTRONAUTA,
-            DestinatarioNotificacion.MEDICO_VUELO,
+        recipients=[
+            NotificationRecipient.ASTRONAUT,
+            NotificationRecipient.FLIGHT_SURGEON,
         ],
-        base_evidencia="NASA-STD-3001 [V2 6004]; Law et al. (2014)",
-        ventana_persistencia="CO2 1h >= 3.0 mmHg + cefalea reportada + día > 7",
-        prioridad_jerarquica=2,
+        evidence_base="Barger et al. (2014); Law et al. (2014); ASTRA Protocol",
+        persistence_window="3 nights with sleep < 6h + CO2 > 2.5 mmHg",
+        hierarchical_priority=2,
     ),
-    ReglaDefinicion(
-        id_regla="CX-08",
-        dominio=DominioRegla.AMBIENTE_CABINA,
-        nivel=NivelSeveridadRegla.PRECAUCION,
-        evaluacion_preliminar="Calidad de descanso alterada por estrés térmico ambiental",
-        contramedidas=[
-            "Ajustar el termostato de la estación de sueño hacia el rango confortable (20-22 °C).",
-            "Revisar el difusor de ventilación personal en el camarote individual.",
-            "Ajustar la vestimenta térmica o capas del saco de dormir espacial.",
+    RuleDefinition(
+        rule_id="CX-04",
+        domain=RuleDomain.COGNITIVE_ALERTNESS,
+        level=RuleSeverityLevel.CAUTION,
+        preliminary_assessment="Unperceived sleep debt (the person feels fine, but their vigilance worsened)",
+        countermeasures=[
+            "Show the astronaut their objective PVT-B lapse chart to counter misleading self-perception.",
+            "Schedule 2 continuous nights of 8.5 h recovery sleep.",
+            "Eliminate blue light exposure from screens 60 minutes before sleep.",
         ],
-        destinatarios=[DestinatarioNotificacion.ASTRONAUTA],
-        base_evidencia="NASA-STD-3001 [V2 6003]; Barger et al. (2014)",
-        ventana_persistencia="Temperatura/humedad fuera de rango durante 2 noches",
-        prioridad_jerarquica=4,
+        recipients=[NotificationRecipient.ASTRONAUT],
+        evidence_base="Van Dongen et al. (2003); Barger et al. (2014)",
+        persistence_window="Debt > 10h over 7 days + PVT-B lapses +50%",
+        hierarchical_priority=2,
     ),
-
-    # 4.4 Hueso, Riñón y Nutrición (Foco Primario de Prevención - Prioridad 3)
-    ReglaDefinicion(
-        id_regla="CX-09",
-        dominio=DominioRegla.HUESO_NUTRICION,
-        nivel=NivelSeveridadRegla.ALERTA,
-        evaluacion_preliminar="Riesgo acelerado de pérdida ósea en ventana crítica de misión",
-        contramedidas=[
-            "Reprogramar sesiones de sentadilla y peso muerto en ARED hasta cubrir meta semanal.",
-            "Incorporar un suplemento o snack con alta biodisponibilidad de proteína.",
-            "Avisar al médico de vuelo si el déficit de carga mecánica persiste por 7 días.",
+    RuleDefinition(
+        rule_id="CX-05",
+        domain=RuleDomain.COGNITIVE_ALERTNESS,
+        level=RuleSeverityLevel.ALERT,
+        preliminary_assessment="Risk of residual reduced alertness (prior hypnotic use)",
+        countermeasures=[
+            "Notify the flight surgeon about the proximity of the critical task.",
+            "Propose reassigning or rescheduling the critical task (docking, robotics or EVA).",
+            "Implement a cross double-check protocol with another crew member.",
         ],
-        destinatarios=[
-            DestinatarioNotificacion.ASTRONAUTA,
-            DestinatarioNotificacion.MEDICO_VUELO,
+        recipients=[
+            NotificationRecipient.ASTRONAUT,
+            NotificationRecipient.FLIGHT_SURGEON,
         ],
-        base_evidencia="Metaanálisis npj Microgravity (2020); NASA HSRB; Carga ARED < 80%",
-        ventana_persistencia="Día misión 1-30 + carga semanal < 80% + energía < 80%",
-        prioridad_jerarquica=3,
+        evidence_base="Barger et al. (2014) Lancet Neurology",
+        persistence_window="Hypnotic use < 8h prior + critical task scheduled",
+        hierarchical_priority=2,
     ),
-    ReglaDefinicion(
-        id_regla="CX-10",
-        dominio=DominioRegla.HUESO_NUTRICION,
-        nivel=NivelSeveridadRegla.ALERTA,
-        evaluacion_preliminar="Riesgo de saturación mineral y formación de cálculos renales",
-        contramedidas=[
-            "Incrementar la ingesta de líquidos hasta la meta prescrita (2.0 a 2.5 L/día).",
-            "Reducir el consumo de sodio en las raciones alimentarias del día.",
-            "Avisar al médico de vuelo para evaluar profilaxis médica (el citrato lo decide el médico).",
+    RuleDefinition(
+        rule_id="CX-06",
+        domain=RuleDomain.COGNITIVE_ALERTNESS,
+        level=RuleSeverityLevel.ALERT,
+        preliminary_assessment="Physiological overload from sustained operational stress",
+        countermeasures=[
+            "Recommend the mission planner redistribute non-critical tasks for the day.",
+            "Establish a mandatory 2 h rest block with no work screens.",
+            "20-minute moderate aerobic exercise session for autonomic regulation.",
         ],
-        destinatarios=[
-            DestinatarioNotificacion.ASTRONAUTA,
-            DestinatarioNotificacion.MEDICO_VUELO,
+        recipients=[
+            NotificationRecipient.ASTRONAUT,
+            NotificationRecipient.FLIGHT_SURGEON,
         ],
-        base_evidencia="NASA NTRS Goodenow et al. (2022); Orina < 2 L/día durante 3 días",
-        ventana_persistencia="Volumen orina < 2 L/día durante 3 días + ingesta < 2 L",
-        prioridad_jerarquica=3,
-    ),
-    ReglaDefinicion(
-        id_regla="CX-11",
-        dominio=DominioRegla.HUESO_NUTRICION,
-        nivel=NivelSeveridadRegla.PRECAUCION,
-        evaluacion_preliminar="Riesgo de deficiencia de vitamina D por falta de radiación solar UV",
-        contramedidas=[
-            "Recordatorio activo de ingesta de la dosis prescrita de vitamina D (800 UI/día).",
-            "Confirmar y registrar la toma del suplemento en el panel del astronauta.",
-        ],
-        destinatarios=[DestinatarioNotificacion.ASTRONAUTA],
-        base_evidencia="NASA Nutritional Requirements; Smith et al. (2012)",
-        ventana_persistencia="Dosis < 800 UI/día durante 7 días consecutivos",
-        prioridad_jerarquica=3,
-    ),
-    ReglaDefinicion(
-        id_regla="CX-12",
-        dominio=DominioRegla.HUESO_NUTRICION,
-        nivel=NivelSeveridadRegla.ALERTA,
-        evaluacion_preliminar="Balance energético negativo sostenido (gasto calórico superior a la ingesta)",
-        contramedidas=[
-            "Ajustar el menú diario al requerimiento calórico total de la misión.",
-            "Priorizar colaciones con carbohidratos complejos y proteína tras el entrenamiento.",
-            "Solicitar teleconsulta de revisión con el especialista en nutrición de vuelo.",
-        ],
-        destinatarios=[
-            DestinatarioNotificacion.ASTRONAUTA,
-            DestinatarioNotificacion.MEDICO_VUELO,
-        ],
-        base_evidencia="NASA Human Research Program; Pérdida corporal > 2% en 2 semanas",
-        ventana_persistencia="Masa corporal -2% en 2 semanas + energía < 80%",
-        prioridad_jerarquica=3,
-    ),
-    ReglaDefinicion(
-        id_regla="CX-13",
-        dominio=DominioRegla.HUESO_NUTRICION,
-        nivel=NivelSeveridadRegla.PRECAUCION,
-        evaluacion_preliminar="Descarga osteo-mecánica por confinamiento forzado en hábitat marciano",
-        contramedidas=[
-            "Incrementar la carga de resistencia en el equipo de ejercicio del hábitat para compensar.",
-            "Completar una rutina corta de saltos o impacto controlado dentro de las instalaciones.",
-        ],
-        destinatarios=[DestinatarioNotificacion.ASTRONAUTA],
-        base_evidencia="NASA JPL (Tormentas globales de polvo); Actividad EVA < 50% en 5 soles",
-        ventana_persistencia="5 soles con actividad exterior reducida + carga < 80%",
-        prioridad_jerarquica=3,
+        evidence_base="NASA Behavioral Health & Performance (BHP); HRV -20%",
+        persistence_window="Workday > 12h over 3 days + HR +10% + HRV -20%",
+        hierarchical_priority=2,
     ),
 
-    # 4.5 Conducta y Bienestar Psicológico (Prioridad 4)
-    ReglaDefinicion(
-        id_regla="CX-14",
-        dominio=DominioRegla.CONDUCTA_PSICOLOGICA,
-        nivel=NivelSeveridadRegla.ALERTA,
-        evaluacion_preliminar="Patrón compatible con retraimiento por aislamiento prolongado",
-        contramedidas=[
-            "Habilitar ventana privada para enlace con familiares (mensaje de video asíncrono en Marte).",
-            "Proponer una actividad colaborativa de grupo o tareas de biofilia (cuidado del invernadero).",
-            "Notificar discretamente al equipo de soporte psicológico de la misión.",
+    # 4.3 Cabin Environment (Priority 2)
+    RuleDefinition(
+        rule_id="CX-07",
+        domain=RuleDomain.CABIN_ENVIRONMENT,
+        level=RuleSeverityLevel.ALERT,
+        preliminary_assessment="Symptoms consistent with exposure to elevated CO2 concentration",
+        countermeasures=[
+            "Move to a spacecraft or habitat module with a higher forced ventilation rate.",
+            "Notify environmental control to raise the absorption cycle of the CO2 cartridges.",
+            "Log a symptomatic self-assessment every 4 hours in the health system.",
         ],
-        destinatarios=[
-            DestinatarioNotificacion.ASTRONAUTA,
-            DestinatarioNotificacion.MEDICO_VUELO,
+        recipients=[
+            NotificationRecipient.ASTRONAUT,
+            NotificationRecipient.FLIGHT_SURGEON,
         ],
-        base_evidencia="NASA Behavioral Health Protocol; Contacto social -50% durante 5 días",
-        ventana_persistencia="Contacto social -50% durante 5 días + ánimo bajo",
-        prioridad_jerarquica=4,
+        evidence_base="NASA-STD-3001 [V2 6004]; Law et al. (2014)",
+        persistence_window="CO2 1h >= 3.0 mmHg + headache reported + day > 7",
+        hierarchical_priority=2,
     ),
-    ReglaDefinicion(
-        id_regla="CX-15",
-        dominio=DominioRegla.CONDUCTA_PSICOLOGICA,
-        nivel=NivelSeveridadRegla.PRECAUCION,
-        evaluacion_preliminar="Disminución de motivación operativa con impacto en el autocuidado",
-        contramedidas=[
-            "Presentar en dashboard un resumen de refuerzo positivo con hitos cumplidos en la misión.",
-            "Ajustar temporalmente la meta de ejercicio del día para favorecer la adherencia al hábito.",
-            "Si la desmotivación persiste 7 días, derivar a sesión de apoyo con psicología de vuelo.",
+    RuleDefinition(
+        rule_id="CX-08",
+        domain=RuleDomain.CABIN_ENVIRONMENT,
+        level=RuleSeverityLevel.CAUTION,
+        preliminary_assessment="Rest quality degraded by ambient thermal stress",
+        countermeasures=[
+            "Adjust the sleep station thermostat toward the comfortable range (20-22 °C).",
+            "Inspect the personal ventilation diffuser in the individual crew quarters.",
+            "Adjust the thermal clothing or layers of the space sleeping bag.",
         ],
-        destinatarios=[DestinatarioNotificacion.ASTRONAUTA],
-        base_evidencia="Gao et al. (2022); Adherencia a ejercicio < 70% semanal + voz alterada",
-        ventana_persistencia="Ánimo bajo + adherencia < 70% semanal",
-        prioridad_jerarquica=4,
+        recipients=[NotificationRecipient.ASTRONAUT],
+        evidence_base="NASA-STD-3001 [V2 6003]; Barger et al. (2014)",
+        persistence_window="Temperature/humidity out of range for 2 nights",
+        hierarchical_priority=4,
+    ),
+
+    # 4.4 Bone, Kidney and Nutrition (Primary Prevention Focus - Priority 3)
+    RuleDefinition(
+        rule_id="CX-09",
+        domain=RuleDomain.BONE_NUTRITION,
+        level=RuleSeverityLevel.ALERT,
+        preliminary_assessment="Accelerated bone loss risk in a critical mission window",
+        countermeasures=[
+            "Reschedule squat and deadlift sessions on ARED until the weekly target is met.",
+            "Add a supplement or snack with high protein bioavailability.",
+            "Notify the flight surgeon if the mechanical loading deficit persists for 7 days.",
+        ],
+        recipients=[
+            NotificationRecipient.ASTRONAUT,
+            NotificationRecipient.FLIGHT_SURGEON,
+        ],
+        evidence_base="npj Microgravity meta-analysis (2020); NASA HSRB; ARED load < 80%",
+        persistence_window="Mission day 1-30 + weekly load < 80% + energy < 80%",
+        hierarchical_priority=3,
+    ),
+    RuleDefinition(
+        rule_id="CX-10",
+        domain=RuleDomain.BONE_NUTRITION,
+        level=RuleSeverityLevel.ALERT,
+        preliminary_assessment="Risk of mineral saturation and kidney stone formation",
+        countermeasures=[
+            "Increase fluid intake up to the prescribed target (2.0 to 2.5 L/day).",
+            "Reduce sodium consumption in the day's food rations.",
+            "Notify the flight surgeon to evaluate medical prophylaxis (citrate is the surgeon's call).",
+        ],
+        recipients=[
+            NotificationRecipient.ASTRONAUT,
+            NotificationRecipient.FLIGHT_SURGEON,
+        ],
+        evidence_base="NASA NTRS Goodenow et al. (2022); Urine < 2 L/day for 3 days",
+        persistence_window="Urine volume < 2 L/day for 3 days + intake < 2 L",
+        hierarchical_priority=3,
+    ),
+    RuleDefinition(
+        rule_id="CX-11",
+        domain=RuleDomain.BONE_NUTRITION,
+        level=RuleSeverityLevel.CAUTION,
+        preliminary_assessment="Risk of vitamin D deficiency from lack of solar UV radiation",
+        countermeasures=[
+            "Active reminder to take the prescribed vitamin D dose (800 IU/day).",
+            "Confirm and log the supplement intake in the astronaut panel.",
+        ],
+        recipients=[NotificationRecipient.ASTRONAUT],
+        evidence_base="NASA Nutritional Requirements; Smith et al. (2012)",
+        persistence_window="Dose < 800 IU/day for 7 consecutive days",
+        hierarchical_priority=3,
+    ),
+    RuleDefinition(
+        rule_id="CX-12",
+        domain=RuleDomain.BONE_NUTRITION,
+        level=RuleSeverityLevel.ALERT,
+        preliminary_assessment="Sustained negative energy balance (caloric expenditure above intake)",
+        countermeasures=[
+            "Adjust the daily menu to the total caloric requirement of the mission.",
+            "Prioritize snacks with complex carbohydrates and protein after training.",
+            "Request a review teleconsultation with the flight nutrition specialist.",
+        ],
+        recipients=[
+            NotificationRecipient.ASTRONAUT,
+            NotificationRecipient.FLIGHT_SURGEON,
+        ],
+        evidence_base="NASA Human Research Program; Body loss > 2% in 2 weeks",
+        persistence_window="Body mass -2% in 2 weeks + energy < 80%",
+        hierarchical_priority=3,
+    ),
+    RuleDefinition(
+        rule_id="CX-13",
+        domain=RuleDomain.BONE_NUTRITION,
+        level=RuleSeverityLevel.CAUTION,
+        preliminary_assessment="Osteo-mechanical unloading from forced confinement in the Martian habitat",
+        countermeasures=[
+            "Increase the resistance load on the habitat exercise equipment to compensate.",
+            "Complete a short routine of jumps or controlled impact inside the facility.",
+        ],
+        recipients=[NotificationRecipient.ASTRONAUT],
+        evidence_base="NASA JPL (Global dust storms); EVA activity < 50% over 5 sols",
+        persistence_window="5 sols with reduced outdoor activity + load < 80%",
+        hierarchical_priority=3,
+    ),
+
+    # 4.5 Behavior and Psychological Wellbeing (Priority 4)
+    RuleDefinition(
+        rule_id="CX-14",
+        domain=RuleDomain.PSYCHOLOGICAL_BEHAVIOR,
+        level=RuleSeverityLevel.ALERT,
+        preliminary_assessment="Pattern consistent with withdrawal from prolonged isolation",
+        countermeasures=[
+            "Enable a private window for a family link (asynchronous video message on Mars).",
+            "Propose a collaborative group activity or biophilia tasks (greenhouse care).",
+            "Discreetly notify the mission psychological support team.",
+        ],
+        recipients=[
+            NotificationRecipient.ASTRONAUT,
+            NotificationRecipient.FLIGHT_SURGEON,
+        ],
+        evidence_base="NASA Behavioral Health Protocol; Social contact -50% over 5 days",
+        persistence_window="Social contact -50% over 5 days + low mood",
+        hierarchical_priority=4,
+    ),
+    RuleDefinition(
+        rule_id="CX-15",
+        domain=RuleDomain.PSYCHOLOGICAL_BEHAVIOR,
+        level=RuleSeverityLevel.CAUTION,
+        preliminary_assessment="Decline in operational motivation with an impact on self-care",
+        countermeasures=[
+            "Present a positive reinforcement summary on the dashboard with mission milestones met.",
+            "Temporarily adjust the day's exercise goal to favor habit adherence.",
+            "If the demotivation persists for 7 days, refer to a support session with flight psychology.",
+        ],
+        recipients=[NotificationRecipient.ASTRONAUT],
+        evidence_base="Gao et al. (2022); Exercise adherence < 70% weekly + altered voice",
+        persistence_window="Low mood + adherence < 70% weekly",
+        hierarchical_priority=4,
     ),
 ]

@@ -1,1 +1,1 @@
-"""Capa de routers y controladores de API REST para H.E.L.I.O.S."""
+"""REST API router and controller layer for H.E.L.I.O.S."""

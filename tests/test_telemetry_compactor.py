@@ -1,9 +1,9 @@
 """
-Pruebas de la compactación de telemetría de H.E.L.I.O.S.
+Tests of the H.E.L.I.O.S. telemetry compaction.
 
-Garantizan que el formato de enlace reducido (códigos + valores numéricos)
-reconstruye exactamente el texto del reporte consolidado y que el ahorro de
-volumen se mantiene dentro del orden de magnitud comprometido.
+They guarantee that the reduced link format (codes + numeric values) reconstructs
+exactly the text of the consolidated report and that the volume savings stay
+within the committed order of magnitude.
 """
 
 import json
@@ -12,187 +12,187 @@ from typing import Any
 import pytest
 from fastapi.testclient import TestClient
 
-from helios_inference.domain.compact_models import RegistroTelemetriaCompacto
-from helios_inference.domain.telemetry_codebook import ORDEN_METRICAS, construir_codebook
+from helios_inference.domain.compact_models import CompactTelemetryRecord
+from helios_inference.domain.telemetry_codebook import METRIC_ORDER, build_codebook
 from helios_inference.services.inference_engine import InferenceEngine
-from helios_inference.services.telemetry_compactor import compactar, expandir
+from helios_inference.services.telemetry_compactor import compact_record, expand
 from main import app
 
 
-def _payload(**sobrescribir: Any) -> dict[str, Any]:
-    """Construye un payload de telemetría nominal, permitiendo sobrescribir secciones."""
+def _payload(**overrides: Any) -> dict[str, Any]:
+    """Builds a nominal telemetry payload, allowing sections to be overridden."""
     base: dict[str, Any] = {
-        "id_mision": "ARES-VI-MARS-EXPEDITION",
-        "dia_mision": 120,
-        "astronauta_id": "ASTRO-HELIOS-01",
-        "entorno": {
+        "mission_id": "ARES-VI-MARS-EXPEDITION",
+        "mission_day": 120,
+        "astronaut_id": "ASTRO-HELIOS-01",
+        "environment": {
             "co2_mmHg": 3.4,
-            "radiacion_acumulada_mSv": 85.0,
-            "presion_cabina_kpa": 101.3,
-            "evento_solar_activo": False,
+            "cumulative_radiation_mSv": 85.0,
+            "cabin_pressure_kpa": 101.3,
+            "solar_event_active": False,
         },
-        "biometria": {
-            "ritmo_cardiaco_bpm": 68.0,
-            "horas_sueno_ultimo_ciclo": 5.8,
-            "perdida_osea_pct": 1.8,
-            "alerta_riesgo_fatiga": False,
+        "biometrics": {
+            "heart_rate_bpm": 68.0,
+            "last_cycle_sleep_hours": 5.8,
+            "bone_loss_pct": 1.8,
+            "fatigue_risk_alert": False,
         },
-        "cognicion": {
-            "latencia_voz_ms": 720.0,
-            "densidad_lexica_score": 0.82,
-            "sans_sintoma_vision": True,
+        "cognition": {
+            "voice_latency_ms": 720.0,
+            "lexical_density_score": 0.82,
+            "sans_vision_symptom": True,
         },
     }
-    base.update(sobrescribir)
+    base.update(overrides)
     return base
 
 
 @pytest.fixture(scope="module")
-def motor() -> InferenceEngine:
+def engine() -> InferenceEngine:
     return InferenceEngine()
 
 
 @pytest.fixture(scope="module")
 def codebook() -> dict[str, Any]:
-    return construir_codebook()
+    return build_codebook()
 
 
 @pytest.fixture(scope="module")
-def cliente() -> TestClient:
+def client() -> TestClient:
     return TestClient(app)
 
 
-class TestLibroDeCodigos:
-    """El libro de códigos debe cubrir el catálogo completo sin divergir de él."""
+class TestCodebook:
+    """The codebook must cover the full catalog without diverging from it."""
 
-    def test_codebook_cubre_las_15_reglas(self, codebook: dict[str, Any]) -> None:
-        assert len(codebook["reglas"]) == 15
-        assert {r["codigo"] for r in codebook["reglas"]} >= {"CX-01", "CX-03", "CX-15"}
+    def test_codebook_covers_the_15_rules(self, codebook: dict[str, Any]) -> None:
+        assert len(codebook["rules"]) == 15
+        assert {r["code"] for r in codebook["rules"]} >= {"CX-01", "CX-03", "CX-15"}
 
-    def test_codebook_cubre_las_12_aristas_de_kronecker(self, codebook: dict[str, Any]) -> None:
-        assert len(codebook["aristas_kronecker"]) == 12
-        assert codebook["aristas_kronecker"][3]["codigo"] == "KR03"
+    def test_codebook_covers_the_12_kronecker_edges(self, codebook: dict[str, Any]) -> None:
+        assert len(codebook["kronecker_edges"]) == 12
+        assert codebook["kronecker_edges"][3]["code"] == "KR03"
 
-    def test_orden_de_metricas_es_contrato_estable(self, codebook: dict[str, Any]) -> None:
-        assert codebook["orden_metricas"] == list(ORDEN_METRICAS)
-        assert codebook["orden_metricas"][0] == "co2_mmHg"
+    def test_metric_order_is_a_stable_contract(self, codebook: dict[str, Any]) -> None:
+        assert codebook["metric_order"] == list(METRIC_ORDER)
+        assert codebook["metric_order"][0] == "co2_mmHg"
 
 
-class TestReconstruccionSinPerdida:
-    """La expansión debe devolver exactamente el texto que emitió el motor."""
+class TestLosslessReconstruction:
+    """The expansion must return exactly the text the engine emitted."""
 
     @pytest.mark.parametrize(
-        "mutacion",
+        "mutation",
         [
             {},
-            {"entorno": {"co2_mmHg": 1.2, "radiacion_acumulada_mSv": 40.0,
-                         "presion_cabina_kpa": 101.3, "evento_solar_activo": False}},
-            {"entorno": {"co2_mmHg": 4.2, "radiacion_acumulada_mSv": 700.0,
-                         "presion_cabina_kpa": 88.0, "evento_solar_activo": True}},
-            {"biometria": {"ritmo_cardiaco_bpm": 132.0, "horas_sueno_ultimo_ciclo": 3.1,
-                           "perdida_osea_pct": 3.2, "alerta_riesgo_fatiga": True}},
-            {"dia_mision": 5},
+            {"environment": {"co2_mmHg": 1.2, "cumulative_radiation_mSv": 40.0,
+                             "cabin_pressure_kpa": 101.3, "solar_event_active": False}},
+            {"environment": {"co2_mmHg": 4.2, "cumulative_radiation_mSv": 700.0,
+                             "cabin_pressure_kpa": 88.0, "solar_event_active": True}},
+            {"biometrics": {"heart_rate_bpm": 132.0, "last_cycle_sleep_hours": 3.1,
+                            "bone_loss_pct": 3.2, "fatigue_risk_alert": True}},
+            {"mission_day": 5},
         ],
-        ids=["nominal", "sin_alertas", "tormenta_solar", "taquicardia", "dia_temprano"],
+        ids=["nominal", "no_alerts", "solar_storm", "tachycardia", "early_day"],
     )
-    def test_evaluaciones_identicas(
-        self, motor: InferenceEngine, codebook: dict[str, Any], mutacion: dict[str, Any]
+    def test_identical_assessments(
+        self, engine: InferenceEngine, codebook: dict[str, Any], mutation: dict[str, Any]
     ) -> None:
-        payload = _payload(**mutacion)
-        reporte = motor.procesar_telemetria(payload)
-        expandido = expandir(compactar(reporte, payload), codebook)
+        payload = _payload(**mutation)
+        report = engine.process_telemetry(payload)
+        expanded = expand(compact_record(report, payload), codebook)
 
-        assert sorted(expandido["evaluaciones_preliminares_activas"]) == sorted(
-            reporte.evaluaciones_preliminares_activas
+        assert sorted(expanded["active_preliminary_assessments"]) == sorted(
+            report.active_preliminary_assessments
         )
-        assert expandido["contramedidas_priorizadas"] == reporte.contramedidas_priorizadas
+        assert expanded["prioritized_countermeasures"] == report.prioritized_countermeasures
         assert (
-            expandido["arista_sinergica_critica"]
-            == reporte.cerebro_3_grafo_fusion.arista_sinergica_critica
+            expanded["critical_synergy_edge"]
+            == report.brain_3_fusion_graph.critical_synergy_edge
         )
 
-    def test_niveles_de_regla_respetan_la_escalada(
-        self, motor: InferenceEngine, codebook: dict[str, Any]
+    def test_rule_levels_respect_escalation(
+        self, engine: InferenceEngine, codebook: dict[str, Any]
     ) -> None:
         payload = _payload(
-            biometria={
-                "ritmo_cardiaco_bpm": 68.0,
-                "horas_sueno_ultimo_ciclo": 4.0,
-                "perdida_osea_pct": 1.8,
-                "alerta_riesgo_fatiga": True,
-                "ciclos_sueno_insuficiente_consecutivos": 4,
+            biometrics={
+                "heart_rate_bpm": 68.0,
+                "last_cycle_sleep_hours": 4.0,
+                "bone_loss_pct": 1.8,
+                "fatigue_risk_alert": True,
+                "consecutive_insufficient_sleep_cycles": 4,
             }
         )
-        reporte = motor.procesar_telemetria(payload)
-        expandido = expandir(compactar(reporte, payload), codebook)
+        report = engine.process_telemetry(payload)
+        expanded = expand(compact_record(report, payload), codebook)
 
-        niveles_originales = [(a.id_regla, a.nivel.value) for a in reporte.alertas_matriz_decisiones]
-        niveles_expandidos = [(a["id_regla"], a["nivel"]) for a in expandido["alertas_matriz_decisiones"]]
-        assert niveles_expandidos == niveles_originales
+        original_levels = [(a.rule_id, a.level.value) for a in report.decision_matrix_alerts]
+        expanded_levels = [(a["rule_id"], a["level"]) for a in expanded["decision_matrix_alerts"]]
+        assert expanded_levels == original_levels
 
-    def test_el_compactador_no_depende_del_texto_del_reporte(
-        self, motor: InferenceEngine
+    def test_compactor_does_not_depend_on_report_text(
+        self, engine: InferenceEngine
     ) -> None:
-        """Cambiar la redacción no debe alterar el registro compacto."""
+        """Changing the wording must not alter the compact record."""
         payload = _payload()
-        reporte = motor.procesar_telemetria(payload)
-        registro_original = compactar(reporte, payload)
+        report = engine.process_telemetry(payload)
+        original_record = compact_record(report, payload)
 
-        mutado = reporte.model_copy(
-            update={"evaluaciones_preliminares_activas": ["TEXTO ARBITRARIO DISTINTO"]}
+        mutated = report.model_copy(
+            update={"active_preliminary_assessments": ["ARBITRARY DIFFERENT TEXT"]}
         )
-        assert compactar(mutado, payload).model_dump() == registro_original.model_dump()
+        assert compact_record(mutated, payload).model_dump() == original_record.model_dump()
 
 
-class TestAhorroDeVolumen:
-    """El registro compacto debe mantener el orden de magnitud de reducción."""
+class TestVolumeSavings:
+    """The compact record must preserve the order of magnitude of the reduction."""
 
-    def test_reduccion_minima_de_un_orden_de_magnitud(self, motor: InferenceEngine) -> None:
+    def test_minimum_reduction_of_one_order_of_magnitude(self, engine: InferenceEngine) -> None:
         payload = _payload()
-        reporte = motor.procesar_telemetria(payload)
+        report = engine.process_telemetry(payload)
 
-        bytes_completo = len(reporte.model_dump_json().encode("utf-8"))
-        bytes_compacto = len(compactar(reporte, payload).model_dump_json().encode("utf-8"))
+        full_bytes = len(report.model_dump_json().encode("utf-8"))
+        compact_bytes = len(compact_record(report, payload).model_dump_json().encode("utf-8"))
 
-        assert bytes_compacto < bytes_completo / 10, (
-            f"Reducción insuficiente: {bytes_completo} B -> {bytes_compacto} B"
+        assert compact_bytes < full_bytes / 10, (
+            f"Insufficient reduction: {full_bytes} B -> {compact_bytes} B"
         )
 
-    def test_el_registro_absorbe_las_metricas_crudas(self, motor: InferenceEngine) -> None:
-        """El compacto sustituye también al payload de entrada: debe portar las métricas."""
+    def test_record_absorbs_the_raw_metrics(self, engine: InferenceEngine) -> None:
+        """The compact record also replaces the input payload: it must carry the metrics."""
         payload = _payload()
-        registro = compactar(motor.procesar_telemetria(payload), payload)
+        record = compact_record(engine.process_telemetry(payload), payload)
 
-        assert len(registro.met) == len(ORDEN_METRICAS)
-        assert registro.met[0] == pytest.approx(payload["entorno"]["co2_mmHg"])
-        assert registro.met[3] == pytest.approx(payload["biometria"]["ritmo_cardiaco_bpm"])
+        assert len(record.met) == len(METRIC_ORDER)
+        assert record.met[0] == pytest.approx(payload["environment"]["co2_mmHg"])
+        assert record.met[3] == pytest.approx(payload["biometrics"]["heart_rate_bpm"])
 
 
-class TestEndpointsDeTelemetria:
-    """Contrato HTTP del router de telemetría compacta."""
+class TestTelemetryEndpoints:
+    """HTTP contract of the compact telemetry router."""
 
-    def test_codebook_se_sirve_cacheable(self, cliente: TestClient) -> None:
-        resp = cliente.get("/api/v1/telemetria/codebook")
+    def test_codebook_is_served_cacheable(self, client: TestClient) -> None:
+        resp = client.get("/api/v1/telemetry/codebook")
         assert resp.status_code == 200
         assert "max-age" in resp.headers.get("cache-control", "")
-        assert len(resp.json()["reglas"]) == 15
+        assert len(resp.json()["rules"]) == 15
 
-    def test_ciclo_compacto_es_menor_que_el_reporte_completo(self, cliente: TestClient) -> None:
-        compacto = cliente.get("/api/v1/telemetria/compacto")
-        completo = cliente.get("/api/v1/fusion/resultado")
-        assert compacto.status_code == 200
-        assert len(compacto.content) < len(completo.content)
+    def test_compact_cycle_is_smaller_than_the_full_report(self, client: TestClient) -> None:
+        compact = client.get("/api/v1/telemetry/compact")
+        full = client.get("/api/v1/fusion/result")
+        assert compact.status_code == 200
+        assert len(compact.content) < len(full.content)
 
-    def test_registro_compacto_valida_contra_su_esquema(self, cliente: TestClient) -> None:
-        registro = RegistroTelemetriaCompacto(**cliente.get("/api/v1/telemetria/compacto").json())
-        assert registro.v == 1
-        assert len(registro.amb) == 3
-        assert len(registro.bio) == 4
+    def test_compact_record_validates_against_its_schema(self, client: TestClient) -> None:
+        record = CompactTelemetryRecord(**client.get("/api/v1/telemetry/compact").json())
+        assert record.v == 1
+        assert len(record.amb) == 3
+        assert len(record.bio) == 4
 
-    def test_endpoint_de_ahorro_reporta_reduccion(self, cliente: TestClient) -> None:
-        datos = cliente.get("/api/v1/telemetria/ahorro").json()
-        assert datos["por_ciclo"]["factor"] > 1.0
-        assert datos["por_dia_mb"]["compacto"] < datos["por_dia_mb"]["completo"]
+    def test_savings_endpoint_reports_a_reduction(self, client: TestClient) -> None:
+        data = client.get("/api/v1/telemetry/savings").json()
+        assert data["per_cycle"]["factor"] > 1.0
+        assert data["per_day_mb"]["compact"] < data["per_day_mb"]["full"]
 
-    def test_el_hud_carga_el_traductor_de_codigos(self, cliente: TestClient) -> None:
-        assert "codebook_service.js" in cliente.get("/dashboard").text
+    def test_the_hud_loads_the_code_translator(self, client: TestClient) -> None:
+        assert "codebook_service.js" in client.get("/dashboard").text

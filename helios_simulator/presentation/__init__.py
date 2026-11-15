@@ -1,7 +1,7 @@
 """
-Exportaciones de la capa de presentación de helios_simulator.
+Exports of the helios_simulator presentation layer.
 """
 
-from helios_simulator.presentation.orchestrator import TelemetriaOrchestrator
+from helios_simulator.presentation.orchestrator import TelemetryOrchestrator
 
-__all__ = ["TelemetriaOrchestrator"]
+__all__ = ["TelemetryOrchestrator"]

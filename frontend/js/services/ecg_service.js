@@ -1,9 +1,9 @@
 /**
  * ==============================================================================
- * CAPA DE SERVICIOS: EcgOscilloscopeService (MODO LIVIANO PERMANENTE)
- * Osciloscopio médico P-Q-R-S-T optimizado:
- * - Se pausa automáticamente cuando la pestaña Biomédica no está activa.
- * - Elimina compositing pesado de shadowBlur continuo.
+ * SERVICES LAYER: EcgOscilloscopeService (PERMANENT LIGHTWEIGHT MODE)
+ * Optimized P-Q-R-S-T medical oscilloscope:
+ * - Pauses automatically when the Biomedical tab is not active.
+ * - Removes the heavy compositing of continuous shadowBlur.
  * ==============================================================================
  */
 
@@ -17,54 +17,54 @@ class EcgOscilloscopeService {
     this._phase = 0;
     this._animId = null;
     this._step = 2.4;
-    this._estaPausado = false;
+    this._isPaused = false;
   }
 
-  inicializar() {
+  initialize() {
     if (!this._canvas || !this._ctx) return;
-    this.redimensionar();
-    window.addEventListener("resize", () => this.redimensionar());
-    window.addEventListener("helios:layout", () => this.redimensionar());
-    this._iniciarBucle();
+    this.resize();
+    window.addEventListener("resize", () => this.resize());
+    window.addEventListener("helios:layout", () => this.resize());
+    this._startLoop();
   }
 
-  pausar() {
+  pause() {
     if (this._animId) {
       cancelAnimationFrame(this._animId);
       this._animId = null;
     }
-    this._estaPausado = true;
+    this._isPaused = true;
   }
 
-  reanudar() {
-    if (this._estaPausado) {
-      this._estaPausado = false;
-      this._iniciarBucle();
+  resume() {
+    if (this._isPaused) {
+      this._isPaused = false;
+      this._startLoop();
     }
   }
 
-  redimensionar() {
+  resize() {
     if (!this._canvas || !this._ctx) return;
     const parent = this._canvas.parentElement;
     this._canvas.width = parent ? parent.clientWidth - 28 : 550;
     this._canvas.height = Math.max(60, this._canvas.clientHeight || 95);
     this._sweepX = 0;
     this._lastY = this._canvas.height / 2;
-    this._limpiarFondoCompleto();
+    this._clearFullBackground();
   }
 
-  actualizarFrecuenciaCardiaca(bpm) {
+  updateHeartRate(bpm) {
     this._heartRate = Math.max(40, Math.min(220, bpm));
   }
 
-  _limpiarFondoCompleto() {
+  _clearFullBackground() {
     if (!this._ctx) return;
     this._ctx.fillStyle = "#020409";
     this._ctx.fillRect(0, 0, this._canvas.width, this._canvas.height);
-    this._dibujarCuadriculaMilimetrica();
+    this._drawMillimeterGrid();
   }
 
-  _dibujarCuadriculaMilimetrica() {
+  _drawMillimeterGrid() {
     if (!this._ctx) return;
     this._ctx.strokeStyle = "rgba(0, 240, 255, 0.05)";
     this._ctx.lineWidth = 1;
@@ -82,58 +82,58 @@ class EcgOscilloscopeService {
     }
   }
 
-  _iniciarBucle() {
+  _startLoop() {
     if (this._animId) return;
     const render = () => {
-      if (!this._estaPausado) {
-        this._dibujarPaso();
+      if (!this._isPaused) {
+        this._drawStep();
         this._animId = requestAnimationFrame(render);
       }
     };
     this._animId = requestAnimationFrame(render);
   }
 
-  _dibujarPaso() {
+  _drawStep() {
     if (!this._ctx) return;
 
-    // Velocidad angular según frecuencia cardíaca
-    const velocidad = (this._heartRate / 60.0) * 0.048;
-    this._phase += velocidad;
+    // Angular speed based on the heart rate
+    const speed = (this._heartRate / 60.0) * 0.048;
+    this._phase += speed;
     if (this._phase > Math.PI * 2) {
       this._phase -= Math.PI * 2;
     }
 
-    let deflexion = 0;
+    let deflection = 0;
     const p = this._phase;
 
-    // Modelado matemático P-Q-R-S-T
+    // P-Q-R-S-T mathematical modeling
     if (p > 0.4 && p < 0.7) {
-      deflexion = -Math.sin((p - 0.4) / 0.3 * Math.PI) * 7.0; // Onda P
+      deflection = -Math.sin((p - 0.4) / 0.3 * Math.PI) * 7.0; // P wave
     } else if (p > 0.95 && p < 1.05) {
-      deflexion = 6.0; // Onda Q
+      deflection = 6.0; // Q wave
     } else if (p > 1.05 && p < 1.22) {
-      deflexion = -44.0; // Onda R
+      deflection = -44.0; // R wave
     } else if (p > 1.22 && p < 1.35) {
-      deflexion = 14.0; // Onda S
+      deflection = 14.0; // S wave
     } else if (p > 1.75 && p < 2.25) {
-      deflexion = -Math.sin((p - 1.75) / 0.5 * Math.PI) * 10.0; // Onda T
+      deflection = -Math.sin((p - 1.75) / 0.5 * Math.PI) * 10.0; // T wave
     }
 
-    deflexion += (Math.random() - 0.5) * 1.5;
+    deflection += (Math.random() - 0.5) * 1.5;
 
-    const lineaBase = this._canvas.height / 2;
-    const currentY = lineaBase + deflexion;
+    const baseline = this._canvas.height / 2;
+    const currentY = baseline + deflection;
 
-    // Borrado limpio de franja frontal
+    // Clean erase of the leading band
     this._ctx.fillStyle = "#020409";
     this._ctx.fillRect(this._sweepX, 0, 18, this._canvas.height);
 
-    // Color del trazo: verde sinusal en reposo, rojo neón en taquicardia/crisis
-    const esTaquicardia = this._heartRate > 100;
-    const colorTrazo = esTaquicardia ? "#ff2255" : "#00ff88";
+    // Trace color: sinus green at rest, neon red on tachycardia/crisis
+    const isTachycardia = this._heartRate > 100;
+    const traceColor = isTachycardia ? "#ff2255" : "#00ff88";
 
     this._ctx.beginPath();
-    this._ctx.strokeStyle = colorTrazo;
+    this._ctx.strokeStyle = traceColor;
     this._ctx.lineWidth = 2.0;
     this._ctx.moveTo(this._sweepX, this._lastY);
     this._ctx.lineTo(this._sweepX + this._step, currentY);
@@ -146,8 +146,8 @@ class EcgOscilloscopeService {
     }
   }
 
-  destruir() {
-    this.pausar();
+  destroy() {
+    this.pause();
   }
 }
 

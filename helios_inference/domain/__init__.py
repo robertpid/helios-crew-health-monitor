@@ -1,17 +1,17 @@
-"""Módulo de dominio para estructuras y modelos de inferencia."""
+"""Domain module for inference structures and models."""
 
 from helios_inference.domain.inference_models import (
-    EstadoAmbientalInferencia,
-    EstadoBiometricoInferencia,
-    EstadoFusionKroneckerInferencia,
-    EstadoAstraInferencia,
-    ReporteInferenciaConsolidado,
+    AstraInferenceState,
+    BiometricInferenceState,
+    ConsolidatedInferenceReport,
+    EnvironmentalInferenceState,
+    KroneckerFusionInferenceState,
 )
 
 __all__ = [
-    "EstadoAmbientalInferencia",
-    "EstadoBiometricoInferencia",
-    "EstadoFusionKroneckerInferencia",
-    "EstadoAstraInferencia",
-    "ReporteInferenciaConsolidado",
+    "EnvironmentalInferenceState",
+    "BiometricInferenceState",
+    "KroneckerFusionInferenceState",
+    "AstraInferenceState",
+    "ConsolidatedInferenceReport",
 ]

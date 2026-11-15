@@ -1,49 +1,48 @@
 """
-Registro de telemetría compacto de H.E.L.I.O.S. (formato de persistencia y enlace).
+H.E.L.I.O.S. compact telemetry record (persistence and link format).
 
-Este es el formato que se GUARDA y se TRANSMITE. Transporta exclusivamente
-códigos estables y valores numéricos; todo el texto descriptivo se reconstruye
-en el cliente a partir del libro de códigos (`telemetry_codebook.py`), que se
-descarga una única vez por sesión.
+This is the format that is STORED and TRANSMITTED. It carries exclusively stable
+codes and numeric values; all descriptive text is reconstructed on the client
+from the codebook (`telemetry_codebook.py`), which is downloaded once per session.
 
-Las claves son deliberadamente cortas: a 0.5 Hz durante 120 días cada byte de
-nombre de campo se repite 5.184.000 veces.
+The keys are deliberately short: at 0.5 Hz over 120 days, every byte of a field
+name is repeated 5,184,000 times.
 """
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from helios_inference.domain.telemetry_codebook import VERSION_ESQUEMA
+from helios_inference.domain.telemetry_codebook import SCHEMA_VERSION
 
 
-class RegistroTelemetriaCompacto(BaseModel):
-    """Un ciclo de inferencia expresado en códigos y números."""
+class CompactTelemetryRecord(BaseModel):
+    """One inference cycle expressed in codes and numbers."""
 
     model_config = ConfigDict(frozen=True)
 
-    v: int = Field(default=VERSION_ESQUEMA, description="Versión del esquema de códigos.")
-    ts: int = Field(..., description="Marca de tiempo UTC en segundos desde época Unix.")
-    mis: str = Field(..., description="Identificador de misión.")
-    ast: str = Field(..., description="Identificador de astronauta.")
-    dia: int = Field(..., description="Día operacional de misión.")
+    v: int = Field(default=SCHEMA_VERSION, description="Version of the code schema.")
+    ts: int = Field(..., description="UTC timestamp in seconds since the Unix epoch.")
+    mis: str = Field(..., description="Mission identifier.")
+    ast: str = Field(..., description="Astronaut identifier.")
+    day: int = Field(..., description="Operational mission day.")
 
-    # Vectores de decisión de los Cerebros 1 y 2 (banderas 0/1)
-    amb: list[int] = Field(..., description="Vector ambiental R^3 [co2, radiacion, presion].")
-    bio: list[int] = Field(..., description="Vector biométrico R^4 [pulso, sueno, osea, sans].")
-    sol: int = Field(default=0, description="Evento solar activo (selecciona plantilla de radiación).")
+    # Decision vectors of Brains 1 and 2 (0/1 flags)
+    amb: list[int] = Field(..., description="Environmental vector R^3 [co2, radiation, pressure].")
+    bio: list[int] = Field(..., description="Biometric vector R^4 [pulse, sleep, bone, sans].")
+    sol: int = Field(default=0, description="Solar event active (selects the radiation template).")
 
-    # Métricas crudas en el orden canónico de ORDEN_METRICAS
-    met: list[float] = Field(..., description="Valores numéricos posicionales según orden_metricas.")
+    # Raw metrics in the canonical order of METRIC_ORDER
+    met: list[float] = Field(..., description="Positional numeric values per metric_order.")
 
-    # Cerebro 3: arista dominante del grafo de Kronecker
-    kr: int = Field(..., description="Índice argmax de la arista crítica (-1 = nominal).")
-    krs: float = Field(..., description="Puntaje de severidad ponderado de la arista.")
-    krx: int = Field(default=0, description="Estrés fisiológico severo (supera el umbral).")
+    # Brain 3: dominant edge of the Kronecker graph
+    kr: int = Field(..., description="Argmax index of the critical edge (-1 = nominal).")
+    krs: float = Field(..., description="Weighted severity score of the edge.")
+    krx: int = Field(default=0, description="Severe physiological stress (exceeds the threshold).")
 
-    # Cerebro 4: ASTRA
-    cos: float = Field(..., description="Similitud coseno respecto a la línea base cognitiva.")
-    inc: int = Field(default=0, description="Incongruencia cognitiva detectada.")
+    # Brain 4: ASTRA
+    cos: float = Field(..., description="Cosine similarity against the cognitive baseline.")
+    inc: int = Field(default=0, description="Cognitive incongruence detected.")
 
-    # Matriz de decisiones: códigos de regla. Sufijo '!' indica escalada de nivel.
-    rg: list[str] = Field(default_factory=list, description="Códigos de regla activos (ej. 'CX-03!').")
+    # Decision matrix: rule codes. A '!' suffix indicates a level escalation.
+    rg: list[str] = Field(default_factory=list, description="Active rule codes (e.g. 'CX-03!').")
 
-    ms: float = Field(..., description="Tiempo de cómputo del ciclo en milisegundos.")
+    ms: float = Field(..., description="Cycle compute time in milliseconds.")

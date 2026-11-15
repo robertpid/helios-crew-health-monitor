@@ -1,322 +1,322 @@
 """
-Suite de pruebas unitarias y de integración para H.E.L.I.O.S. Inference Engine.
+Unit and integration test suite for the H.E.L.I.O.S. Inference Engine.
 
-Verifica la formulación matemática de los 4 cerebros, el producto tensorial de Kronecker,
-la similitud coseno de ASTRA, la inyección de dependencias y los endpoints de FastAPI.
+Verifies the mathematical formulation of the 4 brains, the Kronecker tensor product,
+the ASTRA cosine similarity, dependency injection and the FastAPI endpoints.
 """
 
 import pytest
 import numpy as np
 from fastapi.testclient import TestClient
 
-from helios_inference.cerebros.cerebro_1_ambiental import CerebroAmbiental
-from helios_inference.cerebros.cerebro_2_biometrico import CerebroBiometrico
-from helios_inference.cerebros.cerebro_3_grafo_fusion import CerebroGrafoFusion
-from helios_inference.cerebros.cerebro_4_astra import CerebroCognitivoAstra
-from helios_inference.domain.inference_models import EstadoBiometricoInferencia
-from helios_inference.domain.decision_rules import CATALOGO_REGLAS_CRITICAS, NivelSeveridadRegla
+from helios_inference.brains.brain_1_environmental import EnvironmentalBrain
+from helios_inference.brains.brain_2_biometric import BiometricBrain
+from helios_inference.brains.brain_3_fusion_graph import FusionGraphBrain
+from helios_inference.brains.brain_4_astra import AstraCognitiveBrain
+from helios_inference.domain.inference_models import BiometricInferenceState
+from helios_inference.domain.decision_rules import CRITICAL_RULES_CATALOG, RuleSeverityLevel
 from helios_inference.services.decision_matrix_evaluator import DecisionMatrixEvaluator
 from helios_inference.services.inference_engine import InferenceEngine
 from main import app
 
 
 @pytest.fixture
-def cliente_api() -> TestClient:
-    """Fixture para cliente HTTP de pruebas de FastAPI."""
+def api_client() -> TestClient:
+    """Fixture for the FastAPI test HTTP client."""
     return TestClient(app)
 
 
-class TestCerebroAmbiental:
-    """Pruebas del motor ambiental (Cerebro 1)."""
+class TestEnvironmentalBrain:
+    """Tests of the environmental engine (Brain 1)."""
 
-    def test_condiciones_nominales(self) -> None:
-        cerebro = CerebroAmbiental()
-        datos = {
+    def test_nominal_conditions(self) -> None:
+        brain = EnvironmentalBrain()
+        data = {
             "co2_mmHg": 1.5,
-            "radiacion_acumulada_mSv": 50.0,
-            "presion_cabina_kpa": 101.3,
-            "evento_solar_activo": False,
+            "cumulative_radiation_mSv": 50.0,
+            "cabin_pressure_kpa": 101.3,
+            "solar_event_active": False,
         }
-        vec, estado = cerebro.procesar(datos)
+        vec, state = brain.process(data)
         assert np.array_equal(vec, np.array([0.0, 0.0, 0.0]))
-        assert not estado.co2_excedido
-        assert not estado.radiacion_critica
-        assert not estado.presion_anomala
-        assert len(estado.etiquetas_activadas) == 0
+        assert not state.co2_exceeded
+        assert not state.critical_radiation
+        assert not state.abnormal_pressure
+        assert len(state.activated_labels) == 0
 
-    def test_alerta_co2_excedido(self) -> None:
-        cerebro = CerebroAmbiental(umbral_co2_mmhg=3.0)
-        datos = {"co2_mmHg": 3.8, "radiacion_acumulada_mSv": 40.0, "presion_cabina_kpa": 100.0}
-        vec, estado = cerebro.procesar(datos)
+    def test_co2_exceeded_alert(self) -> None:
+        brain = EnvironmentalBrain(co2_threshold_mmhg=3.0)
+        data = {"co2_mmHg": 3.8, "cumulative_radiation_mSv": 40.0, "cabin_pressure_kpa": 100.0}
+        vec, state = brain.process(data)
         assert np.array_equal(vec, np.array([1.0, 0.0, 0.0]))
-        assert estado.co2_excedido
-        assert any("ALERTA_CO2_ELEVADO" in e for e in estado.etiquetas_activadas)
+        assert state.co2_exceeded
+        assert any("ELEVATED_CO2_ALERT" in label for label in state.activated_labels)
 
-    def test_alerta_tormenta_solar(self) -> None:
-        cerebro = CerebroAmbiental()
-        datos = {
+    def test_solar_storm_alert(self) -> None:
+        brain = EnvironmentalBrain()
+        data = {
             "co2_mmHg": 1.5,
-            "radiacion_acumulada_mSv": 70.0,
-            "presion_cabina_kpa": 101.3,
-            "evento_solar_activo": True,
+            "cumulative_radiation_mSv": 70.0,
+            "cabin_pressure_kpa": 101.3,
+            "solar_event_active": True,
         }
-        vec, estado = cerebro.procesar(datos)
+        vec, state = brain.process(data)
         assert np.array_equal(vec, np.array([0.0, 1.0, 0.0]))
-        assert estado.radiacion_critica
+        assert state.critical_radiation
 
 
-class TestCerebroBiometrico:
-    """Pruebas del motor fisiológico (Cerebro 2)."""
+class TestBiometricBrain:
+    """Tests of the physiological engine (Brain 2)."""
 
-    def test_biometria_nominal(self) -> None:
-        cerebro = CerebroBiometrico()
-        datos = {
-            "ritmo_cardiaco_bpm": 65.0,
-            "horas_sueno_ultimo_ciclo": 7.5,
-            "perdida_osea_pct": 0.5,
+    def test_nominal_biometrics(self) -> None:
+        brain = BiometricBrain()
+        data = {
+            "heart_rate_bpm": 65.0,
+            "last_cycle_sleep_hours": 7.5,
+            "bone_loss_pct": 0.5,
         }
-        vec, estado = cerebro.procesar(datos, dia_mision=15, sintoma_sans=False)
+        vec, state = brain.process(data, mission_day=15, sans_symptom=False)
         assert np.array_equal(vec, np.array([0.0, 0.0, 0.0, 0.0]))
-        assert estado.metricas_fisicas_normales
-        assert not estado.cuerpo_en_panico
+        assert state.normal_physical_metrics
+        assert not state.body_in_panic
 
-    def test_alerta_fatiga_y_riesgo_oseo(self) -> None:
-        cerebro = CerebroBiometrico()
-        datos = {
-            "ritmo_cardiaco_bpm": 68.0,
-            "horas_sueno_ultimo_ciclo": 4.5,
-            "perdida_osea_pct": 2.1,
-            "alerta_riesgo_fatiga": True,
+    def test_fatigue_and_bone_risk_alert(self) -> None:
+        brain = BiometricBrain()
+        data = {
+            "heart_rate_bpm": 68.0,
+            "last_cycle_sleep_hours": 4.5,
+            "bone_loss_pct": 2.1,
+            "fatigue_risk_alert": True,
         }
-        vec, estado = cerebro.procesar(datos, dia_mision=45, sintoma_sans=True)
-        # pulso nominal (0), sueno bajo (1), oseo > 30 días (1), sans (1)
+        vec, state = brain.process(data, mission_day=45, sans_symptom=True)
+        # nominal pulse (0), low sleep (1), bone > 30 days (1), sans (1)
         assert np.array_equal(vec, np.array([0.0, 1.0, 1.0, 1.0]))
-        assert not estado.metricas_fisicas_normales
+        assert not state.normal_physical_metrics
 
 
-class TestCerebroGrafoFusionKronecker:
-    """Pruebas del producto tensorial de Kronecker y grafo matricial (Cerebro 3)."""
+class TestKroneckerFusionGraphBrain:
+    """Tests of the Kronecker tensor product and matrix graph (Brain 3)."""
 
-    def test_estado_nominal_kronecker_cero(self) -> None:
-        cerebro = CerebroGrafoFusion(umbral_peligro_severo=6.5)
-        v_amb = np.array([0.0, 0.0, 0.0])
+    def test_nominal_state_kronecker_zero(self) -> None:
+        brain = FusionGraphBrain(severe_hazard_threshold=6.5)
+        v_env = np.array([0.0, 0.0, 0.0])
         v_bio = np.array([0.0, 0.0, 0.0, 0.0])
 
-        vec_peligro, estado = cerebro.fusionar(v_amb, v_bio)
-        assert vec_peligro.shape == (12,)
-        assert np.all(vec_peligro == 0.0)
-        assert not estado.estres_fisiologico_severo
-        assert estado.puntaje_severidad_maximo == 0.0
+        hazard_vec, state = brain.fuse(v_env, v_bio)
+        assert hazard_vec.shape == (12,)
+        assert np.all(hazard_vec == 0.0)
+        assert not state.severe_physiological_stress
+        assert state.max_severity_score == 0.0
 
-    def test_co2_y_sans_disparo_severo(self) -> None:
+    def test_co2_and_sans_severe_trigger(self) -> None:
         """
-        Cruce crítico: CO2 elevado (índice 0 ambiental) y SANS presente (índice 3 biométrico).
-        En el producto de Kronecker, el índice resultante es 4*0 + 3 = 3 (CO2_CON_HIPERTENSION_INTRACRANEAL_SANS).
-        El peso clínico es 9.2, superando el umbral 6.5.
+        Critical crossover: elevated CO2 (environmental index 0) and SANS present (biometric index 3).
+        In the Kronecker product, the resulting index is 4*0 + 3 = 3 (CO2_WITH_SANS_INTRACRANIAL_HYPERTENSION).
+        The clinical weight is 9.2, exceeding the 6.5 threshold.
         """
-        cerebro = CerebroGrafoFusion(umbral_peligro_severo=6.5)
-        v_amb = np.array([1.0, 0.0, 0.0])  # Alerta CO2
-        v_bio = np.array([0.0, 0.0, 0.0, 1.0])  # Alerta SANS
+        brain = FusionGraphBrain(severe_hazard_threshold=6.5)
+        v_env = np.array([1.0, 0.0, 0.0])  # CO2 alert
+        v_bio = np.array([0.0, 0.0, 0.0, 1.0])  # SANS alert
 
-        vec_peligro, estado = cerebro.fusionar(v_amb, v_bio)
-        assert estado.indice_argmax == 3
-        assert estado.arista_sinergica_critica == "CO2_CON_HIPERTENSION_INTRACRANEAL_SANS"
-        assert estado.puntaje_severidad_maximo == 9.2
-        assert estado.estres_fisiologico_severo
+        hazard_vec, state = brain.fuse(v_env, v_bio)
+        assert state.argmax_index == 3
+        assert state.critical_synergy_edge == "CO2_WITH_SANS_INTRACRANIAL_HYPERTENSION"
+        assert state.max_severity_score == 9.2
+        assert state.severe_physiological_stress
 
 
-class TestCerebroCognitivoAstra:
-    """Pruebas de ASTRA y detección de incongruencia cognitiva (Cerebro 4)."""
+class TestAstraCognitiveBrain:
+    """Tests of ASTRA and cognitive incongruence detection (Brain 4)."""
 
-    def test_similitud_nominal(self) -> None:
-        cerebro = CerebroCognitivoAstra()
-        datos = {"latencia_voz_ms": 200.0, "densidad_lexica_score": 1.0}
-        estado_bio = EstadoBiometricoInferencia(
-            vector_biometrico=[0.0, 0.0, 0.0, 0.0],
-            etiquetas_activadas=[],
-            metricas_fisicas_normales=True,
-            cuerpo_en_panico=False,
+    def test_nominal_similarity(self) -> None:
+        brain = AstraCognitiveBrain()
+        data = {"voice_latency_ms": 200.0, "lexical_density_score": 1.0}
+        bio_state = BiometricInferenceState(
+            biometric_vector=[0.0, 0.0, 0.0, 0.0],
+            activated_labels=[],
+            normal_physical_metrics=True,
+            body_in_panic=False,
         )
 
-        sim, estado = cerebro.procesar(datos, estado_bio, ritmo_cardiaco_bpm=65.0)
+        sim, state = brain.process(data, bio_state, heart_rate_bpm=65.0)
         assert pytest.approx(sim, abs=0.01) == 1.0
-        assert not estado.incongruencia_cognitiva_detectada
-        assert estado.alerta_astra is None
+        assert not state.cognitive_incongruence_detected
+        assert state.astra_alert is None
 
-    def test_incongruencia_fatiga_oculta(self) -> None:
+    def test_hidden_fatigue_incongruence(self) -> None:
         """
-        Latencia de voz disparada a 850 ms (retraso psicomotor agudo),
-        mientras el cuerpo aparentemente reporta métricas normales.
+        Voice latency spiked to 850 ms (acute psychomotor delay),
+        while the body apparently reports normal metrics.
         """
-        cerebro = CerebroCognitivoAstra()
-        datos = {"latencia_voz_ms": 850.0, "densidad_lexica_score": 0.35}
-        estado_bio = EstadoBiometricoInferencia(
-            vector_biometrico=[0.0, 0.0, 0.0, 0.0],
-            etiquetas_activadas=[],
-            metricas_fisicas_normales=True,
-            cuerpo_en_panico=False,
+        brain = AstraCognitiveBrain()
+        data = {"voice_latency_ms": 850.0, "lexical_density_score": 0.35}
+        bio_state = BiometricInferenceState(
+            biometric_vector=[0.0, 0.0, 0.0, 0.0],
+            activated_labels=[],
+            normal_physical_metrics=True,
+            body_in_panic=False,
         )
 
-        sim, estado = cerebro.procesar(datos, estado_bio, ritmo_cardiaco_bpm=64.0)
-        assert estado.incongruencia_cognitiva_detectada
-        assert estado.alerta_astra == (
-            "Incongruencia Cognitiva Detectada. "
-            "Evaluación preliminar: Posible ocultamiento de fatiga."
+        sim, state = brain.process(data, bio_state, heart_rate_bpm=64.0)
+        assert state.cognitive_incongruence_detected
+        assert state.astra_alert == (
+            "Cognitive Incongruence Detected. "
+            "Preliminary assessment: Possible fatigue masking."
         )
 
-    def test_incongruencia_panico_fisico_discurso_calmado(self) -> None:
+    def test_physical_panic_calm_speech_incongruence(self) -> None:
         """
-        Cuerpo en taquicardia severa (115 bpm) pero la voz habla formalizada y calmada (densidad 0.85).
+        Body in severe tachycardia (115 bpm) but the voice is formalized and calm (density 0.85).
         """
-        cerebro = CerebroCognitivoAstra()
-        datos = {"latencia_voz_ms": 220.0, "densidad_lexica_score": 0.85}
-        estado_bio = EstadoBiometricoInferencia(
-            vector_biometrico=[1.0, 0.0, 0.0, 0.0],
-            etiquetas_activadas=["ALERTA_PULSO_ANOMALO: 115 bpm"],
-            metricas_fisicas_normales=False,
-            cuerpo_en_panico=True,
+        brain = AstraCognitiveBrain()
+        data = {"voice_latency_ms": 220.0, "lexical_density_score": 0.85}
+        bio_state = BiometricInferenceState(
+            biometric_vector=[1.0, 0.0, 0.0, 0.0],
+            activated_labels=["ABNORMAL_PULSE_ALERT: 115 bpm"],
+            normal_physical_metrics=False,
+            body_in_panic=True,
         )
 
-        sim, estado = cerebro.procesar(datos, estado_bio, ritmo_cardiaco_bpm=115.0)
-        assert estado.incongruencia_cognitiva_detectada
-        assert "Incongruencia Cognitiva Detectada" in str(estado.alerta_astra)
+        sim, state = brain.process(data, bio_state, heart_rate_bpm=115.0)
+        assert state.cognitive_incongruence_detected
+        assert "Cognitive Incongruence Detected" in str(state.astra_alert)
 
 
-class TestInferenceEngineOrquestador:
-    """Pruebas del orquestador central completo."""
+class TestInferenceEngineOrchestrator:
+    """Tests of the complete central orchestrator."""
 
-    def test_ejecucion_completa_en_milisegundos(self) -> None:
-        motor = InferenceEngine()
+    def test_full_run_in_milliseconds(self) -> None:
+        engine = InferenceEngine()
         payload = {
-            "id_mision": "ARES-VI-MARS-EXPEDITION",
-            "dia_mision": 120,
-            "astronauta_id": "ASTRO-HELIOS-01",
-            "entorno": {"co2_mmHg": 3.4, "radiacion_acumulada_mSv": 90.0, "presion_cabina_kpa": 101.3},
-            "biometria": {"ritmo_cardiaco_bpm": 70.0, "horas_sueno_ultimo_ciclo": 5.2, "perdida_osea_pct": 1.8},
-            "cognicion": {"latencia_voz_ms": 750.0, "densidad_lexica_score": 0.4, "sans_sintoma_vision": True},
+            "mission_id": "ARES-VI-MARS-EXPEDITION",
+            "mission_day": 120,
+            "astronaut_id": "ASTRO-HELIOS-01",
+            "environment": {"co2_mmHg": 3.4, "cumulative_radiation_mSv": 90.0, "cabin_pressure_kpa": 101.3},
+            "biometrics": {"heart_rate_bpm": 70.0, "last_cycle_sleep_hours": 5.2, "bone_loss_pct": 1.8},
+            "cognition": {"voice_latency_ms": 750.0, "lexical_density_score": 0.4, "sans_vision_symptom": True},
         }
 
-        reporte = motor.procesar_telemetria(payload)
-        assert reporte.dia_mision == 120
-        assert reporte.tiempo_computo_ms < 15.0  # Menos de 15 ms en Edge AI
-        assert len(reporte.evaluaciones_preliminares_activas) > 0
-        assert reporte.cerebro_3_grafo_fusion.vector_kronecker_dimension == 12
+        report = engine.process_telemetry(payload)
+        assert report.mission_day == 120
+        assert report.compute_time_ms < 15.0  # Under 15 ms on Edge AI
+        assert len(report.active_preliminary_assessments) > 0
+        assert report.brain_3_fusion_graph.kronecker_vector_dimension == 12
 
 
 class TestFastAPIEndpoints:
-    """Pruebas de los endpoints REST de FastAPI."""
+    """Tests of the FastAPI REST endpoints."""
 
-    def test_root_endpoint(self, cliente_api: TestClient) -> None:
-        resp = cliente_api.get("/")
+    def test_root_endpoint(self, api_client: TestClient) -> None:
+        resp = api_client.get("/")
         assert resp.status_code == 200
         data = resp.json()
-        assert data["sistema"] == "H.E.L.I.O.S. Edge AI Inference Engine"
-        assert len(data["cerebros_activos"]) == 4
+        assert data["system"] == "H.E.L.I.O.S. Edge AI Inference Engine"
+        assert len(data["active_brains"]) == 4
 
-    def test_health_endpoint(self, cliente_api: TestClient) -> None:
-        resp = cliente_api.get("/health")
+    def test_health_endpoint(self, api_client: TestClient) -> None:
+        resp = api_client.get("/health")
         assert resp.status_code == 200
-        assert resp.json()["estado"] == "OK"
+        assert resp.json()["state"] == "OK"
 
-    def test_resultado_fusion_endpoint(self, cliente_api: TestClient) -> None:
-        resp = cliente_api.get("/api/v1/fusion/resultado")
+    def test_fusion_result_endpoint(self, api_client: TestClient) -> None:
+        resp = api_client.get("/api/v1/fusion/result")
         assert resp.status_code == 200
         data = resp.json()
-        assert "cerebro_1_ambiental" in data
-        assert "cerebro_2_biometrico" in data
-        assert "cerebro_3_grafo_fusion" in data
-        assert "cerebro_4_astra" in data
+        assert "brain_1_environmental" in data
+        assert "brain_2_biometric" in data
+        assert "brain_3_fusion_graph" in data
+        assert "brain_4_astra" in data
 
-    def test_inferir_post_endpoint(self, cliente_api: TestClient) -> None:
-        payload_test = {
-            "id_mision": "ARES-TEST",
-            "dia_mision": 95,
-            "astronauta_id": "ASTRO-02",
-            "entorno": {"co2_mmHg": 3.6, "radiacion_acumulada_mSv": 110.0, "presion_cabina_kpa": 101.0},
-            "biometria": {"ritmo_cardiaco_bpm": 62.0, "horas_sueno_ultimo_ciclo": 6.8, "perdida_osea_pct": 1.2},
-            "cognicion": {"latencia_voz_ms": 210.0, "densidad_lexica_score": 0.92, "sans_sintoma_vision": False},
+    def test_infer_post_endpoint(self, api_client: TestClient) -> None:
+        test_payload = {
+            "mission_id": "ARES-TEST",
+            "mission_day": 95,
+            "astronaut_id": "ASTRO-02",
+            "environment": {"co2_mmHg": 3.6, "cumulative_radiation_mSv": 110.0, "cabin_pressure_kpa": 101.0},
+            "biometrics": {"heart_rate_bpm": 62.0, "last_cycle_sleep_hours": 6.8, "bone_loss_pct": 1.2},
+            "cognition": {"voice_latency_ms": 210.0, "lexical_density_score": 0.92, "sans_vision_symptom": False},
         }
-        resp = cliente_api.post("/api/v1/inferir", json=payload_test)
+        resp = api_client.post("/api/v1/infer", json=test_payload)
         assert resp.status_code == 200
         data = resp.json()
-        assert data["id_mision"] == "ARES-TEST"
-        assert data["cerebro_1_ambiental"]["co2_excedido"] is True
+        assert data["mission_id"] == "ARES-TEST"
+        assert data["brain_1_environmental"]["co2_exceeded"] is True
 
-    def test_catalogo_matriz_decisiones_endpoint(self, cliente_api: TestClient) -> None:
-        resp = cliente_api.get("/api/v1/matriz-decisiones")
+    def test_decision_matrix_catalog_endpoint(self, api_client: TestClient) -> None:
+        resp = api_client.get("/api/v1/decision-matrix")
         assert resp.status_code == 200
-        reglas = resp.json()
-        assert len(reglas) == 15
-        ids = [r["id_regla"] for r in reglas]
+        rules = resp.json()
+        assert len(rules) == 15
+        ids = [r["rule_id"] for r in rules]
         assert "CX-01" in ids
         assert "CX-09" in ids
         assert "CX-15" in ids
 
-    def test_contramedidas_activas_endpoint(self, cliente_api: TestClient) -> None:
-        resp = cliente_api.get("/api/v1/contramedidas/activas")
+    def test_active_countermeasures_endpoint(self, api_client: TestClient) -> None:
+        resp = api_client.get("/api/v1/countermeasures/active")
         assert resp.status_code == 200
         data = resp.json()
-        assert data["max_acciones_permitidas"] == 3
-        assert len(data["contramedidas_priorizadas"]) <= 3
+        assert data["max_allowed_actions"] == 3
+        assert len(data["prioritized_countermeasures"]) <= 3
 
-    def test_preguntas_psicologicas_endpoint(self, cliente_api: TestClient) -> None:
-        resp = cliente_api.get("/api/v1/psicologico/preguntas")
+    def test_psychological_questions_endpoint(self, api_client: TestClient) -> None:
+        resp = api_client.get("/api/v1/psychological/questions")
         assert resp.status_code == 200
-        preguntas = resp.json()
-        assert len(preguntas) == 3
-        assert preguntas[0]["id_pregunta"] == 1
+        questions = resp.json()
+        assert len(questions) == 3
+        assert questions[0]["question_id"] == 1
 
-    def test_evaluacion_psicologica_endpoint(self, cliente_api: TestClient) -> None:
+    def test_psychological_assessment_endpoint(self, api_client: TestClient) -> None:
         payload = {
-            "id_pregunta": 3,
-            "texto_respuesta": "Bien, aquí estamos relajados.",
-            "palabras_por_minuto": 133.0,
-            "ritmo_cardiaco_bpm": 68.0,
+            "question_id": 3,
+            "response_text": "Fine, we are relaxed here.",
+            "words_per_minute": 133.0,
+            "heart_rate_bpm": 68.0,
         }
-        resp = cliente_api.post("/api/v1/psicologico/evaluar", json=payload)
+        resp = api_client.post("/api/v1/psychological/evaluate", json=payload)
         assert resp.status_code == 200
         res = resp.json()
-        assert res["estado_cognitivo"] == "NOMINAL"
-        assert res["similitud_coseno"] > 0.90
-        assert not res["incongruencia_detectada"]
-        assert "Sol 120" in res["respuesta_asistente"] or "relajados" in payload["texto_respuesta"]
+        assert res["cognitive_state"] == "NOMINAL"
+        assert res["cosine_similarity"] > 0.90
+        assert not res["incongruence_detected"]
+        assert "Sol 120" in res["assistant_response"] or "relaxed" in payload["response_text"]
 
 
 class TestDecisionMatrixEvaluator:
-    """Pruebas del evaluador de la matriz de 15 cruces de la NASA."""
+    """Tests of the evaluator of NASA's 15-crossover matrix."""
 
-    def test_catalogo_completo_15_reglas(self) -> None:
-        evaluador = DecisionMatrixEvaluator()
-        assert len(evaluador._catalogo) == 15
+    def test_full_catalog_15_rules(self) -> None:
+        evaluator = DecisionMatrixEvaluator()
+        assert len(evaluator._catalog) == 15
 
-    def test_disparo_cx01_tormenta_solar_maximo_3_contramedidas(self) -> None:
-        evaluador = DecisionMatrixEvaluator()
+    def test_cx01_solar_storm_trigger_max_3_countermeasures(self) -> None:
+        evaluator = DecisionMatrixEvaluator()
         payload = {
-            "id_mision": "ARES-MARS",
-            "dia_mision": 95,
-            "entorno": {"evento_solar_activo": True, "co2_mmHg": 1.8},
-            "biometria": {"ritmo_cardiaco_bpm": 65.0, "horas_sueno_ultimo_ciclo": 7.0},
-            "cognicion": {"latencia_voz_ms": 200.0},
+            "mission_id": "ARES-MARS",
+            "mission_day": 95,
+            "environment": {"solar_event_active": True, "co2_mmHg": 1.8},
+            "biometrics": {"heart_rate_bpm": 65.0, "last_cycle_sleep_hours": 7.0},
+            "cognition": {"voice_latency_ms": 200.0},
         }
-        alertas = evaluador.evaluar_telemetria(payload)
-        cx01 = next((a for a in alertas if a.id_regla == "CX-01"), None)
+        alerts = evaluator.evaluate_telemetry(payload)
+        cx01 = next((a for a in alerts if a.rule_id == "CX-01"), None)
         assert cx01 is not None
-        assert cx01.nivel == NivelSeveridadRegla.CRITICA
-        assert len(cx01.contramedidas_sugeridas) <= 3
-        assert any("refugio de tormenta" in c for c in cx01.contramedidas_sugeridas)
+        assert cx01.level == RuleSeverityLevel.CRITICAL
+        assert len(cx01.suggested_countermeasures) <= 3
+        assert any("storm shelter" in c for c in cx01.suggested_countermeasures)
 
-    def test_disparo_cx09_perdida_osea_ventana_critica(self) -> None:
-        evaluador = DecisionMatrixEvaluator()
+    def test_cx09_bone_loss_critical_window_trigger(self) -> None:
+        evaluator = DecisionMatrixEvaluator()
         payload = {
-            "id_mision": "ARES-MARS",
-            "dia_mision": 20,  # En los primeros 30 días
-            "entorno": {"co2_mmHg": 1.8},
-            "biometria": {"perdida_osea_pct": 1.2, "actividad_fisica_minutos": 70.0},  # Carga baja
-            "cognicion": {"latencia_voz_ms": 200.0},
+            "mission_id": "ARES-MARS",
+            "mission_day": 20,  # Within the first 30 days
+            "environment": {"co2_mmHg": 1.8},
+            "biometrics": {"bone_loss_pct": 1.2, "physical_activity_minutes": 70.0},  # Low load
+            "cognition": {"voice_latency_ms": 200.0},
         }
-        alertas = evaluador.evaluar_telemetria(payload)
-        cx09 = next((a for a in alertas if a.id_regla == "CX-09"), None)
+        alerts = evaluator.evaluate_telemetry(payload)
+        cx09 = next((a for a in alerts if a.rule_id == "CX-09"), None)
         assert cx09 is not None
-        assert cx09.dominio.value == "hueso_nutricion"
-        assert len(cx09.contramedidas_sugeridas) <= 3
-        assert any("sentadilla y peso muerto" in c for c in cx09.contramedidas_sugeridas)
+        assert cx09.domain.value == "bone_nutrition"
+        assert len(cx09.suggested_countermeasures) <= 3
+        assert any("squat and deadlift" in c for c in cx09.suggested_countermeasures)

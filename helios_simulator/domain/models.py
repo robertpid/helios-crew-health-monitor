@@ -1,203 +1,203 @@
 """
-Modelos de dominio para telemetría espacial del simulador HELIOS.
+Domain models for the HELIOS simulator space telemetry.
 
-Implementa estructuras de datos inmutables y tipadas con Pydantic v2 para garantizar
-la integridad del payload enviado a la estación terrestre y nodos de soporte vital.
+Implements immutable, typed data structures with Pydantic v2 to guarantee the
+integrity of the payload sent to the ground station and life support nodes.
 """
 
 from datetime import datetime, timezone
 from typing import Any
 from pydantic import BaseModel, Field, ConfigDict
 
-from helios_simulator.domain.enums import NivelAlerta, PeligroRidge
+from helios_simulator.domain.enums import AlertLevel, RidgeHazard
 
 
-class EntornoModel(BaseModel):
+class EnvironmentModel(BaseModel):
     """
-    Cerebro 1: Telemetría ambiental de la cabina y espacio circumambiente.
-    Fundamentado en NASA-STD-3001 Vol. 2 y mediciones de radiación del servidor NTRS.
+    Brain 1: Environmental telemetry of the cabin and surrounding space.
+    Grounded in NASA-STD-3001 Vol. 2 and radiation measurements from the NTRS server.
     """
 
     model_config = ConfigDict(frozen=True)
 
     co2_mmHg: float = Field(
         ...,
-        description="Presión parcial de CO2 en cabina en mmHg. Umbral normativo NASA V2 6004 <= 3.0 mmHg."
+        description="Partial pressure of cabin CO2 in mmHg. NASA V2 6004 normative threshold <= 3.0 mmHg."
     )
-    radiacion_acumulada_mSv: float = Field(
+    cumulative_radiation_mSv: float = Field(
         ...,
-        description="Dosis acumulada efectiva de radiación en mSv (límite de carrera NASA: 600 mSv)."
+        description="Cumulative effective radiation dose in mSv (NASA career limit: 600 mSv)."
     )
-    radiacion_tasa_diaria_mSv: float = Field(
+    daily_radiation_rate_mSv: float = Field(
         ...,
-        description="Tasa de dosis diaria en mSv/día (típico ISS: 0.2 a 0.5 mSv/día)."
+        description="Daily dose rate in mSv/day (typical ISS: 0.2 to 0.5 mSv/day)."
     )
-    presion_cabina_kpa: float = Field(
+    cabin_pressure_kpa: float = Field(
         ...,
-        description="Presión atmosférica de cabina en kPa. Umbral normativo NASA V2 6006: 95.0 - 103.0 kPa."
+        description="Cabin atmospheric pressure in kPa. NASA V2 6006 normative threshold: 95.0 - 103.0 kPa."
     )
-    temperatura_cabina_c: float = Field(
+    cabin_temperature_c: float = Field(
         ...,
-        description="Temperatura ambiental interna en grados Celsius."
+        description="Internal ambient temperature in degrees Celsius."
     )
-    humedad_relativa_pct: float = Field(
+    relative_humidity_pct: float = Field(
         default=45.0,
         ge=0.0,
         le=100.0,
-        description="Sensor de humedad relativa de cabina (NASA OSDR N22: 40-60%)."
+        description="Cabin relative humidity sensor (NASA OSDR N22: 40-60%)."
     )
-    evento_solar_activo: bool = Field(
+    solar_event_active: bool = Field(
         default=False,
-        description="Indicador de anomalía por Tormenta Solar o Evento de Partículas Solares (SPE)."
+        description="Anomaly indicator for a Solar Storm or Solar Particle Event (SPE)."
     )
 
 
-class BiometriaModel(BaseModel):
+class BiometricsModel(BaseModel):
     """
-    Cerebro 2: Biometría Fisiológica del astronauta.
-    Basado en líneas de base personalizadas (NASA Twins Study) y contramedidas de HSRB.
+    Brain 2: Physiological biometrics of the astronaut.
+    Based on personalized baselines (NASA Twins Study) and HSRB countermeasures.
     """
 
     model_config = ConfigDict(frozen=True)
 
-    ritmo_cardiaco_bpm: float = Field(
+    heart_rate_bpm: float = Field(
         ...,
-        description="Frecuencia cardiaca instantánea en latidos por minuto (LPM)."
+        description="Instantaneous heart rate in beats per minute (BPM)."
     )
-    horas_sueno_ultimo_ciclo: float = Field(
+    last_cycle_sleep_hours: float = Field(
         ...,
-        description="Horas efectivas de descanso en el último ciclo circadiano."
+        description="Effective hours of rest in the last circadian cycle."
     )
-    ciclos_sueno_insuficiente_consecutivos: int = Field(
+    consecutive_insufficient_sleep_cycles: int = Field(
         ...,
         ge=0,
-        description="Contador de ciclos continuos con sueño inferior al umbral de 6.0 horas."
+        description="Counter of consecutive cycles with sleep below the 6.0 hour threshold."
     )
-    alerta_riesgo_fatiga: bool = Field(
+    fatigue_risk_alert: bool = Field(
         default=False,
-        description="Bandera de fatiga acumulada activada tras 3 ciclos sucesivos con déficit de sueño."
+        description="Accumulated fatigue flag raised after 3 successive cycles with a sleep deficit."
     )
-    perdida_osea_pct: float = Field(
+    bone_loss_pct: float = Field(
         ...,
         ge=0.0,
-        description="Estimación de pérdida de densidad mineral ósea acumulada según modelo HSRB."
+        description="Estimated cumulative bone mineral density loss per the HSRB model."
     )
-    presion_sistolica_mmHg: float = Field(
+    systolic_pressure_mmHg: float = Field(
         ...,
-        description="Presión arterial sistólica en mmHg."
+        description="Systolic arterial pressure in mmHg."
     )
-    presion_diastolica_mmHg: float = Field(
+    diastolic_pressure_mmHg: float = Field(
         ...,
-        description="Presión arterial diastólica en mmHg."
+        description="Diastolic arterial pressure in mmHg."
     )
     spo2_pct: float = Field(
         ...,
         ge=0.0,
         le=100.0,
-        description="Saturación periférica de oxígeno en sangre."
+        description="Peripheral oxygen saturation in blood."
     )
-    temperatura_piel_c: float = Field(
+    skin_temperature_c: float = Field(
         default=34.8,
-        description="Sensor térmico cutáneo del Bio-Monitor Astroskin en grados Celsius."
+        description="Astroskin Bio-Monitor cutaneous thermal sensor in degrees Celsius."
     )
-    frecuencia_respiratoria_rpm: float = Field(
+    respiratory_rate_rpm: float = Field(
         default=14.0,
-        description="Sensor torácico de frecuencia respiratoria en respiraciones por minuto (Bio-Monitor Astroskin)."
+        description="Thoracic respiratory rate sensor in breaths per minute (Astroskin Bio-Monitor)."
     )
-    variabilidad_cardiaca_hrv_ms: float = Field(
+    heart_rate_variability_hrv_ms: float = Field(
         default=42.0,
-        description="Variabilidad de la frecuencia cardíaca HRV en milisegundos (Frontiers in Physiology 2024 / E13)."
+        description="Heart rate variability HRV in milliseconds (Frontiers in Physiology 2024 / E13)."
     )
-    dolor_cabeza_sintoma: bool = Field(
+    headache_symptom: bool = Field(
         default=False,
-        description="Registro sintomático de cefalea asociado a elevación de CO2 o desplazamiento de fluidos."
+        description="Symptomatic record of headache associated with elevated CO2 or fluid shift."
     )
-    actividad_fisica_minutos: float = Field(
+    physical_activity_minutes: float = Field(
         default=120.0,
-        description="Tiempo diario de ejercicio de resistencia física como contramedida de masa ósea (NASA HSRB)."
+        description="Daily resistance exercise time as a bone mass countermeasure (NASA HSRB)."
     )
-    escala_estres_autorreporte: int = Field(
+    self_reported_stress_scale: int = Field(
         default=3,
         ge=1,
         le=10,
-        description="Autorreporte subjetivo de fatiga y estrés psicofisiológico en escala de 1 a 10."
+        description="Subjective self-report of fatigue and psychophysiological stress on a 1 to 10 scale."
     )
 
 
-class CognicionModel(BaseModel):
+class CognitionModel(BaseModel):
     """
-    Cerebro 4: Psicología y Cognición (Subsistema ASTRA).
-    Monitoreo de latencia comunicacional, coherencia y detección de tensión neuro-ocular.
+    Brain 4: Psychology and Cognition (ASTRA subsystem).
+    Monitors communication latency, coherence and neuro-ocular strain detection.
     """
 
     model_config = ConfigDict(frozen=True)
 
-    latencia_voz_ms: float = Field(
+    voice_latency_ms: float = Field(
         ...,
-        description="Tiempo de respuesta verbal en milisegundos durante comunicaciones de cabina."
+        description="Verbal response time in milliseconds during cabin communications."
     )
-    densidad_lexica_score: float = Field(
+    lexical_density_score: float = Field(
         ...,
         ge=0.0,
         le=1.0,
-        description="Índice de complejidad y variedad léxica en comunicaciones verbales (0.0 a 1.0)."
+        description="Index of lexical complexity and variety in verbal communications (0.0 to 1.0)."
     )
-    incongruencia_estres_oculto: bool = Field(
+    hidden_stress_incongruence: bool = Field(
         default=False,
-        description="Detección de incongruencia psicológica (frecuencia elevada con discurso formalizado)."
+        description="Detection of psychological incongruence (elevated heart rate with formalized speech)."
     )
-    sans_sintoma_vision: bool = Field(
+    sans_vision_symptom: bool = Field(
         default=False,
-        description="Presencia de sintomatología neuro-ocular SANS bajo estrés y presiones elevadas."
+        description="Presence of SANS neuro-ocular symptoms under stress and elevated pressures."
     )
 
 
-class AlertaEvaluacionPreliminar(BaseModel):
+class PreliminaryAssessmentAlert(BaseModel):
     """
-    Estructura formal para evaluaciones preliminares de riesgo y alertas operacionales.
-    Cita normativas oficiales NASA-STD-3001 y RIDGE para respaldo de validación técnica.
+    Formal structure for preliminary risk assessments and operational alerts.
+    Cites official NASA-STD-3001 and RIDGE standards to back technical validation.
     """
 
     model_config = ConfigDict(frozen=True)
 
-    codigo: str = Field(..., description="Identificador único de la alerta normativa.")
-    nivel: NivelAlerta = Field(..., description="Severidad de la alerta.")
-    peligro_ridge: PeligroRidge = Field(..., description="Categoría de riesgo del marco RIDGE.")
-    estandar_referencia: str = Field(..., description="Referencia a estándar oficial NASA.")
-    descripcion: str = Field(..., description="Detalle explicativo del evento detectado.")
-    cruce_multivariado: bool = Field(
+    code: str = Field(..., description="Unique identifier of the normative alert.")
+    level: AlertLevel = Field(..., description="Alert severity.")
+    ridge_hazard: RidgeHazard = Field(..., description="Risk category from the RIDGE framework.")
+    reference_standard: str = Field(..., description="Reference to the official NASA standard.")
+    description: str = Field(..., description="Explanatory detail of the detected event.")
+    multivariate_crossover: bool = Field(
         default=False,
-        description="Indica si la alerta es resultado del cruce sinérgico de múltiples factores."
+        description="Indicates whether the alert results from the synergistic crossover of multiple factors."
     )
 
 
-class TelemetriaPayload(BaseModel):
+class TelemetryPayload(BaseModel):
     """
-    Payload consolidado inyectado al buzón de telemetría hacia Tierra.
-    Representa el estado sistémico del astronauta y su habitáculo en tiempo real.
+    Consolidated payload injected into the telemetry downlink to Earth.
+    Represents the systemic state of the astronaut and their habitat in real time.
     """
 
     model_config = ConfigDict(frozen=True)
 
     timestamp: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc),
-        description="Marca de tiempo en estándar UTC con resolución de microsegundos."
+        description="Timestamp in UTC standard with microsecond resolution."
     )
-    id_mision: str = Field(..., description="Identificador único de la misión aeroespacial.")
-    dia_mision: int = Field(..., ge=1, description="Día transcurrido de la misión (sol).")
-    astronauta_id: str = Field(..., description="Identificador del miembro de tripulación.")
-    entorno: EntornoModel = Field(..., description="Métricas ambientales (Cerebro 1).")
-    biometria: BiometriaModel = Field(..., description="Métricas fisiológicas (Cerebro 2).")
-    cognicion: CognicionModel = Field(..., description="Métricas cognitivas y conductuales (Cerebro 4).")
-    evaluaciones_preliminares: list[AlertaEvaluacionPreliminar] = Field(
+    mission_id: str = Field(..., description="Unique identifier of the aerospace mission.")
+    mission_day: int = Field(..., ge=1, description="Elapsed day of the mission (sol).")
+    astronaut_id: str = Field(..., description="Identifier of the crew member.")
+    environment: EnvironmentModel = Field(..., description="Environmental metrics (Brain 1).")
+    biometrics: BiometricsModel = Field(..., description="Physiological metrics (Brain 2).")
+    cognition: CognitionModel = Field(..., description="Cognitive and behavioral metrics (Brain 4).")
+    preliminary_assessments: list[PreliminaryAssessmentAlert] = Field(
         default_factory=list,
-        description="Colección de evaluaciones preliminares y alertas activas en el instante."
+        description="Collection of preliminary assessments and alerts active at this instant."
     )
-    porcentaje_presupuesto_radiacion_carrera: float = Field(
+    career_radiation_budget_pct: float = Field(
         ...,
-        description="Porcentaje consumido del límite de 600 mSv permitido para la carrera del astronauta."
+        description="Percentage consumed of the 600 mSv limit allowed for the astronaut's career."
     )
-    metadatos_sistema: dict[str, Any] = Field(
+    system_metadata: dict[str, Any] = Field(
         default_factory=dict,
-        description="Metadatos operacionales del productor en el borde (Edge AI)."
+        description="Operational metadata of the edge producer (Edge AI)."
     )

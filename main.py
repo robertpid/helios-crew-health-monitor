@@ -1,16 +1,16 @@
 """
 H.E.L.I.O.S. (Holistic Edge Life-support Intelligence & Operational Support)
-Motor de Inferencia Central y Servidor API Edge (FastAPI + Pure NumPy).
+Central Inference Engine and Edge API Server (FastAPI + Pure NumPy).
 
-Desarrollado para computación en el borde (Edge Computing) en misiones espaciales profundas.
-Ejecuta 4 cerebros analíticos con álgebra lineal pura sin dependencias pesadas:
-- Cerebro 1: Motor Ambiental (Heurísticas de cabina y radiación).
-- Cerebro 2: Motor Biométrico (Desviación de línea base y fatiga circadiana/ósea).
-- Cerebro 3: Grafo Lógico y Fusión Espacial (Producto Tensorial de Kronecker: np.kron).
-- Cerebro 4: Inteligencia Vectorial Cognitiva ASTRA (Similitud Coseno: np.dot).
+Built for edge computing on deep space missions.
+Runs 4 analytical brains with pure linear algebra and no heavy dependencies:
+- Brain 1: Environmental Engine (Cabin and radiation heuristics).
+- Brain 2: Biometric Engine (Baseline deviation and circadian/bone fatigue).
+- Brain 3: Logic Graph and Spatial Fusion (Kronecker Tensor Product: np.kron).
+- Brain 4: ASTRA Cognitive Vector Intelligence (Cosine Similarity: np.dot).
 
-Consume asíncronamente desde colas de Redis ('buzon_telemetria_tierra') mediante RPOP
-y expone endpoints REST para monitorización y control por la tripulación.
+Consumes asynchronously from Redis queues ('earth_telemetry_mailbox') via RPOP
+and exposes REST endpoints for crew monitoring and control.
 """
 
 from contextlib import asynccontextmanager
@@ -25,22 +25,22 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 import uvicorn
 
-from helios_inference.cerebros.cerebro_1_ambiental import CerebroAmbiental
-from helios_inference.cerebros.cerebro_2_biometrico import CerebroBiometrico
-from helios_inference.cerebros.cerebro_3_grafo_fusion import CerebroGrafoFusion
-from helios_inference.cerebros.cerebro_4_astra import CerebroCognitivoAstra
-from helios_inference.domain.decision_rules import CATALOGO_REGLAS_CRITICAS, ReglaDefinicion
-from helios_inference.domain.inference_models import ReporteInferenciaConsolidado
+from helios_inference.brains.brain_1_environmental import EnvironmentalBrain
+from helios_inference.brains.brain_2_biometric import BiometricBrain
+from helios_inference.brains.brain_3_fusion_graph import FusionGraphBrain
+from helios_inference.brains.brain_4_astra import AstraCognitiveBrain
+from helios_inference.domain.decision_rules import CRITICAL_RULES_CATALOG, RuleDefinition
+from helios_inference.domain.inference_models import ConsolidatedInferenceReport
 from helios_inference.infrastructure.redis_consumer import AsyncRedisTelemetryConsumer
 from helios_inference.services.decision_matrix_evaluator import DecisionMatrixEvaluator
 from helios_inference.services.inference_engine import InferenceEngine
-from helios_inference.api.psicologia_router import router as psicologia_router
-from helios_inference.api.telemetria_router import (
-    router as telemetria_router,
-    registrar_proveedor_ciclo,
+from helios_inference.api.psychology_router import router as psychology_router
+from helios_inference.api.telemetry_router import (
+    router as telemetry_router,
+    register_cycle_provider,
 )
 
-# Configuración del subsistema de logging según normas aeroespaciales
+# Logging subsystem configuration per aerospace standards
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s.%(msecs)03d UTC | %(levelname)-8s | [%(name)s] | %(message)s",
@@ -51,195 +51,195 @@ logger = logging.getLogger("helios_inference")
 
 
 # ======================================================================================
-# INYECCIÓN DE DEPENDENCIAS (SOLID - DIP): CONSTRUCCIÓN MODULAR DE LOS 4 CEREBROS
+# DEPENDENCY INJECTION (SOLID - DIP): MODULAR CONSTRUCTION OF THE 4 BRAINS
 # ======================================================================================
-def instanciar_motor_inferencia() -> InferenceEngine:
-    """Ensambla el motor inyectando instancias independientes para cada cerebro (DIP)."""
-    cerebro_ambiental = CerebroAmbiental(
-        umbral_co2_mmhg=3.0, umbral_radiacion_msv=600.0,
-        presion_minima_kpa=95.0, presion_maxima_kpa=103.0,
+def instantiate_inference_engine() -> InferenceEngine:
+    """Assembles the engine by injecting independent instances for each brain (DIP)."""
+    environmental_brain = EnvironmentalBrain(
+        co2_threshold_mmhg=3.0, radiation_threshold_msv=600.0,
+        min_pressure_kpa=95.0, max_pressure_kpa=103.0,
     )
-    cerebro_biometrico = CerebroBiometrico(
-        umbral_taquicardia_bpm=95.0, umbral_bradicardia_bpm=50.0,
-        umbral_sueno_minimo_horas=6.0, dia_mision_inicio_riesgo_oseo=30,
-        umbral_perdida_osea_pct=1.5,
+    biometric_brain = BiometricBrain(
+        tachycardia_threshold_bpm=95.0, bradycardia_threshold_bpm=50.0,
+        min_sleep_threshold_hours=6.0, bone_risk_start_mission_day=30,
+        bone_loss_threshold_pct=1.5,
     )
-    cerebro_grafo = CerebroGrafoFusion(umbral_peligro_severo=6.5)
-    cerebro_astra = CerebroCognitivoAstra(
-        latencia_base_ms=200.0, densidad_base_score=1.0,
-        umbral_caida_similitud=0.88, umbral_latencia_fatiga_ms=500.0,
+    graph_brain = FusionGraphBrain(severe_hazard_threshold=6.5)
+    astra_brain = AstraCognitiveBrain(
+        base_latency_ms=200.0, base_density_score=1.0,
+        similarity_drop_threshold=0.88, fatigue_latency_threshold_ms=500.0,
     )
-    evaluador_matriz = DecisionMatrixEvaluator()
+    matrix_evaluator = DecisionMatrixEvaluator()
 
     return InferenceEngine(
-        cerebro_ambiental=cerebro_ambiental,
-        cerebro_biometrico=cerebro_biometrico,
-        cerebro_grafo_fusion=cerebro_grafo,
-        cerebro_cognitivo_astra=cerebro_astra,
-        evaluador_matriz=evaluador_matriz,
+        environmental_brain=environmental_brain,
+        biometric_brain=biometric_brain,
+        fusion_graph_brain=graph_brain,
+        astra_cognitive_brain=astra_brain,
+        matrix_evaluator=matrix_evaluator,
     )
 
 
-# Instancia única del orquestador analítico
-motor_inferencia_global = instanciar_motor_inferencia()
+# Single instance of the analytical orchestrator
+global_inference_engine = instantiate_inference_engine()
 
-# Consumidor asíncrono para ingesta en background desde Redis
-consumidor_redis_global = AsyncRedisTelemetryConsumer(
-    motor_inferencia=motor_inferencia_global,
+# Asynchronous consumer for background ingestion from Redis
+global_redis_consumer = AsyncRedisTelemetryConsumer(
+    inference_engine=global_inference_engine,
     host="127.0.0.1",
     port=6379,
-    colas=["buzon_telemetria_tierra", "buzon_telemetria_tierra_queue"],
-    intervalo_sondeo_segundos=0.5,
-    intervalo_reintento_segundos=3.0,
+    queues=["earth_telemetry_mailbox", "earth_telemetry_mailbox_queue"],
+    polling_interval_seconds=0.5,
+    retry_interval_seconds=3.0,
 )
 
 
 # ======================================================================================
-# CICLO DE VIDA DE FASTAPI (LIFESPAN ASÍNCRONO)
+# FASTAPI LIFECYCLE (ASYNCHRONOUS LIFESPAN)
 # ======================================================================================
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """
-    Gestiona el inicio y detención limpia del consumidor asíncrono de Redis.
-    Asegura que el servicio FastAPI arranque inmediatamente sin bloquearse por la red.
+    Manages the clean startup and shutdown of the asynchronous Redis consumer.
+    Ensures the FastAPI service starts immediately without blocking on the network.
     """
-    logger.info("Iniciando H.E.L.I.O.S. Inference Engine (Edge Computing Mode)...")
-    await consumidor_redis_global.iniciar()
+    logger.info("Starting the H.E.L.I.O.S. Inference Engine (Edge Computing Mode)...")
+    await global_redis_consumer.start()
     yield
-    logger.info("Deteniendo servicios de H.E.L.I.O.S. y liberando conexiones...")
-    await consumidor_redis_global.detener()
+    logger.info("Stopping H.E.L.I.O.S. services and releasing connections...")
+    await global_redis_consumer.stop()
 
 
 # ======================================================================================
-# SERVIDOR FASTAPI
+# FASTAPI SERVER
 # ======================================================================================
 app = FastAPI(
     title="H.E.L.I.O.S. - Deep Space Life Support Inference Engine",
     description=(
-        "Motor de inferencia en el borde (Edge AI) para soporte vital y evaluación preliminar "
-        "de tripulaciones espaciales basada en 4 cerebros modulares con álgebra lineal pura (NumPy)."
+        "Edge inference engine (Edge AI) for life support and preliminary assessment "
+        "of space crews, based on 4 modular brains with pure linear algebra (NumPy)."
     ),
     version="1.0.0",
     lifespan=lifespan,
 )
 
-# Montaje de la capa estática del Frontend N-Capas
-ruta_frontend = os.path.join(os.path.dirname(__file__), "frontend")
-if os.path.exists(ruta_frontend):
-    app.mount("/static", StaticFiles(directory=ruta_frontend), name="static")
+# Mounting the static layer of the N-Layer Frontend
+frontend_path = os.path.join(os.path.dirname(__file__), "frontend")
+if os.path.exists(frontend_path):
+    app.mount("/static", StaticFiles(directory=frontend_path), name="static")
 
-# Inclusión del router para evaluación psicológica y bienestar del astronauta (ASTRA BHP)
-app.include_router(psicologia_router, prefix="/api/v1/psicologico", tags=["Evaluación Psicológica"])
+# Including the router for astronaut psychological assessment and wellbeing (ASTRA BHP)
+app.include_router(psychology_router, prefix="/api/v1/psychological", tags=["Psychological Assessment"])
 
-# Router de telemetría compacta (códigos + valores numéricos) y su libro de códigos
-app.include_router(telemetria_router, prefix="/api/v1/telemetria", tags=["Telemetría Compacta"])
+# Compact telemetry router (codes + numeric values) and its codebook
+app.include_router(telemetry_router, prefix="/api/v1/telemetry", tags=["Compact Telemetry"])
 
 
-def _obtener_ciclo_vigente() -> tuple[ReporteInferenciaConsolidado, dict[str, Any]] | None:
+def _get_current_cycle() -> tuple[ConsolidatedInferenceReport, dict[str, Any]] | None:
     """
-    Entrega el par (reporte, payload) del ciclo vigente para el compactador.
+    Delivers the (report, payload) pair of the current cycle for the compactor.
 
-    Si aún no ha llegado telemetría por Redis, procesa la muestra nominal por
-    defecto, de modo que el HUD disponga de un ciclo válido desde el arranque.
+    If no telemetry has arrived over Redis yet, it processes the default nominal
+    sample so the HUD has a valid cycle from startup.
     """
-    reporte = consumidor_redis_global.ultimo_reporte
-    payload = consumidor_redis_global.ultimo_payload
-    if reporte is not None and payload is not None:
-        return reporte, payload
+    report = global_redis_consumer.last_report
+    payload = global_redis_consumer.last_payload
+    if report is not None and payload is not None:
+        return report, payload
 
-    payload_inicial = TelemetriaInputSchema().model_dump()
-    return motor_inferencia_global.procesar_telemetria(payload_inicial), payload_inicial
-
-
-registrar_proveedor_ciclo(_obtener_ciclo_vigente)
+    initial_payload = TelemetryInputSchema().model_dump()
+    return global_inference_engine.process_telemetry(initial_payload), initial_payload
 
 
-def servir_dashboard_html() -> HTMLResponse:
-    """Retorna el documento HTML del Cockpit HUD con cabeceras anti-caché estrictas."""
-    ruta_html = os.path.join(os.path.dirname(__file__), "frontend", "index.html")
-    if not os.path.exists(ruta_html):
+register_cycle_provider(_get_current_cycle)
+
+
+def serve_dashboard_html() -> HTMLResponse:
+    """Returns the Cockpit HUD HTML document with strict anti-cache headers."""
+    html_path = os.path.join(os.path.dirname(__file__), "frontend", "index.html")
+    if not os.path.exists(html_path):
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Archivo de interfaz frontend/index.html no encontrado.",
+            detail="Interface file frontend/index.html not found.",
         )
     headers = {
         "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
         "Pragma": "no-cache",
         "Expires": "0",
     }
-    with open(ruta_html, "r", encoding="utf-8") as f:
+    with open(html_path, "r", encoding="utf-8") as f:
         return HTMLResponse(content=f.read(), headers=headers)
 
 
-# Esquema para inyección directa HTTP (pruebas sin Redis)
-class TelemetriaInputSchema(BaseModel):
-    """Payload de entrada para evaluación preliminar inmediata vía REST."""
-    id_mision: str = Field(default="ARES-VI-MARS-EXPEDITION")
-    dia_mision: int = Field(default=120)
-    astronauta_id: str = Field(default="ASTRO-HELIOS-01")
-    entorno: dict[str, Any] = Field(
+# Schema for direct HTTP injection (tests without Redis)
+class TelemetryInputSchema(BaseModel):
+    """Input payload for an immediate preliminary assessment over REST."""
+    mission_id: str = Field(default="ARES-VI-MARS-EXPEDITION")
+    mission_day: int = Field(default=120)
+    astronaut_id: str = Field(default="ASTRO-HELIOS-01")
+    environment: dict[str, Any] = Field(
         default={
             "co2_mmHg": 1.8,
-            "radiacion_acumulada_mSv": 85.0,
-            "presion_cabina_kpa": 101.3,
-            "evento_solar_activo": False,
+            "cumulative_radiation_mSv": 85.0,
+            "cabin_pressure_kpa": 101.3,
+            "solar_event_active": False,
         }
     )
-    biometria: dict[str, Any] = Field(
+    biometrics: dict[str, Any] = Field(
         default={
-            "ritmo_cardiaco_bpm": 68.0,
-            "horas_sueno_ultimo_ciclo": 7.0,
-            "perdida_osea_pct": 0.8,
-            "alerta_riesgo_fatiga": False,
+            "heart_rate_bpm": 68.0,
+            "last_cycle_sleep_hours": 7.0,
+            "bone_loss_pct": 0.8,
+            "fatigue_risk_alert": False,
         }
     )
-    cognicion: dict[str, Any] = Field(
+    cognition: dict[str, Any] = Field(
         default={
-            "latencia_voz_ms": 210.0,
-            "densidad_lexica_score": 0.95,
-            "sans_sintoma_vision": False,
+            "voice_latency_ms": 210.0,
+            "lexical_density_score": 0.95,
+            "sans_vision_symptom": False,
         }
     )
 
 
 # ======================================================================================
-# ENDPOINTS REST
+# REST ENDPOINTS
 # ======================================================================================
 @app.get(
     "/",
-    summary="Dashboard Visual / Estado General de H.E.L.I.O.S.",
-    tags=["Sistema"],
+    summary="Visual Dashboard / General H.E.L.I.O.S. Status",
+    tags=["System"],
 )
-async def estado_sistema(request: Request) -> Any:
+async def system_status(request: Request) -> Any:
     """
-    Retorna el Dashboard Holográfico interactivo en navegadores web (Accept text/html)
-    o los metadatos JSON operacionales en llamadas API de máquina (Accept application/json).
+    Returns the interactive Holographic Dashboard in web browsers (Accept text/html)
+    or the operational JSON metadata on machine API calls (Accept application/json).
     """
     accept = request.headers.get("accept", "")
     if "text/html" in accept and not (
         "application/json" in accept and accept.index("application/json") < accept.index("text/html")
     ):
-        return servir_dashboard_html()
+        return serve_dashboard_html()
 
     return {
-        "sistema": "H.E.L.I.O.S. Edge AI Inference Engine",
-        "mision_referencia": "ARES-VI-MARS-EXPEDITION (Día 120)",
-        "estado": "OPERACIONAL",
-        "cerebros_activos": [
-            "Cerebro 1: Motor Ambiental (Reglas Heurísticas en R^3)",
-            "Cerebro 2: Motor Biométrico (Desviación de Línea Base en R^4)",
-            "Cerebro 3: Grafo Lógico y Fusión Espacial (Producto Tensorial de Kronecker en R^12)",
-            "Cerebro 4: Inteligencia Vectorial Cognitiva ASTRA (Similitud Coseno en R^2)",
+        "system": "H.E.L.I.O.S. Edge AI Inference Engine",
+        "reference_mission": "ARES-VI-MARS-EXPEDITION (Day 120)",
+        "state": "OPERATIONAL",
+        "active_brains": [
+            "Brain 1: Environmental Engine (Heuristic Rules in R^3)",
+            "Brain 2: Biometric Engine (Baseline Deviation in R^4)",
+            "Brain 3: Logic Graph and Spatial Fusion (Kronecker Tensor Product in R^12)",
+            "Brain 4: ASTRA Cognitive Vector Intelligence (Cosine Similarity in R^2)",
         ],
-        "edge_ai_restricciones": {
-            "pytorch_tensorflow": "DESHABILITADOS (Pure-NumPy Mode)",
-            "bases_vectoriales_grafos": "DESHABILITADAS (Álgebra matricial np.kron/np.dot)",
-            "consumo_memoria": "< 60 MB",
-            "latencia_inferencia_tipica": "< 1.0 ms",
+        "edge_ai_constraints": {
+            "pytorch_tensorflow": "DISABLED (Pure-NumPy Mode)",
+            "graph_vector_bases": "DISABLED (np.kron/np.dot matrix algebra)",
+            "memory_usage": "< 60 MB",
+            "typical_inference_latency": "< 1.0 ms",
         },
-        "redis_enlace": {
-            "conectado": consumidor_redis_global.conectado,
-            "paquetes_procesados": consumidor_redis_global.contador_procesados,
+        "redis_link": {
+            "connected": global_redis_consumer.connected,
+            "processed_packets": global_redis_consumer.processed_counter,
         },
         "dashboard_ui_url": "http://127.0.0.1:8000/dashboard",
     }
@@ -248,150 +248,150 @@ async def estado_sistema(request: Request) -> Any:
 @app.get(
     "/dashboard",
     response_class=HTMLResponse,
-    summary="Dashboard Holográfico de Soporte Vital",
-    tags=["Interfaz Visual"],
+    summary="Holographic Life Support Dashboard",
+    tags=["Visual Interface"],
 )
-async def ver_dashboard() -> HTMLResponse:
-    """Despliega directamente la interfaz visual de cabina con el cuerpo holográfico y hábitat."""
-    return servir_dashboard_html()
+async def view_dashboard() -> HTMLResponse:
+    """Directly renders the cabin visual interface with the holographic body and habitat."""
+    return serve_dashboard_html()
 
 
 @app.get(
     "/health",
-    summary="Verificación de Salud del Nodo Edge",
-    tags=["Sistema"],
+    summary="Edge Node Health Check",
+    tags=["System"],
 )
 async def healthcheck() -> dict[str, Any]:
-    """Comprueba el estado del motor y la conectividad con la infraestructura Redis."""
+    """Checks the engine state and connectivity with the Redis infrastructure."""
     return {
-        "estado": "OK",
-        "redis_conectado": consumidor_redis_global.conectado,
-        "mensajes_ingeridos": consumidor_redis_global.contador_procesados,
+        "state": "OK",
+        "redis_connected": global_redis_consumer.connected,
+        "ingested_messages": global_redis_consumer.processed_counter,
     }
 
 
 @app.get(
-    "/api/v1/fusion/resultado",
-    response_model=ReporteInferenciaConsolidado,
-    summary="Obtener Último Resultado de Fusión de los 4 Cerebros",
-    tags=["Inferencia"],
+    "/api/v1/fusion/result",
+    response_model=ConsolidatedInferenceReport,
+    summary="Get the Latest Fusion Result of the 4 Brains",
+    tags=["Inference"],
 )
-async def obtener_resultado_fusion() -> ReporteInferenciaConsolidado:
+async def get_fusion_result() -> ConsolidatedInferenceReport:
     """
-    Expone el resultado consolidado de la última telemetría procesada por los 4 Cerebros.
-    Si aún no ha llegado telemetría desde Redis, procesa una muestra nominal por defecto.
+    Exposes the consolidated result of the latest telemetry processed by the 4 Brains.
+    If no telemetry has arrived from Redis yet, it processes a default nominal sample.
     """
-    reporte = consumidor_redis_global.ultimo_reporte
-    if reporte is None:
-        # Generar inferencia inicial de demostración para el estado de arranque
-        payload_inicial = TelemetriaInputSchema().model_dump()
-        reporte = motor_inferencia_global.procesar_telemetria(payload_inicial)
+    report = global_redis_consumer.last_report
+    if report is None:
+        # Generate an initial demonstration inference for the startup state
+        initial_payload = TelemetryInputSchema().model_dump()
+        report = global_inference_engine.process_telemetry(initial_payload)
 
-    return reporte
+    return report
 
 
 @app.get(
-    "/api/v1/alertas",
-    summary="Lista de Evaluaciones Preliminares y Alertas Activas",
-    tags=["Inferencia"],
+    "/api/v1/alerts",
+    summary="List of Active Preliminary Assessments and Alerts",
+    tags=["Inference"],
 )
-async def obtener_alertas_activas() -> dict[str, Any]:
-    """Retorna las alertas y evaluaciones preliminares vigentes derivadas del cruce multivariado."""
-    reporte = consumidor_redis_global.ultimo_reporte
-    if reporte is None:
+async def get_active_alerts() -> dict[str, Any]:
+    """Returns the current alerts and preliminary assessments derived from the multivariate crossover."""
+    report = global_redis_consumer.last_report
+    if report is None:
         return {
-            "evaluaciones_preliminares_activas": [],
-            "estres_fisiologico_severo": False,
-            "incongruencia_cognitiva": False,
-            "mensaje": "Sin telemetrías registradas en la cola.",
+            "active_preliminary_assessments": [],
+            "severe_physiological_stress": False,
+            "cognitive_incongruence": False,
+            "message": "No telemetry recorded in the queue.",
         }
 
     return {
-        "timestamp": reporte.timestamp_inferencia.isoformat(),
-        "astronauta_id": reporte.astronauta_id,
-        "dia_mision": reporte.dia_mision,
-        "evaluaciones_preliminares_activas": reporte.evaluaciones_preliminares_activas,
-        "estres_fisiologico_severo": reporte.cerebro_3_grafo_fusion.estres_fisiologico_severo,
-        "incongruencia_cognitiva": reporte.cerebro_4_astra.incongruencia_cognitiva_detectada,
-        "arista_grafo_critica": reporte.cerebro_3_grafo_fusion.arista_sinergica_critica,
+        "timestamp": report.inference_timestamp.isoformat(),
+        "astronaut_id": report.astronaut_id,
+        "mission_day": report.mission_day,
+        "active_preliminary_assessments": report.active_preliminary_assessments,
+        "severe_physiological_stress": report.brain_3_fusion_graph.severe_physiological_stress,
+        "cognitive_incongruence": report.brain_4_astra.cognitive_incongruence_detected,
+        "critical_graph_edge": report.brain_3_fusion_graph.critical_synergy_edge,
     }
 
 
 @app.post(
-    "/api/v1/inferir",
-    response_model=ReporteInferenciaConsolidado,
+    "/api/v1/infer",
+    response_model=ConsolidatedInferenceReport,
     status_code=status.HTTP_200_OK,
-    summary="Inferencia Directa vía REST (Prueba sin Redis)",
-    tags=["Inferencia"],
+    summary="Direct Inference over REST (Test without Redis)",
+    tags=["Inference"],
 )
-async def inferir_directo(payload: TelemetriaInputSchema) -> ReporteInferenciaConsolidado:
+async def infer_direct(payload: TelemetryInputSchema) -> ConsolidatedInferenceReport:
     """
-    Permite inyectar un payload de telemetría directamente por HTTP para obtener
-    la evaluación preliminar inmediata y verificar el comportamiento de los 4 cerebros.
+    Allows injecting a telemetry payload directly over HTTP to obtain the immediate
+    preliminary assessment and verify the behavior of the 4 brains.
     """
     try:
-        reporte = motor_inferencia_global.procesar_telemetria(payload.model_dump())
-        return reporte
+        report = global_inference_engine.process_telemetry(payload.model_dump())
+        return report
     except Exception as error:
-        logger.error("Error al procesar inferencia directa: %s", str(error), exc_info=True)
+        logger.error("Error processing direct inference: %s", str(error), exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Fallo en motor de inferencia: {error}",
+            detail=f"Inference engine failure: {error}",
         )
 
 
 @app.get(
-    "/api/v1/matriz-decisiones",
-    summary="Catálogo de las 15 Reglas Críticas de Cruce (NASA-STD-3001)",
-    tags=["Matriz de Decisiones"],
+    "/api/v1/decision-matrix",
+    summary="Catalog of the 15 Critical Crossover Rules (NASA-STD-3001)",
+    tags=["Decision Matrix"],
 )
-async def obtener_catalogo_matriz() -> list[ReglaDefinicion]:
-    """Retorna las 15 reglas formales de la matriz de Martina para inspección o configuración del frontend."""
-    return CATALOGO_REGLAS_CRITICAS
+async def get_matrix_catalog() -> list[RuleDefinition]:
+    """Returns the 15 formal rules of Martina's matrix for inspection or frontend configuration."""
+    return CRITICAL_RULES_CATALOG
 
 
 @app.get(
-    "/api/v1/contramedidas/activas",
-    summary="Contramedidas Inmediatas Priorizadas (Máximo 3 Acciones)",
-    tags=["Contramedidas"],
+    "/api/v1/countermeasures/active",
+    summary="Prioritized Immediate Countermeasures (Maximum 3 Actions)",
+    tags=["Countermeasures"],
 )
-async def obtener_contramedidas_activas() -> dict[str, Any]:
+async def get_active_countermeasures() -> dict[str, Any]:
     """
-    Retorna hasta 3 contramedidas priorizadas de las alertas dominantes activas,
-    ordenadas por jerarquía estricta para evitar la saturación cognitiva del astronauta.
+    Returns up to 3 prioritized countermeasures from the dominant active alerts,
+    ordered by strict hierarchy to avoid cognitive saturation of the astronaut.
     """
-    reporte = consumidor_redis_global.ultimo_reporte
-    if reporte is None:
-        payload_inicial = TelemetriaInputSchema().model_dump()
-        reporte = motor_inferencia_global.procesar_telemetria(payload_inicial)
+    report = global_redis_consumer.last_report
+    if report is None:
+        initial_payload = TelemetryInputSchema().model_dump()
+        report = global_inference_engine.process_telemetry(initial_payload)
 
     return {
-        "timestamp": reporte.timestamp_inferencia.isoformat(),
-        "astronauta_id": reporte.astronauta_id,
-        "dia_mision": reporte.dia_mision,
-        "max_acciones_permitidas": 3,
-        "contramedidas_priorizadas": reporte.contramedidas_priorizadas,
-        "cruces_activos_total": len(reporte.alertas_matriz_decisiones),
-        "alertas_detalladas": [
+        "timestamp": report.inference_timestamp.isoformat(),
+        "astronaut_id": report.astronaut_id,
+        "mission_day": report.mission_day,
+        "max_allowed_actions": 3,
+        "prioritized_countermeasures": report.prioritized_countermeasures,
+        "total_active_crossovers": len(report.decision_matrix_alerts),
+        "detailed_alerts": [
             {
-                "id_regla": a.id_regla,
-                "nivel": a.nivel.value,
-                "dominio": a.dominio.value,
-                "evaluacion_preliminar": a.evaluacion_preliminar,
-                "acciones_sugeridas": a.contramedidas_sugeridas,
-                "destinatarios": [d.value for d in a.destinatarios],
-                "estandar_base": a.estandar_base,
+                "rule_id": a.rule_id,
+                "level": a.level.value,
+                "domain": a.domain.value,
+                "preliminary_assessment": a.preliminary_assessment,
+                "suggested_actions": a.suggested_countermeasures,
+                "recipients": [d.value for d in a.recipients],
+                "base_standard": a.base_standard,
             }
-            for a in reporte.alertas_matriz_decisiones
+            for a in report.decision_matrix_alerts
         ],
     }
 
 
 # ======================================================================================
-# PUNTO DE ENTRADA PRINCIPAL SEGURO (PEP 8)
+# SAFE MAIN ENTRY POINT (PEP 8)
 # ======================================================================================
 if __name__ == "__main__":
-    logger.info("Iniciando servidor web aeroespacial en http://0.0.0.0:8000 (red local activa)...")
+    logger.info("Starting the aerospace web server at http://0.0.0.0:8000 (local network active)...")
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
