@@ -3,7 +3,7 @@
 <!-- ----------------------------------------------------------------------- -->
 <div id="viewEnvironmental" class="view-container" style="grid-template-columns: 1fr 1fr; gap: 20px;">
   
-  <!-- LADO IZQUIERDO: HOLOGRAMA DE HÁBITAT ESPACIAL (ESTILO CIBER-HUD) -->
+  <!-- LADO IZQUIERDO: HOLOGRAMA DE HÁBITAT ESPACIAL -->
   <div class="hud-panel">
     <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center;">
       <div>
@@ -16,28 +16,20 @@
         </div>
         <div class="panel-subtitle" id="habitatSubtitle">ORION DEEP SPACE VEHICLE · TRÁNSITO INTERPLANETARIO (0.00g)</div>
       </div>
-
-      <!-- Selector de Hábitat Unificado: Nave, Marte o Estación Espacial -->
+      <!-- Selector de Hábitat -->
       <div style="display:flex; gap:6px;">
-        <button id="btnHabitatOrion" class="btn-hud active" style="font-size:10px; padding:5px 11px;" onclick="window.hudController.alternarModeloHabitat('orion')">
-          🛰️ NAVE ESPACIAL
-        </button>
-        <button id="btnHabitatMars" class="btn-hud" style="font-size:10px; padding:5px 11px;" onclick="window.hudController.alternarModeloHabitat('mars')">
-          🔴 BASE MARCIANA
-        </button>
-        <button id="btnHabitatIss" class="btn-hud" style="font-size:10px; padding:5px 11px;" onclick="window.hudController.alternarModeloHabitat('iss')">
-          🛸 ESTACIÓN ESPACIAL
-        </button>
+        <button id="btnHabitatOrion" class="btn-hud active" style="font-size:10px; padding:5px 11px;" onclick="window.hudController.alternarModeloHabitat('orion')">🛰️ NAVE ESPACIAL</button>
+        <button id="btnHabitatMars" class="btn-hud" style="font-size:10px; padding:5px 11px;" onclick="window.hudController.alternarModeloHabitat('mars')">🔴 BASE MARCIANA</button>
+        <button id="btnHabitatIss" class="btn-hud" style="font-size:10px; padding:5px 11px;" onclick="window.hudController.alternarModeloHabitat('iss')">🛸 ESTACIÓN ESPACIAL</button>
       </div>
     </div>
 
     <!-- ESCENARIO HOLOGRÁFICO DEL HÁBITAT -->
     <div class="hologram-stage-wrapper" style="background:radial-gradient(circle at center, rgba(0,119,255,0.14) 0%, transparent 72%);">
-      
       <canvas id="particlesHabitatCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1;"></canvas>
       <div class="holo-scan-beam"></div>
 
-      <!-- CORTE ESTRUCTURAL HOLOGRÁFICO DEL HÁBITAT / NAVE (SVG) -->
+      <!-- CORTE ESTRUCTURAL HOLOGRÁFICO SVG -->
       <svg id="svgHologramHabitat" width="100%" height="500" viewBox="0 0 680 500" style="position:relative; z-index:5; width:100%; height:500px; filter:drop-shadow(0 0 14px rgba(0,240,255,0.4));">
         <defs>
           <linearGradient id="habitatHullGrad" x1="0" y1="0" x2="0" y2="1">
@@ -45,13 +37,11 @@
             <stop offset="40%" stop-color="rgba(0, 160, 255, 0.10)"></stop>
             <stop offset="100%" stop-color="rgba(0, 80, 220, 0.04)"></stop>
           </linearGradient>
-
           <linearGradient id="solarWingGrad" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stop-color="rgba(0, 240, 255, 0.6)"></stop>
             <stop offset="50%" stop-color="rgba(0, 140, 255, 0.35)"></stop>
             <stop offset="100%" stop-color="rgba(0, 80, 255, 0.7)"></stop>
           </linearGradient>
-
           <radialGradient id="plasmaExhaustGrad" cx="50%" cy="0%" r="100%">
             <stop offset="0%" stop-color="#ffffff"></stop>
             <stop offset="30%" stop-color="#00f0ff"></stop>
@@ -60,352 +50,129 @@
           </radialGradient>
         </defs>
 
-        <!-- ============================================================= -->
-        <!-- 1. MODELO A: NAVE ORION DEEP SPACE TRANSIT                    -->
-        <!-- ============================================================= -->
+        <!-- 1. MODELO A: NAVE ORION -->
         <g id="habitatOrionGroup">
-          <!-- Elementos del Casco y Cubiertas de la Nave centrados en X=340 -->
           <g transform="translate(180, 10)">
-            <!-- Alas de Paneles Solares Fotovoltaicos Laterales -->
             <g stroke="var(--neon-cyan)" stroke-width="1.2">
               <polygon points="102,248 18,240 18,285 102,295" fill="url(#solarWingGrad)" opacity="0.85"></polygon>
-              <line x1="39" y1="242" x2="39" y2="287" stroke="#ffffff" stroke-width="1"></line>
-              <line x1="60" y1="244" x2="60" y2="289" stroke="#ffffff" stroke-width="1"></line>
-              <line x1="81" y1="246" x2="81" y2="292" stroke="#ffffff" stroke-width="1"></line>
-              <line x1="18" y1="262" x2="102" y2="271" stroke="#ffffff" stroke-width="0.8" stroke-dasharray="2 2"></line>
-
+              <line x1="39" y1="242" x2="39" y2="287" stroke="#fff" stroke-width="1"></line><line x1="60" y1="244" x2="60" y2="289" stroke="#fff" stroke-width="1"></line><line x1="81" y1="246" x2="81" y2="292" stroke="#fff" stroke-width="1"></line>
               <polygon points="218,248 302,240 302,285 218,295" fill="url(#solarWingGrad)" opacity="0.85"></polygon>
-              <line x1="281" y1="242" x2="281" y2="287" stroke="#ffffff" stroke-width="1"></line>
-              <line x1="260" y1="244" x2="260" y2="289" stroke="#ffffff" stroke-width="1"></line>
-              <line x1="239" y1="246" x2="239" y2="292" stroke="#ffffff" stroke-width="1"></line>
-              <line x1="218" y1="271" x2="302" y2="262" stroke="#ffffff" stroke-width="0.8" stroke-dasharray="2 2"></line>
+              <line x1="281" y1="242" x2="281" y2="287" stroke="#fff" stroke-width="1"></line><line x1="260" y1="244" x2="260" y2="289" stroke="#fff" stroke-width="1"></line><line x1="239" y1="246" x2="239" y2="292" stroke="#fff" stroke-width="1"></line>
             </g>
-
-            <!-- Casco Exterior de Presión y Escudo Térmico -->
-            <path d="M148 40 L172 40 L224 145 C224 145, 160 156, 96 145 Z
-                     M98 145 L98 340 L126 395 L194 395 L222 340 L222 145"
-                  fill="url(#habitatHullGrad)" stroke="var(--neon-cyan)" stroke-width="2" stroke-linejoin="round"></path>
-
+            <path d="M148 40 L172 40 L224 145 C224 145, 160 156, 96 145 Z M98 145 L98 340 L126 395 L194 395 L222 340 L222 145" fill="url(#habitatHullGrad)" stroke="var(--neon-cyan)" stroke-width="2" stroke-linejoin="round"></path>
             <rect x="144" y="32" width="32" height="10" rx="3" fill="rgba(0,240,255,0.4)" stroke="var(--neon-cyan)" stroke-width="1.5"></rect>
 
-            <!-- CUBIERTA 1: CABINA DE MANDO / COCKPIT -->
-            <g id="deckCockpit" class="habitat-module-node" data-habitat-module="press"
-               onmouseenter="window.hudController.enfocarModuloHabitat('press')"
-               onmouseleave="window.hudController.desenfocarModuloHabitat()">
+            <g id="deckCockpit" class="habitat-module-node" data-habitat-module="press" onmouseenter="window.hudController.enfocarModuloHabitat('press')" onmouseleave="window.hudController.desenfocarModuloHabitat()">
               <rect x="135" y="60" width="50" height="40" fill="transparent" pointer-events="all"></rect>
-              <polygon points="144,72 154,72 151,88 142,88" fill="rgba(0,240,255,0.7)" stroke="#fff" stroke-width="1.2"></polygon>
-              <polygon points="166,72 176,72 178,88 169,88" fill="rgba(0,240,255,0.7)" stroke="#fff" stroke-width="1.2"></polygon>
-              <line x1="120" y1="110" x2="200" y2="110" stroke="rgba(0,240,255,0.5)" stroke-width="1.5" stroke-dasharray="3 2"></line>
+              <polygon points="144,72 154,72 151,88 142,88" fill="rgba(0,240,255,0.7)" stroke="#fff" stroke-width="1.2"></polygon><polygon points="166,72 176,72 178,88 169,88" fill="rgba(0,240,255,0.7)" stroke="#fff" stroke-width="1.2"></polygon>
               <circle cx="160" cy="78" r="5" fill="var(--neon-green)" stroke="#fff" stroke-width="1.5" filter="drop-shadow(0 0 8px var(--neon-green))"></circle>
             </g>
-
-            <!-- CUBIERTA 2: MÓDULO ECLSS / SCRUBBERS DE CO2 -->
-            <g id="deckEclss" class="habitat-module-node" data-habitat-module="co2"
-               onmouseenter="window.hudController.enfocarModuloHabitat('co2')"
-               onmouseleave="window.hudController.desenfocarModuloHabitat()">
+            <g id="deckEclss" class="habitat-module-node" data-habitat-module="co2" onmouseenter="window.hudController.enfocarModuloHabitat('co2')" onmouseleave="window.hudController.desenfocarModuloHabitat()">
               <rect x="130" y="155" width="60" height="55" fill="transparent" pointer-events="all"></rect>
               <line x1="98" y1="145" x2="222" y2="145" stroke="var(--neon-cyan)" stroke-width="2"></line>
               <rect x="136" y="162" width="48" height="44" rx="4" fill="rgba(0,255,136,0.18)" stroke="var(--neon-green)" stroke-width="1.6"></rect>
-              <circle cx="160" cy="184" r="14" fill="none" stroke="var(--neon-green)" stroke-width="1.2" stroke-dasharray="4 2"></circle>
               <circle cx="160" cy="184" r="5" fill="#00ff88" stroke="#fff" stroke-width="1.2" filter="drop-shadow(0 0 6px #00ff88)"></circle>
-              <path d="M115 184 L136 184 M184 184 L205 184" stroke="rgba(0,255,136,0.7)" stroke-width="1.5" stroke-dasharray="2 2"></path>
             </g>
-
-            <!-- CUBIERTA 3: REFUGIO ANTIRRADIACIÓN / STORM SHELTER -->
-            <g id="deckRadiationShelter" class="habitat-module-node" data-habitat-module="rad"
-               onmouseenter="window.hudController.enfocarModuloHabitat('rad')"
-               onmouseleave="window.hudController.desenfocarModuloHabitat()">
+            <g id="deckRadiationShelter" class="habitat-module-node" data-habitat-module="rad" onmouseenter="window.hudController.enfocarModuloHabitat('rad')" onmouseleave="window.hudController.desenfocarModuloHabitat()">
               <rect x="100" y="235" width="120" height="65" fill="transparent" pointer-events="all"></rect>
               <line x1="98" y1="230" x2="222" y2="230" stroke="var(--neon-cyan)" stroke-width="1.8"></line>
-              <rect x="106" y="240" width="22" height="55" rx="3" fill="rgba(0,119,255,0.3)" stroke="var(--neon-blue)" stroke-width="1.2"></rect>
-              <rect x="192" y="240" width="22" height="55" rx="3" fill="rgba(0,119,255,0.3)" stroke="var(--neon-blue)" stroke-width="1.2"></rect>
               <rect x="134" y="242" width="52" height="52" rx="4" fill="rgba(255,170,0,0.15)" stroke="var(--neon-amber)" stroke-width="1.5"></rect>
               <circle cx="160" cy="268" r="6" fill="var(--neon-amber)" stroke="#fff" stroke-width="1.5" filter="drop-shadow(0 0 8px var(--neon-amber))"></circle>
             </g>
-
-            <!-- CUBIERTA 4: CONTROL TÉRMICO (ATCS) Y CONDENSADOR -->
-            <g id="deckThermalAtcs" class="habitat-module-node" data-habitat-module="temp"
-               onmouseenter="window.hudController.enfocarModuloHabitat('temp')"
-               onmouseleave="window.hudController.desenfocarModuloHabitat()">
+            <g id="deckThermalAtcs" class="habitat-module-node" data-habitat-module="temp" onmouseenter="window.hudController.enfocarModuloHabitat('temp')" onmouseleave="window.hudController.desenfocarModuloHabitat()">
               <rect x="105" y="310" width="110" height="40" fill="transparent" pointer-events="all"></rect>
               <line x1="98" y1="305" x2="222" y2="305" stroke="var(--neon-cyan)" stroke-width="1.8"></line>
-              <path d="M112 320 Q120 315 128 320 T144 320 M112 335 Q120 330 128 335 T144 335" stroke="rgba(255,255,255,0.7)" stroke-width="1.4" fill="none"></path>
               <circle cx="128" cy="335" r="5" fill="#ffffff" stroke="var(--neon-cyan)" stroke-width="1.5" filter="drop-shadow(0 0 6px #fff)"></circle>
-              <path d="M176 320 Q184 315 192 320 T208 320 M176 335 Q184 330 192 335 T208 335" stroke="var(--neon-blue)" stroke-width="1.4" fill="none"></path>
               <circle cx="192" cy="335" r="5" fill="var(--neon-blue)" stroke="#fff" stroke-width="1.5" filter="drop-shadow(0 0 6px var(--neon-blue))"></circle>
             </g>
-
-            <!-- PROPULSIÓN IÓNICA / OMS -->
             <g id="propulsionNozzle">
               <polygon points="138,395 182,395 192,425 128,425" fill="rgba(8,16,32,0.9)" stroke="var(--neon-cyan)" stroke-width="1.6"></polygon>
               <polygon points="132,425 188,425 160,470" fill="url(#plasmaExhaustGrad)" opacity="0.9"></polygon>
             </g>
           </g>
-
-          <!-- LÍNEAS GUÍA DIRECTAS DE LA NAVE ORION -->
-          <!-- Conexión ECLSS SCRUBBER (ppCO2) -->
-          <g class="habitat-connector-line" data-habitat-line="co2">
-            <polyline points="316,194 255,56 218,56" fill="none" stroke="var(--neon-green)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-green))"></polyline>
-            <circle cx="316" cy="194" r="5" fill="#00ff88" stroke="#ffffff" stroke-width="1.8"></circle>
-            <circle cx="218" cy="56" r="3.5" fill="#00ff88"></circle>
-          </g>
-
-          <!-- Conexión BLINDAJE RADIACIÓN (SPE) -->
-          <g class="habitat-connector-line" data-habitat-line="rad">
-            <polyline points="314,278 255,172 218,172" fill="none" stroke="var(--neon-amber)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-amber))"></polyline>
-            <circle cx="314" cy="278" r="5" fill="#ffaa00" stroke="#ffffff" stroke-width="1.8"></circle>
-            <circle cx="218" cy="172" r="3.5" fill="#ffaa00"></circle>
-          </g>
-
-          <!-- Conexión CONTROL TÉRMICO (ATCS) -->
-          <g class="habitat-connector-line" data-habitat-line="temp">
-            <polyline points="308,345 255,288 218,288" fill="none" stroke="#ffffff" stroke-width="2.5" filter="drop-shadow(0 0 6px #fff)"></polyline>
-            <circle cx="308" cy="345" r="5" fill="#ffffff" stroke="var(--neon-cyan)" stroke-width="1.8"></circle>
-            <circle cx="218" cy="288" r="3.5" fill="#ffffff"></circle>
-          </g>
-
-          <!-- Conexión PRESIÓN CASCO (HULL) -->
-          <g class="habitat-connector-line" data-habitat-line="press">
-            <polyline points="346,88 420,126 462,126" fill="none" stroke="var(--neon-cyan)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-cyan))"></polyline>
-            <circle cx="346" cy="88" r="5" fill="#00f0ff" stroke="#ffffff" stroke-width="1.8"></circle>
-            <circle cx="462" cy="126" r="3.5" fill="#00f0ff"></circle>
-          </g>
-
-          <!-- Conexión HUMEDAD ATMOSFÉRICA -->
-          <g class="habitat-connector-line" data-habitat-line="hum">
-            <polyline points="372,345 420,382 462,382" fill="none" stroke="var(--neon-blue)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-blue))"></polyline>
-            <circle cx="372" cy="345" r="5" fill="#0088ff" stroke="#ffffff" stroke-width="1.8"></circle>
-            <circle cx="462" cy="382" r="3.5" fill="#0088ff"></circle>
-          </g>
+          <!-- Líneas de conexión Orion -->
+          <g class="habitat-connector-line" data-habitat-line="co2"><polyline points="316,194 255,56 218,56" fill="none" stroke="var(--neon-green)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-green))"></polyline><circle cx="316" cy="194" r="5" fill="#00ff88" stroke="#fff" stroke-width="1.8"></circle><circle cx="218" cy="56" r="3.5" fill="#00ff88"></circle></g>
+          <g class="habitat-connector-line" data-habitat-line="rad"><polyline points="314,278 255,172 218,172" fill="none" stroke="var(--neon-amber)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-amber))"></polyline><circle cx="314" cy="278" r="5" fill="#ffaa00" stroke="#fff" stroke-width="1.8"></circle><circle cx="218" cy="172" r="3.5" fill="#ffaa00"></circle></g>
+          <g class="habitat-connector-line" data-habitat-line="temp"><polyline points="308,345 255,288 218,288" fill="none" stroke="#fff" stroke-width="2.5" filter="drop-shadow(0 0 6px #fff))"></polyline><circle cx="308" cy="345" r="5" fill="#fff" stroke="var(--neon-cyan)" stroke-width="1.8"></circle><circle cx="218" cy="288" r="3.5" fill="#fff"></circle></g>
+          <g class="habitat-connector-line" data-habitat-line="press"><polyline points="346,88 420,126 462,126" fill="none" stroke="var(--neon-cyan)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-cyan))"></polyline><circle cx="346" cy="88" r="5" fill="#00f0ff" stroke="#fff" stroke-width="1.8"></circle><circle cx="462" cy="126" r="3.5" fill="#00f0ff"></circle></g>
+          <g class="habitat-connector-line" data-habitat-line="hum"><polyline points="372,345 420,382 462,382" fill="none" stroke="var(--neon-blue)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-blue))"></polyline><circle cx="372" cy="345" r="5" fill="#0088ff" stroke="#fff" stroke-width="1.8"></circle><circle cx="462" cy="382" r="3.5" fill="#0088ff"></circle></g>
         </g>
 
-        <!-- ============================================================= -->
-        <!-- 2. MODELO B: BASE HABITACIONAL MARCIANA (DOMO GEODÉSICO)      -->
-        <!-- ============================================================= -->
+        <!-- 2. MODELO B: BASE MARCIANA -->
         <g id="habitatMarsGroup" style="display:none;">
           <g transform="translate(180, 10)">
-            <!-- Suelo Marciano de Regolito -->
             <path d="M10 400 Q90 390 160 395 T310 400 L310 470 L10 470 Z" fill="rgba(180, 50, 20, 0.25)" stroke="#e05638" stroke-width="1.5"></path>
-            <ellipse cx="70" cy="425" rx="35" ry="8" fill="rgba(100, 25, 10, 0.4)" stroke="#e05638" stroke-width="1"></ellipse>
-
-            <!-- Domo Geodésico Principal -->
             <path d="M48 400 C48 210, 160 120, 272 400 Z" fill="url(#habitatHullGrad)" stroke="var(--neon-cyan)" stroke-width="2.2"></path>
             <g stroke="rgba(0,240,255,0.4)" stroke-width="1" fill="none">
-              <line x1="160" y1="120" x2="160" y2="400"></line>
-              <line x1="160" y1="120" x2="105" y2="240"></line>
-              <line x1="160" y1="120" x2="215" y2="240"></line>
-              <line x1="105" y1="240" x2="215" y2="240"></line>
-              <line x1="105" y1="240" x2="72" y2="340"></line>
-              <line x1="215" y1="240" x2="248" y2="340"></line>
-              <line x1="72" y1="340" x2="248" y2="340"></line>
-              <line x1="105" y1="240" x2="160" y2="340"></line>
-              <line x1="215" y1="240" x2="160" y2="340"></line>
+              <line x1="160" y1="120" x2="160" y2="400"></line><line x1="160" y1="120" x2="105" y2="240"></line><line x1="160" y1="120" x2="215" y2="240"></line><line x1="105" y1="240" x2="215" y2="240"></line>
+              <line x1="105" y1="240" x2="72" y2="340"></line><line x1="215" y1="240" x2="248" y2="340"></line><line x1="72" y1="340" x2="248" y2="340"></line>
             </g>
-
-            <!-- Escudo de Regolito y Blindaje -->
             <path d="M120 150 Q160 135 200 150 Q160 165 120 150 Z" fill="rgba(255,170,0,0.45)" stroke="var(--neon-amber)" stroke-width="1.5"></path>
             <circle cx="160" cy="150" r="5" fill="var(--neon-amber)" stroke="#fff" stroke-width="1.5"></circle>
-
-            <!-- Invernadero Hidropónico -->
             <ellipse cx="95" cy="360" rx="30" ry="25" fill="rgba(0,255,136,0.2)" stroke="var(--neon-green)" stroke-width="1.4"></ellipse>
             <circle cx="95" cy="360" r="5" fill="var(--neon-green)" stroke="#fff" stroke-width="1.5"></circle>
-
-            <!-- Biorreactor MOXIE de Soporte Vital -->
             <rect x="195" y="340" width="45" height="35" rx="4" fill="rgba(0,240,255,0.2)" stroke="var(--neon-cyan)" stroke-width="1.4"></rect>
             <circle cx="218" cy="358" r="5" fill="#00f0ff" stroke="#fff" stroke-width="1.5"></circle>
-
-            <!-- Esclusa de Descompresión para Trajes y Rover -->
-            <polygon points="144,400 176,400 170,365 150,365" fill="rgba(8,16,32,0.9)" stroke="#fff" stroke-width="1.4"></polygon>
             <circle cx="160" cy="270" r="5" fill="var(--neon-blue)" stroke="#fff" stroke-width="1.5"></circle>
           </g>
-
-          <!-- LÍNEAS GUÍA DIRECTAS DE LA BASE MARCIANA -->
-          <!-- MOXIE / Soporte Vital -->
-          <g class="habitat-connector-line" data-habitat-line="co2">
-            <polyline points="275,370 255,56 218,56" fill="none" stroke="var(--neon-green)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-green))"></polyline>
-            <circle cx="275" cy="370" r="5" fill="#00ff88" stroke="#ffffff" stroke-width="1.8"></circle>
-            <circle cx="218" cy="56" r="3.5" fill="#00ff88"></circle>
-          </g>
-
-          <!-- Blindaje de Regolito -->
-          <g class="habitat-connector-line" data-habitat-line="rad">
-            <polyline points="340,160 255,172 218,172" fill="none" stroke="var(--neon-amber)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-amber))"></polyline>
-            <circle cx="340" cy="160" r="5" fill="#ffaa00" stroke="#ffffff" stroke-width="1.8"></circle>
-            <circle cx="218" cy="172" r="3.5" fill="#ffaa00"></circle>
-          </g>
-
-          <!-- Climatización y Control Térmico Domo -->
-          <g class="habitat-connector-line" data-habitat-line="temp">
-            <polyline points="340,280 255,288 218,288" fill="none" stroke="#ffffff" stroke-width="2.5" filter="drop-shadow(0 0 6px #fff)"></polyline>
-            <circle cx="340" cy="280" r="5" fill="#ffffff" stroke="var(--neon-cyan)" stroke-width="1.8"></circle>
-            <circle cx="218" cy="288" r="3.5" fill="#ffffff"></circle>
-          </g>
-
-          <!-- Presión Interior del Domo -->
-          <g class="habitat-connector-line" data-habitat-line="press">
-            <polyline points="340,130 420,126 462,126" fill="none" stroke="var(--neon-cyan)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-cyan))"></polyline>
-            <circle cx="340" cy="130" r="5" fill="#00f0ff" stroke="#ffffff" stroke-width="1.8"></circle>
-            <circle cx="462" cy="126" r="3.5" fill="#00f0ff"></circle>
-          </g>
-
-          <!-- Humedad Invernadero -->
-          <g class="habitat-connector-line" data-habitat-line="hum">
-            <polyline points="398,368 420,382 462,382" fill="none" stroke="var(--neon-blue)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-blue))"></polyline>
-            <circle cx="398" cy="368" r="5" fill="#0088ff" stroke="#ffffff" stroke-width="1.8"></circle>
-            <circle cx="462" cy="382" r="3.5" fill="#0088ff"></circle>
-          </g>
+          <!-- Líneas de conexión Marte -->
+          <g class="habitat-connector-line" data-habitat-line="co2"><polyline points="275,370 255,56 218,56" fill="none" stroke="var(--neon-green)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-green))"></polyline><circle cx="275" cy="370" r="5" fill="#00ff88" stroke="#fff" stroke-width="1.8"></circle><circle cx="218" cy="56" r="3.5" fill="#00ff88"></circle></g>
+          <g class="habitat-connector-line" data-habitat-line="rad"><polyline points="340,160 255,172 218,172" fill="none" stroke="var(--neon-amber)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-amber))"></polyline><circle cx="340" cy="160" r="5" fill="#ffaa00" stroke="#fff" stroke-width="1.8"></circle><circle cx="218" cy="172" r="3.5" fill="#ffaa00"></circle></g>
+          <g class="habitat-connector-line" data-habitat-line="temp"><polyline points="340,280 255,288 218,288" fill="none" stroke="#fff" stroke-width="2.5" filter="drop-shadow(0 0 6px #fff)"></polyline><circle cx="340" cy="280" r="5" fill="#fff" stroke="var(--neon-cyan)" stroke-width="1.8"></circle><circle cx="218" cy="288" r="3.5" fill="#fff"></circle></g>
+          <g class="habitat-connector-line" data-habitat-line="press"><polyline points="340,130 420,126 462,126" fill="none" stroke="var(--neon-cyan)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-cyan))"></polyline><circle cx="340" cy="130" r="5" fill="#00f0ff" stroke="#fff" stroke-width="1.8"></circle><circle cx="462" cy="126" r="3.5" fill="#00f0ff"></circle></g>
+          <g class="habitat-connector-line" data-habitat-line="hum"><polyline points="398,368 420,382 462,382" fill="none" stroke="var(--neon-blue)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-blue))"></polyline><circle cx="398" cy="368" r="5" fill="#0088ff" stroke="#fff" stroke-width="1.8"></circle><circle cx="462" cy="382" r="3.5" fill="#0088ff"></circle></g>
         </g>
 
-        <!-- ============================================================= -->
-        <!-- 3. MODELO C: ESTACIÓN ESPACIAL INTERNACIONAL (ISS / GATEWAY)  -->
-        <!-- ============================================================= -->
+        <!-- 3. MODELO C: ISS -->
         <g id="habitatIssGroup" style="display:none;">
           <g transform="translate(180, 10)">
-            <!-- Viga Central Estructural Truss (P6 a S6) -->
             <rect x="36" y="195" width="248" height="12" fill="rgba(0,240,255,0.2)" stroke="var(--neon-cyan)" stroke-width="1.5"></rect>
-            <line x1="80" y1="195" x2="80" y2="207" stroke="#fff" stroke-width="1"></line>
-            <line x1="120" y1="195" x2="120" y2="207" stroke="#fff" stroke-width="1"></line>
-            <line x1="200" y1="195" x2="200" y2="207" stroke="#fff" stroke-width="1"></line>
-            <line x1="240" y1="195" x2="240" y2="207" stroke="#fff" stroke-width="1"></line>
-
-            <!-- Paneles Solares Orbitales Babor (Izquierda) -->
             <g stroke="var(--neon-cyan)" stroke-width="1">
               <rect x="18" y="70" width="36" height="110" fill="url(#solarWingGrad)" opacity="0.85"></rect>
-              <line x1="18" y1="105" x2="54" y2="105" stroke="#fff" stroke-width="0.8"></line>
-              <line x1="18" y1="140" x2="54" y2="140" stroke="#fff" stroke-width="0.8"></line>
               <rect x="18" y="222" width="36" height="110" fill="url(#solarWingGrad)" opacity="0.85"></rect>
-              <line x1="18" y1="257" x2="54" y2="257" stroke="#fff" stroke-width="0.8"></line>
-              <line x1="18" y1="292" x2="54" y2="292" stroke="#fff" stroke-width="0.8"></line>
-            </g>
-
-            <!-- Paneles Solares Orbitales Estribor (Derecha) -->
-            <g stroke="var(--neon-cyan)" stroke-width="1">
               <rect x="266" y="70" width="36" height="110" fill="url(#solarWingGrad)" opacity="0.85"></rect>
-              <line x1="266" y1="105" x2="302" y2="105" stroke="#fff" stroke-width="0.8"></line>
-              <line x1="266" y1="140" x2="302" y2="140" stroke="#fff" stroke-width="0.8"></line>
               <rect x="266" y="222" width="36" height="110" fill="url(#solarWingGrad)" opacity="0.85"></rect>
-              <line x1="266" y1="257" x2="302" y2="257" stroke="#fff" stroke-width="0.8"></line>
-              <line x1="266" y1="292" x2="302" y2="292" stroke="#fff" stroke-width="0.8"></line>
             </g>
-
-            <!-- Radiadores Térmicos de Amoníaco (Truss ATCS) -->
-            <polygon points="100,140 120,140 120,195 100,195" fill="rgba(255,255,255,0.3)" stroke="#fff" stroke-width="1.2"></polygon>
-            <polygon points="200,140 220,140 220,195 200,195" fill="rgba(255,255,255,0.3)" stroke="#fff" stroke-width="1.2"></polygon>
-
-            <!-- MÓDULOS PRESURIZADOS AXIALES (CENTRO) -->
-            <!-- Cúpula de Observación con 7 Ventanas (Tierra Abajo) -->
-            <polygon points="148,65 172,65 178,82 142,82" fill="rgba(0,240,255,0.7)" stroke="#fff" stroke-width="1.4"></polygon>
-            <circle cx="160" cy="74" r="4" fill="#fff" filter="drop-shadow(0 0 6px #00f0ff)"></circle>
-
-            <!-- Módulo Node 2 (Harmony) -->
-            <rect x="142" y="82" width="36" height="34" rx="4" fill="url(#habitatHullGrad)" stroke="var(--neon-cyan)" stroke-width="1.8"></rect>
-            <circle cx="160" cy="98" r="4" fill="var(--neon-green)" stroke="#fff" stroke-width="1.2"></circle>
-
-            <!-- Laboratorio Científico Destiny (US Lab) -->
-            <rect x="140" y="116" width="40" height="52" rx="4" fill="url(#habitatHullGrad)" stroke="var(--neon-cyan)" stroke-width="1.8"></rect>
-            <!-- Módulo Europeo Columbus (Babor) -->
-            <rect x="96" y="126" width="44" height="30" rx="3" fill="url(#habitatHullGrad)" stroke="var(--neon-cyan)" stroke-width="1.5"></rect>
-            <!-- Módulo Japonés Kibo (Estribor) -->
-            <rect x="180" y="126" width="48" height="30" rx="3" fill="url(#habitatHullGrad)" stroke="var(--neon-cyan)" stroke-width="1.5"></rect>
-
-            <!-- Módulo Node 1 (Unity) y Esclusa Quest Airlock -->
-            <rect x="142" y="168" width="36" height="38" rx="4" fill="url(#habitatHullGrad)" stroke="var(--neon-cyan)" stroke-width="1.8"></rect>
-            <circle cx="160" cy="186" r="5" fill="#00ff88" stroke="#fff" stroke-width="1.4" filter="drop-shadow(0 0 6px #00ff88)"></circle>
-
-            <!-- Módulo Ruso Zarya (FGB) y Zvezda (Servicio y Propulsión) -->
-            <rect x="144" y="206" width="32" height="60" rx="3" fill="url(#habitatHullGrad)" stroke="var(--neon-cyan)" stroke-width="1.6"></rect>
-            <rect x="146" y="266" width="28" height="55" rx="3" fill="url(#habitatHullGrad)" stroke="var(--neon-cyan)" stroke-width="1.6"></rect>
-            <circle cx="160" cy="242" r="5" fill="var(--neon-amber)" stroke="#fff" stroke-width="1.2"></circle>
-            <!-- Puerto de Acoplamiento Soyuz / Progress Aft -->
-            <rect x="152" y="321" width="16" height="12" rx="2" fill="rgba(8,16,32,0.9)" stroke="var(--neon-cyan)" stroke-width="1.2"></rect>
-
-            <!-- Brazo Robótico Canadarm2 Articulado -->
-            <polyline points="180,120 205,95 198,75 208,60" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"></polyline>
-            <circle cx="180" cy="120" r="2.5" fill="var(--neon-cyan)"></circle>
-            <circle cx="205" cy="95" r="2.5" fill="var(--neon-cyan)"></circle>
+            <rect x="146" y="105" width="28" height="195" rx="14" fill="url(#habitatHullGrad)" stroke="var(--neon-cyan)" stroke-width="2"></rect>
+            <circle cx="160" cy="140" r="5" fill="var(--neon-green)" stroke="#fff" stroke-width="1.5"></circle>
+            <circle cx="160" cy="202" r="6" fill="var(--neon-amber)" stroke="#fff" stroke-width="1.5"></circle>
+            <circle cx="160" cy="270" r="5" fill="#fff" stroke="var(--neon-cyan)" stroke-width="1.5"></circle>
+            <circle cx="160" cy="115" r="5" fill="var(--neon-cyan)" stroke="#fff" stroke-width="1.5"></circle>
+            <circle cx="115" cy="235" r="5" fill="var(--neon-blue)" stroke="#fff" stroke-width="1.5"></circle>
           </g>
-
-          <!-- LÍNEAS GUÍA DIRECTAS DE LA ESTACIÓN ESPACIAL (ISS) -->
-          <!-- Sistema CDRA -->
-          <g class="habitat-connector-line" data-habitat-line="co2">
-            <polyline points="320,152 255,56 218,56" fill="none" stroke="var(--neon-green)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-green))"></polyline>
-            <circle cx="320" cy="152" r="5" fill="#00ff88" stroke="#ffffff" stroke-width="1.8"></circle>
-            <circle cx="218" cy="56" r="3.5" fill="#00ff88"></circle>
-          </g>
-
-          <!-- Blindaje Whipple -->
-          <g class="habitat-connector-line" data-habitat-line="rad">
-            <polyline points="340,252 255,172 218,172" fill="none" stroke="var(--neon-amber)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-amber))"></polyline>
-            <circle cx="340" cy="252" r="5" fill="#ffaa00" stroke="#ffffff" stroke-width="1.8"></circle>
-            <circle cx="218" cy="172" r="3.5" fill="#ffaa00"></circle>
-          </g>
-
-          <!-- Bucle Térmico Amoniaco -->
-          <g class="habitat-connector-line" data-habitat-line="temp">
-            <polyline points="290,175 255,288 218,288" fill="none" stroke="#ffffff" stroke-width="2.5" filter="drop-shadow(0 0 6px #fff)"></polyline>
-            <circle cx="290" cy="175" r="5" fill="#ffffff" stroke="var(--neon-cyan)" stroke-width="1.8"></circle>
-            <circle cx="218" cy="288" r="3.5" fill="#ffffff"></circle>
-          </g>
-
-          <!-- Presión Módulo Node 2 -->
-          <g class="habitat-connector-line" data-habitat-line="press">
-            <polyline points="340,84 420,126 462,126" fill="none" stroke="var(--neon-cyan)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-cyan))"></polyline>
-            <circle cx="340" cy="84" r="5" fill="#00f0ff" stroke="#ffffff" stroke-width="1.8"></circle>
-            <circle cx="462" cy="126" r="3.5" fill="#00f0ff"></circle>
-          </g>
-
-          <!-- Humedad Habitáculo -->
-          <g class="habitat-connector-line" data-habitat-line="hum">
-            <polyline points="360,150 420,382 462,382" fill="none" stroke="var(--neon-blue)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-blue))"></polyline>
-            <circle cx="360" cy="150" r="5" fill="#0088ff" stroke="#ffffff" stroke-width="1.8"></circle>
-            <circle cx="462" cy="382" r="3.5" fill="#0088ff"></circle>
-          </g>
+          <!-- Líneas de conexión ISS -->
+          <g class="habitat-connector-line" data-habitat-line="co2"><polyline points="340,150 255,56 218,56" fill="none" stroke="var(--neon-green)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-green))"></polyline><circle cx="340" cy="150" r="5" fill="#00ff88" stroke="#fff" stroke-width="1.8"></circle><circle cx="218" cy="56" r="3.5" fill="#00ff88"></circle></g>
+          <g class="habitat-connector-line" data-habitat-line="rad"><polyline points="340,212 255,172 218,172" fill="none" stroke="var(--neon-amber)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-amber))"></polyline><circle cx="340" cy="212" r="5" fill="#ffaa00" stroke="#fff" stroke-width="1.8"></circle><circle cx="218" cy="172" r="3.5" fill="#ffaa00"></circle></g>
+          <g class="habitat-connector-line" data-habitat-line="temp"><polyline points="340,280 255,288 218,288" fill="none" stroke="#fff" stroke-width="2.5" filter="drop-shadow(0 0 6px #fff)"></polyline><circle cx="340" cy="280" r="5" fill="#fff" stroke="var(--neon-cyan)" stroke-width="1.8"></circle><circle cx="218" cy="288" r="3.5" fill="#fff"></circle></g>
+          <g class="habitat-connector-line" data-habitat-line="press"><polyline points="340,125 420,126 462,126" fill="none" stroke="var(--neon-cyan)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-cyan))"></polyline><circle cx="340" cy="125" r="5" fill="#00f0ff" stroke="#fff" stroke-width="1.8"></circle><circle cx="462" cy="126" r="3.5" fill="#00f0ff"></circle></g>
+          <g class="habitat-connector-line" data-habitat-line="hum"><polyline points="295,245 420,382 462,382" fill="none" stroke="var(--neon-blue)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-blue))"></polyline><circle cx="295" cy="245" r="5" fill="#0088ff" stroke="#fff" stroke-width="1.8"></circle><circle cx="462" cy="382" r="3.5" fill="#0088ff"></circle></g>
         </g>
       </svg>
 
-      <!-- TARJETAS FLOTANTES CALLOUTS AMPLIADAS DE LAS VARIABLES DE HÁBITAT -->
-      <div class="hologram-callout callout-lungs" data-habitat-card="co2"
-           onmouseenter="window.hudController.enfocarModuloHabitat('co2')"
-           onmouseleave="window.hudController.desenfocarModuloHabitat()"
-           style="position:absolute; top:28px; left:16px; width:198px; cursor:pointer;">
-        <div class="callout-header" id="labelEnvCo2" style="color:var(--neon-green);">ECLSS SCRUBBER (ppCO₂)</div>
-        <div class="callout-sub">NIVEL: <span id="calloutEnvCo2" class="callout-val" style="color:var(--neon-green);">1.8 mmHg</span></div>
+      <!-- TARJETAS FLOTANTES CALLOUTS -->
+      <div class="hologram-callout callout-lungs" data-habitat-card="co2" onmouseenter="window.hudController.enfocarModuloHabitat('co2')" onmouseleave="window.hudController.desenfocarModuloHabitat()" style="position:absolute; top:28px; left:16px; width:198px; cursor:pointer;">
+        <div class="callout-header" id="labelEnvCo2" style="color:var(--neon-green);">ECLSS SCRUBBER (ppCO2)</div>
+        <div class="callout-sub">VALOR: <span id="calloutEnvCo2" class="callout-val" style="color:var(--neon-green);">1.8 mmHg</span></div>
       </div>
-
-      <div class="hologram-callout callout-bone" data-habitat-card="rad"
-           onmouseenter="window.hudController.enfocarModuloHabitat('rad')"
-           onmouseleave="window.hudController.desenfocarModuloHabitat()"
-           style="position:absolute; top:144px; left:16px; width:198px; cursor:pointer;">
+      <div class="hologram-callout callout-bone" data-habitat-card="rad" onmouseenter="window.hudController.enfocarModuloHabitat('rad')" onmouseleave="window.hudController.desenfocarModuloHabitat()" style="position:absolute; top:144px; left:16px; width:198px; cursor:pointer;">
         <div class="callout-header" id="labelEnvRad" style="color:var(--neon-amber);">BLINDAJE RADIACIÓN (SPE)</div>
         <div class="callout-sub">DOSIS: <span id="calloutEnvRad" class="callout-val" style="color:var(--neon-amber);">85.0 mSv</span></div>
       </div>
-
-      <div class="hologram-callout callout-thermal" data-habitat-card="temp"
-           onmouseenter="window.hudController.enfocarModuloHabitat('temp')"
-           onmouseleave="window.hudController.desenfocarModuloHabitat()"
-           style="position:absolute; top:260px; left:16px; width:198px; cursor:pointer;">
-        <div class="callout-header" id="labelEnvTemp" style="color:#ffffff;">CONTROL TÉRMICO (ATCS)</div>
-        <div class="callout-sub">TEMP: <span id="calloutEnvTemp" class="callout-val" style="color:#ffffff;">21.8 °C</span></div>
+      <div class="hologram-callout" data-habitat-card="temp" onmouseenter="window.hudController.enfocarModuloHabitat('temp')" onmouseleave="window.hudController.desenfocarModuloHabitat()" style="position:absolute; top:260px; left:16px; width:198px; cursor:pointer;">
+        <div class="callout-header" id="labelEnvTemp" style="color:#fff;">CONTROL TÉRMICO (ATCS)</div>
+        <div class="callout-sub">TEMP: <span id="calloutEnvTemp" class="callout-val" style="color:#fff;">21.8 °C</span></div>
       </div>
-
-      <div class="hologram-callout callout-brain" data-habitat-card="press"
-           onmouseenter="window.hudController.enfocarModuloHabitat('press')"
-           onmouseleave="window.hudController.desenfocarModuloHabitat()"
-           style="position:absolute; top:98px; right:16px; width:198px; cursor:pointer;">
+      <div class="hologram-callout callout-brain" data-habitat-card="press" onmouseenter="window.hudController.enfocarModuloHabitat('press')" onmouseleave="window.hudController.desenfocarModuloHabitat()" style="position:absolute; top:98px; right:16px; width:198px; cursor:pointer;">
         <div class="callout-header" id="labelEnvPress" style="color:var(--neon-cyan);">PRESIÓN CASCO (HULL)</div>
         <div class="callout-sub">CABINA: <span id="calloutEnvPress" class="callout-val" style="color:var(--neon-cyan);">101.3 kPa</span></div>
       </div>
-
-      <div class="hologram-callout callout-hydration" data-habitat-card="hum"
-           onmouseenter="window.hudController.enfocarModuloHabitat('hum')"
-           onmouseleave="window.hudController.desenfocarModuloHabitat()"
-           style="position:absolute; top:354px; right:16px; width:198px; cursor:pointer;">
+      <div class="hologram-callout callout-hydration" data-habitat-card="hum" onmouseenter="window.hudController.enfocarModuloHabitat('hum')" onmouseleave="window.hudController.desenfocarModuloHabitat()" style="position:absolute; top:354px; right:16px; width:198px; cursor:pointer;">
         <div class="callout-header" id="labelEnvHum" style="color:var(--neon-blue);">HUMEDAD ATMOSFÉRICA</div>
         <div class="callout-sub">HUMEDAD: <span id="calloutEnvHum" class="callout-val" style="color:var(--neon-blue);">45.0 %</span></div>
       </div>
     </div>
 
-    <!-- PILLS INFORMATIVAS DE GRAVEDAD Y VENTILACIÓN -->
+    <!-- PILLS INFORMATIVAS -->
     <div style="margin-top:14px; display:flex; justify-content:space-between; gap:12px; font-family:var(--font-data); font-size:12px;">
       <div style="flex:1; background:rgba(0,240,255,0.06); border:1px solid rgba(0,240,255,0.25); padding:8px 14px; border-radius:4px; color:var(--neon-cyan); text-align:center;">
         GRAVEDAD: <span id="envGravity" style="font-weight:bold;">0.00 g</span> (MICROGRAVEDAD)
@@ -416,7 +183,7 @@
     </div>
   </div>
 
-  <!-- LADO DERECHO: SENSORES AMBIENTALES, KRONECKER Y CONTRAMEDIDAS -->
+  <!-- LADO DERECHO: SENSORES, KRONECKER Y CONTRAMEDIDAS -->
   <div class="hud-panel">
     <div class="panel-header">
       <div class="panel-title">
@@ -434,31 +201,26 @@
         <div class="tile-value"><span id="valCo2">1.8</span> <span class="tile-unit">mmHg</span></div>
         <div class="tile-status" id="statusCo2">LÍMITE NASA: &lt; 3.0 mmHg (~1200 ppm)</div>
       </div>
-
       <div class="metric-tile" id="cardRad">
         <div class="tile-label">DOSIS RADIACIÓN ACUMULADA</div>
         <div class="tile-value"><span id="valRad">85.0</span> <span class="tile-unit">mSv</span></div>
         <div class="tile-status" id="statusRad">14.1% DE LÍMITE CARRERA (600 mSv)</div>
       </div>
-
       <div class="metric-tile" id="cardPress">
         <div class="tile-label">PRESIÓN CABINA</div>
         <div class="tile-value"><span id="valPress">101.3</span> <span class="tile-unit">kPa</span></div>
         <div class="tile-status">RANGO NOMINAL (95.0 - 103.0 kPa)</div>
       </div>
-
       <div class="metric-tile">
         <div class="tile-label">TEMPERATURA CABINA</div>
         <div class="tile-value"><span id="valCabinTemp">21.8</span> <span class="tile-unit">°C</span></div>
         <div class="tile-status">CONFORT OPERACIONAL</div>
       </div>
-
       <div class="metric-tile">
         <div class="tile-label">HUMEDAD RELATIVA</div>
         <div class="tile-value"><span id="valHumidity">45.0</span> <span class="tile-unit">%</span></div>
         <div class="tile-status">RANGO NOMINAL (40 - 60%)</div>
       </div>
-
       <div class="metric-tile" id="cardSolar">
         <div class="tile-label">CLIMA ESPACIAL (NOAA SWPC)</div>
         <div class="tile-value"><span id="valSolarStatus">S0 QUIETO</span></div>
@@ -466,18 +228,16 @@
       </div>
     </div>
 
-    <!-- MATRIZ DE SINERGIA DE KRONECKER (12 ARISTAS DEL GRAFO DE DECISIÓN) -->
+    <!-- MATRIZ DE SINERGIA DE KRONECKER -->
     <div style="background:#040814; border:1px solid rgba(0,240,255,0.25); border-radius:8px; padding:14px; margin-top:16px;">
       <div style="font-family:var(--font-hud); font-size:11px; color:var(--neon-cyan); display:flex; justify-content:space-between; margin-bottom:8px;">
         <span>GRAFO MATRICIAL TENSORIAL KRONECKER (R^12)</span>
         <span id="matrixMaxSeverity" style="color:var(--neon-green);">Peligro: 0.0/10</span>
       </div>
-      <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px;" id="kroneckerGrid">
-        <!-- Celdas de Kronecker generadas por HudController -->
-      </div>
+      <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:6px;" id="kroneckerGrid"></div>
     </div>
 
-    <!-- CONTRAMEDIDAS ACTIVAS DE CABINA (MÁXIMO 3) -->
+    <!-- CONTRAMEDIDAS ACTIVAS DE CABINA -->
     <div style="background:rgba(0,240,255,0.06); border:1px solid rgba(0,240,255,0.3); border-radius:8px; padding:14px; margin-top:14px;">
       <div style="font-family:var(--font-hud); font-size:11px; color:var(--neon-cyan); margin-bottom:6px;">
         CONTRAMEDIDAS ACTIVAS SUGERIDAS (MÁXIMO 3 ACCIONES):

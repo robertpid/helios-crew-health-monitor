@@ -3,7 +3,7 @@ H.E.L.I.O.S. - Generador y Ensamblador Modular del Cockpit HUD.
 
 Este script ensambla el archivo 'frontend/index.html' a partir de componentes HTML
 independientes y desacoplados ubicados en 'frontend/components/'.
-Permite mantener componentes individuales de menos de 250 líneas sin sobrecargar
+Permite mantener componentes individuales de menos de 400 líneas sin sobrecargar
 el archivo principal, manteniendo compatibilidad pura sin requerir bundlers pesados
 (Webpack, Vite) ni dependencias externas.
 
@@ -88,6 +88,7 @@ class DashboardAssembler:
         view_environmental = self.leer_componente("view_environmental.html")
         view_wellness = self.leer_componente("view_wellness.html")
         modal_alert = self.leer_componente("modal_alert.html")
+        modal_login = self.leer_componente("modal_login.html")
         footer_html = self.leer_componente("footer.html")
 
         # Ensamblaje seguro de la estructura HTML5 con indentación estricta
@@ -103,7 +104,7 @@ class DashboardAssembler:
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   
-  <!-- H.E.L.I.O.S. Capa de Estilos N-Capas -->
+  <!-- H.E.L.I.O.S. Capa de Estilos N-Capas Modular -->
   <link rel="stylesheet" href="/static/css/hud-theme.css">
   <link rel="stylesheet" href="/static/css/animations.css">
 </head>
@@ -128,20 +129,24 @@ class DashboardAssembler:
 
   {modal_alert}
 
+  {modal_login}
+
   {footer_html}
 
   <!-- ========================================================================= -->
   <!-- 6. CARGA DE MÓDULOS DE ARQUITECTURA N-CAPAS EN JAVASCRIPT                 -->
   <!-- ========================================================================= -->
   <script src="/static/js/state/state_manager.js"></script>
+  <script src="/static/js/services/auth_service.js"></script>
   <script src="/static/js/services/sound_service.js"></script>
   <script src="/static/js/services/telemetry_service.js"></script>
   <script src="/static/js/services/ecg_service.js"></script>
   <script src="/static/js/services/hologram_service.js"></script>
+  <script src="/static/js/controllers/wellness_controller.js"></script>
   <script src="/static/js/controllers/hud_controller.js"></script>
 
   <script>
-    // Inicialización del ecosistema HUD N-Capas
+    // Inicialización del ecosistema HUD N-Capas Modular
     window.addEventListener("DOMContentLoaded", () => {{
       // 1. Instanciar Servicios
       const ecgService = new EcgOscilloscopeService("ecgDisplayCanvas");
@@ -153,12 +158,18 @@ class DashboardAssembler:
       const habitatHologramService = new HologramRendererService("particlesHabitatCanvas", "svgHologramHabitat");
       habitatHologramService.inicializar();
 
-      // 2. Instanciar Controlador con SoundService inyectado
+      // 2. Instanciar Controlador de Bienestar y Rutinas
+      const wellnessController = new WellnessController(window.soundService);
+      window.wellnessController = wellnessController;
+
+      // 3. Instanciar Controlador Principal con Inyección de Dependencias
       window.hudController = new HudController(
         window.stateManager,
         ecgService,
         window.telemetryService,
-        window.soundService
+        window.soundService,
+        wellnessController,
+        window.authService
       );
       window.hudController.inicializar();
     }});

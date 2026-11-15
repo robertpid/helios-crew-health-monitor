@@ -1,0 +1,60 @@
+<!-- ========================================================================= -->
+<!-- MODAL DE CONTROL DE ACCESO (LOGIN DE TRIPULANTES Y CIRUJANO DE VUELO)     -->
+<!-- ========================================================================= -->
+<div id="modalLogin" class="hud-modal-backdrop" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(3,7,18,0.85); backdrop-filter:blur(10px); z-index:9999; align-items:center; justify-content:center;">
+  <div class="modal-bounce-in" style="width:90%; max-width:480px; background:#0b1426; border:2px solid var(--neon-cyan); box-shadow:0 0 45px rgba(0,240,255,0.4), inset 0 0 25px rgba(0,240,255,0.08); border-radius:12px; padding:28px 32px; text-align:center; position:relative;">
+    
+    <!-- Botón cerrar (solo si ya hay sesión activa) -->
+    <button id="btnCloseLoginModal" onclick="window.hudController.cerrarModalLogin()" style="display:none; position:absolute; top:14px; right:18px; background:transparent; border:none; color:#94a3b8; font-size:22px; cursor:pointer;" title="Cerrar">&times;</button>
+
+    <div style="font-family:var(--font-hud); font-size:22px; font-weight:900; color:var(--neon-cyan); letter-spacing:2px; text-transform:uppercase; margin-bottom:6px; display:flex; align-items:center; justify-content:center; gap:10px; text-shadow:0 0 12px var(--neon-cyan);">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+      </svg>
+      CONTROL DE ACCESO
+    </div>
+    
+    <div style="font-family:var(--font-data); font-size:12px; color:#94a3b8; margin-bottom:20px;">
+      AUTENTICACIÓN DE TRIPULANTE Y CIRUJANO DE VUELO · SOL 120
+    </div>
+
+    <!-- BOTONES DE ACCESO RÁPIDO DEMO -->
+    <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:18px;">
+      <div style="font-family:var(--font-hud); font-size:11px; color:#cbd5e1; text-align:left; letter-spacing:0.5px;">
+        PERFILES REGISTRADOS (ACCESO RÁPIDO):
+      </div>
+      <button type="button" class="btn-hud" onclick="window.hudController.seleccionarUsuarioDemo('astro1', '1001')" style="font-size:11px; padding:8px 12px; text-align:left; display:flex; justify-content:space-between; align-items:center;">
+        <span>👨‍🚀 <strong>astro1</strong> · Alex Mercer (Comandante A01)</span>
+        <span style="color:var(--neon-green); font-family:var(--font-data);">PIN: 1001</span>
+      </button>
+      <button type="button" class="btn-hud" onclick="window.hudController.seleccionarUsuarioDemo('astro2', '2002')" style="font-size:11px; padding:8px 12px; text-align:left; display:flex; justify-content:space-between; align-items:center;">
+        <span>👩‍🚀 <strong>astro2</strong> · Elena Rostova (Especialista A02)</span>
+        <span style="color:var(--neon-green); font-family:var(--font-data);">PIN: 2002</span>
+      </button>
+      <button type="button" class="btn-hud" onclick="window.hudController.seleccionarUsuarioDemo('cirujano', '9009')" style="font-size:11px; padding:8px 12px; text-align:left; display:flex; justify-content:space-between; align-items:center; border-color:rgba(168,85,247,0.4);">
+        <span>🩺 <strong>cirujano</strong> · Dr. Vance (Cirujano de Vuelo)</span>
+        <span style="color:#c084fc; font-family:var(--font-data);">PIN: 9009</span>
+      </button>
+    </div>
+
+    <!-- FORMULARIO DE ACCESO -->
+    <form onsubmit="event.preventDefault(); window.hudController.ejecutarLogin();" style="text-align:left;">
+      <div style="margin-bottom:12px;">
+        <label for="inputLoginUsuario" style="display:block; font-family:var(--font-hud); font-size:11px; color:#cbd5e1; margin-bottom:5px;">USUARIO</label>
+        <input type="text" id="inputLoginUsuario" placeholder="astro1, astro2 o cirujano" style="width:100%; background:rgba(0,0,0,0.6); border:1px solid rgba(0,240,255,0.3); border-radius:6px; padding:10px 14px; font-family:var(--font-data); font-size:14px; color:#ffffff; outline:none;" autocomplete="username" required>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label for="inputLoginPin" style="display:block; font-family:var(--font-hud); font-size:11px; color:#cbd5e1; margin-bottom:5px;">CLAVE PIN (4 DÍGITOS)</label>
+        <input type="password" id="inputLoginPin" maxlength="6" placeholder="PIN numérico" style="width:100%; background:rgba(0,0,0,0.6); border:1px solid rgba(0,240,255,0.3); border-radius:6px; padding:10px 14px; font-family:var(--font-data); font-size:14px; color:#ffffff; outline:none; letter-spacing:4px;" autocomplete="current-password" required>
+      </div>
+
+      <div id="loginErrorMsg" style="display:none; color:var(--neon-red); font-family:var(--font-data); font-size:12px; margin-bottom:14px; padding:6px 10px; background:rgba(255,34,85,0.1); border-left:3px solid var(--neon-red); border-radius:0 4px 4px 0;"></div>
+
+      <button type="submit" class="btn-hud" style="width:100%; background:var(--neon-cyan); color:#030712; font-size:13px; font-weight:800; letter-spacing:1.5px; padding:12px; border-radius:6px; cursor:pointer; text-transform:uppercase;">
+        DESBLOQUEAR TERMINAL
+      </button>
+    </form>
+  </div>
+</div>

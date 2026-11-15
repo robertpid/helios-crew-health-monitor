@@ -1,0 +1,218 @@
+/* ==========================================================================
+   H.E.L.I.O.S. - HUD PANELS, METRICS & MODAL DE ALERTAS
+   Arquitectura Modular: <= 300 líneas por módulo.
+   ========================================================================== */
+
+.main-viewport {
+  padding: 22px 28px;
+  max-width: 1720px;
+  margin: 0 auto;
+}
+
+.view-container {
+  display: none !important;
+}
+
+.view-container.active-view {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 20px !important;
+  width: 100% !important;
+  align-items: start;
+}
+
+#viewBiomedical.active-view {
+  grid-template-columns: 1.15fr 1fr !important;
+}
+
+#viewMatrix.active-view {
+  display: grid !important;
+}
+
+.hud-panel {
+  background: var(--bg-panel-solid);
+  border: 1px solid var(--bg-panel-border);
+  border-radius: 10px;
+  padding: 22px;
+  position: relative;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  transition: border-color 0.3s;
+}
+
+.hud-panel:hover {
+  border-color: var(--bg-panel-border-hover);
+}
+
+/* Decoradores de esquina Sci-Fi */
+.hud-panel::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; width: 12px; height: 12px;
+  border-top: 2px solid var(--neon-cyan);
+  border-left: 2px solid var(--neon-cyan);
+}
+
+.hud-panel::after {
+  content: "";
+  position: absolute;
+  bottom: 0; right: 0; width: 12px; height: 12px;
+  border-bottom: 2px solid var(--neon-cyan);
+  border-right: 2px solid var(--neon-cyan);
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+  padding-bottom: 10px;
+}
+
+.panel-title {
+  font-family: var(--font-hud);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--neon-cyan);
+  letter-spacing: 1.5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.panel-subtitle {
+  font-family: var(--font-data);
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* Cuadrícula de métricas */
+.metrics-grid-2x {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.metric-tile {
+  background: rgba(4, 9, 20, 0.8);
+  border: 1px solid rgba(0, 240, 255, 0.2);
+  border-radius: 8px;
+  padding: 16px 18px;
+  position: relative;
+  transition: all 0.25s ease;
+}
+
+.metric-tile:hover {
+  border-color: var(--neon-cyan);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 240, 255, 0.12);
+}
+
+.tile-label {
+  font-family: var(--font-hud);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.tile-value {
+  font-family: var(--font-data);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--neon-cyan);
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.tile-unit {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.tile-status {
+  font-family: var(--font-data);
+  font-size: 12px;
+  color: var(--neon-green);
+  margin-top: 5px;
+}
+
+/* Modificador de Alerta en Tile */
+.tile-danger {
+  border-color: var(--neon-red) !important;
+  background: rgba(255, 34, 85, 0.08) !important;
+}
+
+.tile-danger .tile-value {
+  color: var(--neon-red) !important;
+  text-shadow: 0 0 10px var(--neon-red-glow);
+}
+
+.tile-danger .tile-status {
+  color: var(--neon-red) !important;
+}
+
+/* Osciloscopio ECG Canvas */
+.ecg-monitor-frame {
+  background: #020409;
+  border: 1px solid rgba(0, 240, 255, 0.35);
+  border-radius: 8px;
+  padding: 14px;
+  margin-top: 16px;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+}
+
+.ecg-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-hud);
+  font-size: 11px;
+  color: var(--neon-cyan);
+  margin-bottom: 10px;
+}
+
+#ecgDisplayCanvas {
+  width: 100%;
+  height: 95px;
+  display: block;
+}
+
+/* Modal de Alerta Crítica Flotante */
+#modalAlerta {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(3, 6, 16, 0.88);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+#modalAlerta.open {
+  display: flex !important;
+}
+
+.modal-bounce-in {
+  animation: modalPop 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modalPop {
+  0% {
+    transform: scale(0.88);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
