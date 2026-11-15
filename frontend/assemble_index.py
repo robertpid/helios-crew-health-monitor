@@ -88,6 +88,7 @@ class DashboardAssembler:
         view_biomedical = self.leer_componente("view_biomedical.html")
         view_environmental = self.leer_componente("view_environmental.html")
         view_wellness = self.leer_componente("view_wellness.html")
+        view_support = self.leer_componente("view_support.html")
         modal_alert = self.leer_componente("modal_alert.html")
         modal_login = self.leer_componente("modal_login.html")
         footer_html = self.leer_componente("footer.html")
@@ -133,6 +134,8 @@ class DashboardAssembler:
 
     {view_wellness}
 
+    {view_support}
+
   </main>
 
   {modal_alert}
@@ -152,6 +155,7 @@ class DashboardAssembler:
   <script src="/static/js/services/ecg_service.js?v={version_tag}"></script>
   <script src="/static/js/services/hologram_service.js?v={version_tag}"></script>
   <script src="/static/js/controllers/wellness_controller.js?v={version_tag}"></script>
+  <script src="/static/js/controllers/viewport_controller.js?v={version_tag}"></script>
   <script src="/static/js/controllers/hud_controller.js?v={version_tag}"></script>
 
   <script>
@@ -180,6 +184,8 @@ class DashboardAssembler:
         wellnessController,
         window.authService
       );
+      window.viewportController = new ViewportController();
+      window.viewportController.inicializar();
       window.hudController.inicializar();
     }});
   </script>

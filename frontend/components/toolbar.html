@@ -1,15 +1,22 @@
 <!-- ========================================================================= -->
 <!-- 2. TOOLBAR DE CONTROL INTERACTIVO Y DEMO                                   -->
+<!-- El rótulo del enlace DSN se abrevia: a ancho completo competía con los      -->
+<!-- botones y empujaba la fila fuera del viewport.                             -->
 <!-- ========================================================================= -->
 <div class="control-toolbar">
-  <div class="toolbar-group">
-    <span style="color:var(--neon-cyan); font-weight:700;">ENLACE DSN ESPACIO PROFUNDO:</span>
-    <span id="dsnLatency" style="color:#ffffff;">14 min (Store-and-Forward Activo) · Sol 120</span>
+  <div class="toolbar-group toolbar-link" title="Enlace Deep Space Network — retardo de propagación a Tierra">
+    <span class="link-dot" aria-hidden="true"></span>
+    <span class="link-label">ENLACE DSN</span>
+    <span id="dsnLatency" class="link-value">14 min · Store-and-Forward · Sol 120</span>
   </div>
   <div class="toolbar-group">
-    <button id="btnAudioToggle" class="btn-hud" onclick="window.hudController.toggleAudio()" title="Activar/Silenciar Efectos de Audio Procedural">🔊 AUDIO: ACTIVO</button>
-    <button class="btn-hud" onclick="window.hudController.restablecerModoNominal()">MODO NOMINAL</button>
-    <button class="btn-hud btn-hud-danger" onclick="window.hudController.activarModoCrisis()">SIMULAR CRISIS (DÍA 95)</button>
-    <button class="btn-hud" onclick="window.hudController.toggleModal()">VER ALERTA MODAL</button>
+    <button id="btnAudioToggle" class="btn-hud" onclick="window.hudController.toggleAudio()"
+            title="Activar o silenciar los efectos de audio procedural">🔊 AUDIO</button>
+    <button class="btn-hud" onclick="window.hudController.restablecerModoNominal()"
+            title="Restablecer la telemetría a valores nominales">MODO NOMINAL</button>
+    <button class="btn-hud btn-hud-danger" onclick="window.hudController.activarModoCrisis()"
+            title="Inyectar el escenario de crisis del día 95">SIMULAR CRISIS</button>
+    <button class="btn-hud" onclick="window.hudController.toggleModal()"
+            title="Mostrar la ventana modal de alerta crítica">VER ALERTA</button>
   </div>
 </div>

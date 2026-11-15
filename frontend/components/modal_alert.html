@@ -4,9 +4,9 @@
 <div id="modalAlerta" onclick="if(event.target === this) window.hudController.toggleModal();">
   <div class="modal-bounce-in" style="width:90%; max-width:680px; background:#0b1426; border:2px solid var(--neon-red); box-shadow:0 0 50px rgba(255,34,85,0.5), inset 0 0 25px rgba(255,34,85,0.1); border-radius:12px; padding:30px 36px; text-align:center; position:relative;">
     
-    <button onclick="window.hudController.toggleModal()" style="position:absolute; top:14px; right:18px; background:transparent; border:none; color:#94a3b8; font-size:24px; cursor:pointer;" title="Cerrar Alerta Modal">&times;</button>
+    <button onclick="window.hudController.toggleModal()" style="position:absolute; top:14px; right:18px; background:transparent; border:none; color:var(--text-muted); font-size:24px; cursor:pointer;" title="Cerrar Alerta Modal">&times;</button>
     
-    <div style="font-family:var(--font-hud); font-size:26px; font-weight:900; color:var(--neon-red); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; justify-content:center; gap:12px; text-shadow:0 0 15px var(--neon-red);">
+    <div style="font-family:var(--font-hud); font-size:26px; font-weight:900; color:var(--c-red-ink); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; display:flex; align-items:center; justify-content:center; gap:12px; text-shadow:0 0 15px var(--neon-red);">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
         <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path>
         <line x1="12" y1="9" x2="12" y2="13"></line>
@@ -14,21 +14,21 @@
       </svg>
       ! CRITICAL ALERT
     </div>
-    <div id="modalAlertSubtitle" style="font-family:var(--font-data); font-size:14px; color:#cbd5e1; margin-bottom:20px;">
+    <div id="modalAlertSubtitle" style="font-family:var(--font-data); font-size:14px; color:var(--text-secondary); margin-bottom:20px;">
       4 parameter(s) detected out of range
     </div>
 
     <!-- LISTA DE PARÁMETROS DEL BOCETO (DINÁMICOS) -->
     <div style="text-align:left; background:rgba(0,0,0,0.5); border:1px solid rgba(255,34,85,0.3); border-radius:8px; padding:16px 20px; margin-bottom:22px; font-family:var(--font-data); font-size:13px; line-height:1.8;">
-      <div style="color:#ffd6df;"><strong style="color:var(--neon-red);">[CRITICAL]</strong> HEART RATE <span id="modalHrVal">132</span> bpm – check sensor and rest</div>
-      <div style="color:#ffd6df;"><strong style="color:var(--neon-red);">[CRITICAL]</strong> SpO₂ <span id="modalSpo2Val">88</span> % – check sensor and oxygen</div>
-      <div style="color:#ffd6df;"><strong style="color:var(--neon-red);">[CRITICAL]</strong> CO₂ <span id="modalCo2Val">3.8</span> mmHg – increase ventilation</div>
-      <div style="color:#ffd6df;"><strong style="color:var(--neon-red);">[CRITICAL]</strong> TEMPERATURE <span id="modalTempVal">38.4</span> °C – thermal control</div>
+      <div style="color:#ffd6df;"><strong style="color:var(--c-red-ink);">[CRITICAL]</strong> HEART RATE <span id="modalHrVal">132</span> bpm – check sensor and rest</div>
+      <div style="color:#ffd6df;"><strong style="color:var(--c-red-ink);">[CRITICAL]</strong> SpO₂ <span id="modalSpo2Val">88</span> % – check sensor and oxygen</div>
+      <div style="color:#ffd6df;"><strong style="color:var(--c-red-ink);">[CRITICAL]</strong> CO₂ <span id="modalCo2Val">3.8</span> mmHg – increase ventilation</div>
+      <div style="color:#ffd6df;"><strong style="color:var(--c-red-ink);">[CRITICAL]</strong> TEMPERATURE <span id="modalTempVal">38.4</span> °C – thermal control</div>
     </div>
 
     <!-- CONTRAMEDIDAS PRIORITARIAS (MÁXIMO 3 - REGLA MARTINA) -->
     <div style="text-align:left; background:rgba(0,240,255,0.06); border:1px solid rgba(0,240,255,0.35); border-radius:8px; padding:16px 20px; margin-bottom:24px;">
-      <div style="font-family:var(--font-hud); font-size:11px; color:var(--neon-cyan); letter-spacing:1px; margin-bottom:8px; text-transform:uppercase;">
+      <div style="font-family:var(--font-hud); font-size:11px; color:var(--c-cyan-ink); letter-spacing:1px; margin-bottom:8px; text-transform:uppercase;">
         ACCIONES RECOMENDADAS PRIORITARIAS (MÁXIMO 3):
       </div>
       <div id="modalCountermeasures" style="font-family:var(--font-data); font-size:13px; color:#f1f5f9; line-height:1.7;">
@@ -36,10 +36,10 @@
       </div>
     </div>
 
-    <button onclick="window.hudController.cambiarVista('matrix'); window.hudController.toggleModal();" style="background:var(--neon-cyan); color:#030712; border:none; font-family:var(--font-hud); font-size:14px; font-weight:800; letter-spacing:2px; padding:14px 32px; border-radius:6px; cursor:pointer; box-shadow:0 0 25px rgba(0,240,255,0.6); width:100%; text-transform:uppercase;">
+    <button onclick="window.viewportController.mostrarReglas(); window.hudController.toggleModal();" style="background:var(--neon-cyan); color:#030712; border:none; font-family:var(--font-hud); font-size:14px; font-weight:800; letter-spacing:2px; padding:14px 32px; border-radius:6px; cursor:pointer; box-shadow:0 0 25px rgba(0,240,255,0.6); width:100%; text-transform:uppercase;">
       OPEN FULL REPORT
     </button>
-    <div style="margin-top:10px; font-family:var(--font-data); font-size:11px; color:#94a3b8;">
+    <div style="margin-top:10px; font-family:var(--font-data); font-size:11px; color:var(--text-muted);">
       Press "ID" in H.E.L.I.O.S. menu to open full report
     </div>
   </div>

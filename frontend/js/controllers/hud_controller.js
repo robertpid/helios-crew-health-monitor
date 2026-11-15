@@ -206,7 +206,10 @@ class HudController {
   iniciarExamenSonar() { this._wellness?.iniciarExamenSonar(); }
   sincronizarCorreo() { this._wellness?.sincronizarCorreo(); }
   toggleGuiaRespiracion() { this._wellness?.toggleGuiaRespiracion(); }
-  iniciarProtocoloPsicologico() { this._wellness?.iniciarProtocoloPsicologico(); }
+  iniciarProtocoloPsicologico() {
+    this._wellness?.iniciarProtocoloPsicologico();
+    window.viewportController?.mostrarAsistente();
+  }
   enviarRespuestaPsicologica() { this._wellness?.enviarRespuestaPsicologica(); }
   seleccionarChipSugerido(t) { this._wellness?.seleccionarChipSugerido(t); }
   activarDictadoVoz() { this._wellness?.activarDictadoVoz(); }
@@ -286,7 +289,8 @@ class HudController {
     const mapa = {
       biomedical: { tab: tabs[0], view: "viewBiomedical" },
       environmental: { tab: tabs[1], view: "viewEnvironmental" },
-      matrix: { tab: tabs[2], view: "viewMatrix" }
+      matrix: { tab: tabs[2], view: "viewMatrix" },
+      support: { tab: tabs[3], view: "viewSupport" }
     };
     if (activa === "biomedical") this._ecg?.reanudar?.();
     else this._ecg?.pausar?.();
@@ -294,8 +298,10 @@ class HudController {
     const tgt = mapa[activa];
     if (tgt) {
       tgt.tab?.classList.add("active");
+      tabs.forEach(tab => tab.setAttribute("aria-pressed", String(tab === tgt.tab)));
       const v = document.getElementById(tgt.view);
       if (v) { v.classList.add("active-view"); v.style.setProperty("display", "grid", "important"); }
+      window.viewportController?.actualizarVista(activa);
       if (activa === "environmental") setTimeout(() => window.dispatchEvent(new Event("resize")), 60);
     }
   }
@@ -344,22 +350,8 @@ class HudController {
   }
 
   async _cargarCatalogoMatriz() {
-    const tbody = document.getElementById("matrixTableBody");
-    if (!tbody) return;
     const reglas = await this._telemetry.obtenerCatalogoMatriz();
-    if (!reglas?.length) return;
-    tbody.innerHTML = "";
-    reglas.forEach(r => {
-      const cls = (r.nivel === "CRITICA") ? "badge-crit" : (r.nivel === "ALERTA") ? "badge-warn" : "badge-info";
-      const row = document.createElement("tr");
-      row.innerHTML = `
-        <td><strong>${r.id_regla}</strong></td><td><span class="${cls}">${r.nivel}</span></td>
-        <td>${r.dominio}</td><td><strong>${r.evaluacion_preliminar}</strong></td>
-        <td><ol style="padding-left:14px; margin:0;">${r.contramedidas.map(c => `<li>${c}</li>`).join("")}</ol></td>
-        <td>${r.destinatarios.join(", ")}</td><td><small>${r.base_evidencia}</small></td>
-      `;
-      tbody.appendChild(row);
-    });
+    window.viewportController?.setRules(reglas || []);
   }
 
   _setTxt(id, val) { const el = document.getElementById(id); if (el) el.innerText = val; }

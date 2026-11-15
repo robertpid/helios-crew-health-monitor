@@ -24,6 +24,7 @@ class EcgOscilloscopeService {
     if (!this._canvas || !this._ctx) return;
     this.redimensionar();
     window.addEventListener("resize", () => this.redimensionar());
+    window.addEventListener("helios:layout", () => this.redimensionar());
     this._iniciarBucle();
   }
 
@@ -46,7 +47,7 @@ class EcgOscilloscopeService {
     if (!this._canvas || !this._ctx) return;
     const parent = this._canvas.parentElement;
     this._canvas.width = parent ? parent.clientWidth - 28 : 550;
-    this._canvas.height = 95;
+    this._canvas.height = Math.max(60, this._canvas.clientHeight || 95);
     this._sweepX = 0;
     this._lastY = this._canvas.height / 2;
     this._limpiarFondoCompleto();

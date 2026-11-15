@@ -62,9 +62,9 @@ class WellnessController {
       this._gamificacion.expMax = Math.round(this._gamificacion.expMax * 1.25);
       this._sound?.reproducirNominal?.();
     }
-    const lvlTag = document.getElementById("gamificationLevelTag");
-    const expTag = document.getElementById("gamificationExpTag");
-    const expBar = document.getElementById("gamificationExpBar");
+    const lvlTag = document.getElementById("userLevelTag");
+    const expTag = document.getElementById("userExpTag");
+    const expBar = document.getElementById("userExpBar");
     if (lvlTag) lvlTag.innerText = `NIVEL ${this._gamificacion.nivel}`;
     if (expTag) expTag.innerHTML = `EXP <strong style="color:var(--neon-green);">${this._gamificacion.exp}</strong> / ${this._gamificacion.expMax}`;
     if (expBar) expBar.style.width = `${Math.min(100, Math.round((this._gamificacion.exp / this._gamificacion.expMax) * 100))}%`;
@@ -313,12 +313,7 @@ class WellnessController {
 
   toggleMatrizTecnica() {
     this._sound?.reproducirClick?.();
-    const drawer = document.getElementById("martinaMatrixDrawer");
-    const btnText = document.getElementById("btnTextMartinaToggle");
-    if (!drawer) return;
-    const vis = drawer.style.display === "block";
-    drawer.style.display = vis ? "none" : "block";
-    if (btnText) btnText.innerText = vis ? "VER MATRIZ TÉCNICA DE DECISIÓN (15 CRUCES MARTINA)" : "OCULTAR MATRIZ TÉCNICA DE DECISIÓN";
+    window.viewportController?.mostrarReglas();
   }
 
   actualizarHidratacion(esCrisis) {

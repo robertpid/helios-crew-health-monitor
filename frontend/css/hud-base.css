@@ -1,265 +1,530 @@
 /* ==========================================================================
-   H.E.L.I.O.S. - HUD BASE & DESIGN SYSTEM (VARIABLES, RESET & LAYOUT)
-   Arquitectura Modular: <= 300 líneas por módulo.
+   H.E.L.I.O.S. - HUD BASE & DESIGN SYSTEM (TOKENS, RESET & CHROME)
+
+   SISTEMA CROMÁTICO
+   -----------------
+   La paleta de órganos está re-escalonada y verificada con el validador de
+   accesibilidad sobre la superficie real (#050811, modo oscuro, todos los pares):
+
+     [PASS] Banda de luminosidad   los 5 tonos dentro de L 0.48–0.67
+     [PASS] Suelo de croma         los 5 >= 0.1
+     [WARN] Separación CVD         peor par rojo↔verde ΔE 6.5 (deuteranopía)
+     [PASS] Suelo de visión normal peor par ΔE 16.1 (mínimo 15)
+     [PASS] Contraste vs fondo     los 5 >= 3:1
+
+   El aviso de CVD cae en la banda 6–8, admisible ÚNICAMENTE con codificación
+   secundaria. Aquí la hay y es permanente: cada órgano lleva rótulo de texto,
+   línea guía y posición anatómica propia. El color nunca porta identidad solo.
+
+   La paleta anterior fallaba dos puertas: tres tonos por encima de la banda de
+   luminosidad (deslumbraban sobre el fondo) y morado↔azul con ΔE 1.5 en
+   deuteranopía, es decir, indistinguibles.
+
+   TONO DE MARCA vs TINTA
+   ----------------------
+   Los tonos validados (--c-*) pintan MARCAS: rellenos, trazos, bordes, nodos.
+   El TEXTO viste siempre tinta neutra (--text-*); la identidad la porta una
+   marca de color contigua. Un valor numérico grande nunca se tiñe: gana peso
+   visual y pierde legibilidad. Para los casos donde el texto sí debe ir teñido
+   (titulares de rótulo) existe el escalón --c-*-ink, más claro y con contraste
+   suficiente para tipografía pequeña.
    ========================================================================== */
 
 :root {
-  /* Paleta cromática de espacio profundo */
-  --bg-deep-space: #050811;
-  --bg-cockpit-panel: rgba(10, 18, 36, 0.88);
-  --bg-panel-solid: #091224;
-  --bg-panel-border: rgba(0, 240, 255, 0.25);
-  --bg-panel-border-hover: rgba(0, 240, 255, 0.7);
+  /* ---- Superficies: escalera de elevación sobre el espacio profundo ---- */
+  --surface-0: #050811;   /* plano de página */
+  --surface-1: #0a1020;   /* panel */
+  --surface-2: #0e1526;   /* tile dentro de panel */
+  --surface-3: #141d33;   /* elemento elevado / hover */
+  --surface-sunken: #03060e;
 
-  /* Acentos de luz neón */
-  --neon-cyan: #00f0ff;
-  --neon-cyan-glow: rgba(0, 240, 255, 0.5);
-  --neon-blue: #0088ff;
-  --neon-green: #00ff88;
-  --neon-green-glow: rgba(0, 255, 136, 0.4);
-  --neon-amber: #ffaa00;
-  --neon-amber-glow: rgba(255, 170, 0, 0.4);
-  --neon-red: #ff2255;
-  --neon-red-glow: rgba(255, 34, 85, 0.6);
-  --neon-purple: #a855f7;
+  /* ---- Marcas: paleta categórica validada (NO usar para texto) ---- */
+  --c-cyan:  #179fb3;   /* cerebro / ASTRA   L 0.665 */
+  --c-green: #107a52;   /* pulmones / SpO2   L 0.521 */
+  --c-amber: #bd850c;   /* hueso / radiación L 0.649 */
+  --c-red:   #c73450;   /* corazón / crítico L 0.553 */
+  --c-blue:  #2f5fc0;   /* hidratación/renal L 0.492 */
 
-  /* Tipografías */
-  --font-hud: 'Orbitron', monospace, sans-serif;
-  --font-data: 'Share Tech Mono', monospace;
-  --font-body: 'Rajdhani', sans-serif;
+  /* ---- Tinta de color: escalón claro para texto pequeño teñido ---- */
+  --c-cyan-ink:  #5ad6ea;
+  --c-green-ink: #3fcf92;
+  --c-amber-ink: #f0b63c;
+  --c-red-ink:   #ff6b85;
+  --c-blue-ink:  #74a4f5;
 
-  /* Textos */
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  /* ---- Halos: la luminosidad vive en el resplandor, no en el color base ---- */
+  --glow-cyan:  rgba(23, 159, 179, 0.55);
+  --glow-green: rgba(16, 122, 82, 0.55);
+  --glow-amber: rgba(189, 133, 12, 0.55);
+  --glow-red:   rgba(199, 52, 80, 0.60);
+  --glow-blue:  rgba(47, 95, 192, 0.55);
+
+  /* ---- Estado: reservada. Nunca se reutiliza como serie.
+         Se acompaña SIEMPRE de icono + rótulo, jamás color solo. ---- */
+  --st-good:     #0ca30c;
+  --st-warning:  #fab219;
+  --st-serious:  #ec835a;
+  --st-critical: #d03b3b;
+
+  /* ---- Tinta ---- */
+  --text-primary:   #eaf2f8;
+  --text-secondary: #9fb3c8;
+  --text-muted:     #64788f;
+  --text-inverse:   #03060e;
+
+  /* ---- Líneas: finas y recesivas ---- */
+  --line-subtle:  rgba(125, 190, 215, 0.10);
+  --line-default: rgba(125, 190, 215, 0.20);
+  --line-strong:  rgba(23, 159, 179, 0.50);
+
+  /* ---- Escala de espaciado (base 4) ---- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+
+  /* ---- Escala tipográfica ---- */
+  --fs-2xs: 10px;
+  --fs-xs:  11px;
+  --fs-sm:  12px;
+  --fs-md:  14px;
+  --fs-lg:  16px;
+  --fs-xl:  20px;
+  --fs-2xl: 26px;
+  --fs-3xl: 32px;
+
+  --lh-tight:  1.15;
+  --lh-snug:   1.35;
+  --lh-normal: 1.55;
+
+  /* Orbitron es ancha: el tracking generoso de antes la volvía ilegible
+     por debajo de 13px. Se reduce y se reserva para titulares. */
+  --tr-tight: 0.01em;
+  --tr-wide:  0.05em;
+  --tr-wider: 0.10em;
+
+  /* ---- Radios y elevación ---- */
+  --r-sm: 4px;
+  --r-md: 7px;
+  --r-lg: 11px;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --shadow-2: 0 4px 14px rgba(0, 0, 0, 0.50);
+  --shadow-3: 0 12px 34px rgba(0, 0, 0, 0.60);
+
+  /* ---- Tipografías ---- */
+  --font-hud:  'Orbitron', system-ui, sans-serif;   /* sólo titulares */
+  --font-body: 'Rajdhani', system-ui, sans-serif;   /* interfaz y rótulos */
+  --font-data: 'Share Tech Mono', ui-monospace, monospace;  /* cifras */
+
+  /* ==== Alias de compatibilidad con las reglas heredadas ==== */
+  --bg-deep-space: var(--surface-0);
+  --bg-cockpit-panel: rgba(10, 16, 32, 0.88);
+  --bg-panel-solid: var(--surface-1);
+  --bg-panel-border: var(--line-default);
+  --bg-panel-border-hover: var(--line-strong);
+  --neon-cyan: var(--c-cyan);
+  --neon-cyan-glow: var(--glow-cyan);
+  --neon-blue: var(--c-blue);
+  --neon-green: var(--c-green);
+  --neon-green-glow: var(--glow-green);
+  --neon-amber: var(--c-amber);
+  --neon-amber-glow: var(--glow-amber);
+  --neon-red: var(--c-red);
+  --neon-red-glow: var(--glow-red);
+  --neon-purple: #7b61d6;
 }
 
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+/* El bloqueo de selección se limita al cromo: las cifras de telemetría deben
+   poder copiarse para un informe o una incidencia. */
+.hud-header,
+.control-toolbar,
+.nav-tabs-wrapper,
+.hud-footer,
+.panel-header {
   user-select: none;
 }
 
 body {
-  background-color: var(--bg-deep-space);
+  background-color: var(--surface-0);
   color: var(--text-primary);
   font-family: var(--font-body);
+  font-size: var(--fs-md);
+  line-height: var(--lh-normal);
   min-height: 100vh;
   overflow-x: hidden;
   position: relative;
-  background-image: 
-    radial-gradient(circle at 50% 0%, rgba(0, 136, 255, 0.15) 0%, transparent 60%),
-    radial-gradient(circle at 80% 80%, rgba(0, 240, 255, 0.08) 0%, transparent 50%),
-    linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(23, 159, 179, 0.13) 0%, transparent 70%),
+    radial-gradient(ellipse 70% 50% at 85% 100%, rgba(47, 95, 192, 0.10) 0%, transparent 70%),
+    linear-gradient(rgba(125, 190, 215, 0.022) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(125, 190, 215, 0.022) 1px, transparent 1px);
+  background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+  background-attachment: fixed;
 }
 
-/* Scanlines aeroespaciales en superposición */
+/* Scanlines: a 0.55 de opacidad y 4px de paso velaban el texto pequeño.
+   Se reducen a una insinuación y se retiran si se pide menos movimiento. */
 body::after {
   content: "";
   position: fixed;
-  top: 0; left: 0; width: 100vw; height: 100vh;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%);
-  background-size: 100% 4px;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0px,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 0, 0, 0.22) 3px
+  );
   pointer-events: none;
   z-index: 999;
-  opacity: 0.55;
+  opacity: 0.30;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::after { display: none; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Foco visible y coherente en todo el cockpit */
+:where(button, a, input, [tabindex]):focus-visible {
+  outline: 2px solid var(--c-cyan-ink);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
 }
 
 /* ==========================================================================
-   HEADER HUD COCKPIT
+   CABECERA
    ========================================================================== */
+/* Rejilla de tres zonas en vez de flex libre: la navegación queda centrada en
+   el viewport y las zonas laterales se encogen antes que desbordar. El
+   min-width:0 es lo que permite que un hijo flex/grid se comprima por debajo
+   de su contenido; sin él, la fila crece y se sale de la pantalla. */
 header.hud-header {
   background: var(--bg-cockpit-panel);
   backdrop-filter: blur(14px);
-  border-bottom: 2px solid var(--neon-cyan);
-  box-shadow: 0 4px 30px rgba(0, 240, 255, 0.2);
-  padding: 12px 28px;
-  display: flex;
-  justify-content: space-between;
+  border-bottom: 1px solid var(--line-strong);
+  box-shadow: 0 1px 0 rgba(23, 159, 179, 0.12), var(--shadow-2);
+  padding: var(--sp-3) var(--sp-5);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
+  gap: var(--sp-4);
   position: sticky;
   top: 0;
   z-index: 100;
+  overflow: hidden;
+}
+
+header.hud-header > * {
+  min-width: 0;
 }
 
 .brand-wrapper {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--sp-3);
+  min-width: 0;
 }
 
 .brand-title {
   font-family: var(--font-hud);
-  font-size: 26px;
-  font-weight: 900;
-  color: var(--neon-cyan);
-  letter-spacing: 3px;
-  text-shadow: 0 0 14px var(--neon-cyan-glow);
+  font-size: var(--fs-xl);
+  font-weight: 800;
+  color: var(--c-cyan-ink);
+  letter-spacing: var(--tr-wider);
+  line-height: var(--lh-tight);
+  text-shadow: 0 0 18px var(--glow-cyan);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--sp-2);
 }
 
 .brand-sub {
   font-family: var(--font-data);
-  font-size: 13px;
+  font-size: var(--fs-xs);
   color: var(--text-secondary);
-  border-left: 2px solid rgba(0, 240, 255, 0.4);
-  padding-left: 14px;
-  line-height: 1.35;
+  border-left: 1px solid var(--line-default);
+  padding-left: var(--sp-3);
+  line-height: var(--lh-snug);
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
-/* Selector de Pestañas / Ventanas */
+/* ---- Pestañas de ventana ---- */
 .nav-tabs-wrapper {
   display: flex;
-  gap: 6px;
-  background: rgba(3, 7, 18, 0.85);
-  padding: 4px;
-  border-radius: 8px;
-  border: 1px solid rgba(0, 240, 255, 0.25);
-  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.6);
+  gap: var(--sp-1);
+  background: var(--surface-sunken);
+  padding: var(--sp-1);
+  border-radius: var(--r-md);
+  border: 1px solid var(--line-subtle);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.6);
+  min-width: 0;
 }
 
 .nav-tab-btn {
   background: transparent;
   border: 1px solid transparent;
   color: var(--text-secondary);
-  font-family: var(--font-hud);
-  font-size: 12px;
+  font-family: var(--font-body);
+  font-size: var(--fs-sm);
   font-weight: 700;
-  letter-spacing: 1px;
-  padding: 9px 18px;
-  border-radius: 6px;
+  letter-spacing: var(--tr-wide);
+  text-transform: uppercase;
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--r-sm);
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: color 0.18s ease, background-color 0.18s ease;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--sp-2);
+  white-space: nowrap;
 }
 
 .nav-tab-btn:hover {
   color: var(--text-primary);
-  background: rgba(0, 240, 255, 0.1);
+  background: rgba(23, 159, 179, 0.12);
 }
 
 .nav-tab-btn.active {
-  color: #030712;
-  background: var(--neon-cyan);
-  box-shadow: 0 0 18px var(--neon-cyan-glow);
+  color: var(--text-inverse);
+  background: var(--c-cyan-ink);
+  box-shadow: 0 0 16px var(--glow-cyan);
 }
 
-/* Indicador de Estado del Tripulante */
+/* ---- Indicador de tripulante ---- */
 .crew-status-indicator {
   display: flex;
   align-items: center;
-  gap: 16px;
+  justify-content: flex-end;
+  gap: var(--sp-2);
   font-family: var(--font-data);
-  font-size: 13px;
+  font-size: var(--fs-sm);
+  min-width: 0;
 }
 
 .astro-tag {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(0, 240, 255, 0.08);
-  padding: 6px 14px;
-  border-radius: 6px;
-  border: 1px solid rgba(0, 240, 255, 0.35);
-  color: var(--neon-cyan);
+  gap: var(--sp-2);
+  background: rgba(23, 159, 179, 0.10);
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-default);
+  color: var(--c-cyan-ink);
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  min-width: 0;
+  transition: border-color 0.18s ease, background-color 0.18s ease;
 }
 
+.astro-tag:hover {
+  border-color: var(--line-strong);
+  background: rgba(23, 159, 179, 0.18);
+}
+
+/* Identidad en dos líneas: ocupa menos ancho que en una sola */
+.astro-names {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.astro-names > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.astro-names small {
+  font-size: var(--fs-2xs);
+  color: var(--text-muted);
+}
+
+.btn-icon {
+  padding: var(--sp-1) var(--sp-2);
+  font-size: var(--fs-sm);
+  line-height: 1.4;
+  flex: none;
+}
+
+/* La insignia de estado porta icono + rótulo: nunca color solo. */
 .badge-status {
-  font-family: var(--font-hud);
-  font-size: 11px;
-  font-weight: 900;
-  padding: 5px 12px;
-  border-radius: 4px;
-  letter-spacing: 1.5px;
+  font-family: var(--font-body);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-sm);
+  letter-spacing: var(--tr-wide);
   text-transform: uppercase;
-  transition: all 0.3s ease;
+  transition: background-color 0.25s ease, color 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  white-space: nowrap;
+}
+
+.badge-status::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+  box-shadow: 0 0 8px currentColor;
 }
 
 .status-stable {
-  background: rgba(0, 255, 136, 0.15);
-  border: 1px solid var(--neon-green);
-  color: var(--neon-green);
-  box-shadow: 0 0 10px var(--neon-green-glow);
+  background: rgba(12, 163, 12, 0.14);
+  border: 1px solid rgba(12, 163, 12, 0.55);
+  color: #4cd94c;
 }
 
 .status-critical {
-  background: rgba(255, 34, 85, 0.25);
-  border: 1px solid var(--neon-red);
-  color: var(--neon-red);
-  box-shadow: 0 0 20px var(--neon-red-glow);
+  background: rgba(208, 59, 59, 0.18);
+  border: 1px solid rgba(208, 59, 59, 0.65);
+  color: #ff6b6b;
 }
 
 /* ==========================================================================
-   TOOLBAR SUPERIOR DE CONTROL
+   BARRA DE CONTROL
    ========================================================================== */
 .control-toolbar {
-  background: rgba(8, 15, 30, 0.7);
+  background: rgba(10, 16, 32, 0.70);
   backdrop-filter: blur(8px);
-  padding: 10px 28px;
-  border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+  padding: var(--sp-2) var(--sp-6);
+  border-bottom: 1px solid var(--line-subtle);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--sp-4);
   font-family: var(--font-data);
-  font-size: 13px;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
 }
 
 .toolbar-group {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.toolbar-link {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.link-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--st-good);
+  box-shadow: 0 0 8px var(--st-good);
+  flex: none;
+}
+
+.link-label {
+  color: var(--c-cyan-ink);
+  font-weight: 700;
+  letter-spacing: var(--tr-wide);
+  flex: none;
+}
+
+.link-value {
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+/* Índice numérico de pestaña: sustituye al rótulo largo en anchos reducidos */
+.tab-index {
+  font-family: var(--font-data);
+  font-size: var(--fs-xs);
+  opacity: 0.7;
+  flex: none;
+}
+
+.nav-tab-btn.active .tab-index {
+  opacity: 1;
+  font-weight: 700;
+}
+
+.tab-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .btn-hud {
-  background: rgba(0, 240, 255, 0.1);
-  color: var(--neon-cyan);
-  border: 1px solid var(--neon-cyan);
-  padding: 6px 14px;
-  border-radius: 6px;
-  font-family: var(--font-hud);
-  font-size: 11px;
+  background: rgba(23, 159, 179, 0.10);
+  color: var(--c-cyan-ink);
+  border: 1px solid var(--line-strong);
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-sm);
+  font-family: var(--font-body);
+  font-size: var(--fs-xs);
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: var(--tr-wide);
+  text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.18s ease, color 0.18s ease;
+  white-space: nowrap;
 }
 
 .btn-hud:hover {
-  background: var(--neon-cyan);
-  color: #030712;
-  box-shadow: 0 0 15px var(--neon-cyan-glow);
+  background: var(--c-cyan-ink);
+  color: var(--text-inverse);
+  box-shadow: 0 0 14px var(--glow-cyan);
 }
 
 .btn-hud-danger {
-  background: rgba(255, 34, 85, 0.15);
-  color: var(--neon-red);
-  border-color: var(--neon-red);
+  background: rgba(199, 52, 80, 0.14);
+  color: var(--c-red-ink);
+  border-color: rgba(199, 52, 80, 0.60);
 }
 
 .btn-hud-danger:hover {
-  background: var(--neon-red);
-  color: #fff;
-  box-shadow: 0 0 20px var(--neon-red-glow);
+  background: var(--c-red-ink);
+  color: var(--text-inverse);
+  box-shadow: 0 0 18px var(--glow-red);
 }
 
 footer.hud-footer {
-  border-top: 1px solid rgba(0, 240, 255, 0.2);
-  background: #03060f;
-  padding: 14px 28px;
+  border-top: 1px solid var(--line-subtle);
+  background: var(--surface-sunken);
+  padding: var(--sp-4) var(--sp-6);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--sp-4);
   font-family: var(--font-data);
-  font-size: 12px;
+  font-size: var(--fs-sm);
   color: var(--text-muted);
-  margin-top: 40px;
+  margin-top: var(--sp-7);
 }
 
 /* Bloqueo estricto de pantalla pre-autenticación (Zero-Access Gate) */
@@ -271,4 +536,3 @@ body.locked .hud-footer {
   opacity: 0 !important;
   pointer-events: none !important;
 }
-

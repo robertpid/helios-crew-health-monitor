@@ -1,14 +1,5 @@
-<!-- ----------------------------------------------------------------------- -->
-<!-- VENTANA 3: BIENESTAR, RUTINAS, GAMIFICACIÓN & ASISTENTE PSICOLÓGICO     -->
-<!-- (REEMPLAZO MODULAR DE VENTANA CRUCES CON ESTILO COCKPIT HUD CIBERNÉTICO) -->
-<!-- ----------------------------------------------------------------------- -->
-<div id="viewMatrix" class="view-container" style="display:none; grid-template-columns: 1fr 1fr; gap: 20px;">
-  
-  <!-- COLUMNA IZQUIERDA: SUEÑO, TAREAS DIARIAS Y GAMIFICACIÓN -->
-  <div style="display:flex; flex-direction:column; gap:20px;">
-    
-    <!-- 1. HORAS DE SUEÑO / DÍA (GRÁFICO SEMANAL DE BARRAS) -->
-    <div class="hud-panel">
+<div id="viewMatrix" class="view-container viewport-view"><div class="view-pager"><strong>3 · BIENESTAR</strong><div class="pager-controls"><button type="button" class="btn-hud page-prev" aria-label="Panel anterior">‹ Anterior</button><span class="page-label" aria-live="polite"></span><button type="button" class="btn-hud page-next" aria-label="Panel siguiente">Siguiente ›</button></div></div>
+<div class="wellness-column" data-column="left"><div class="hud-panel screen-panel" data-panel="sleep">
       <div class="panel-header">
         <div class="panel-title">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
@@ -19,95 +10,43 @@
 
       <div class="sleep-chart-panel" style="padding: 18px 20px 10px 20px; background: rgba(5, 12, 26, 0.7); border-radius: 8px; border: 1px solid rgba(0, 240, 255, 0.15);">
         <div class="sleep-bars-wrapper" style="position:relative; height:150px; display:flex; align-items:flex-end; justify-content:space-between; padding-top:28px;">
-          <div class="sleep-meta-line" style="position:absolute; top:28px; left:0; right:0; border-top:2px dashed #ff2255; box-shadow:0 0 8px rgba(255,34,85,0.6); z-index:10; pointer-events:none;"></div>
+          <div class="sleep-meta-line" style="position:absolute; top:28px; left:0; right:0; border-top:2px dashed var(--c-red); box-shadow:0 0 8px rgba(255,34,85,0.6); z-index:10; pointer-events:none;"></div>
           
           <div class="sleep-bar-col" style="flex:1; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end;" title="Lunes: 6.8 h (REM: 1.8h)">
-            <div class="sleep-bar-rect" style="width:78%; height:75%; background:#00f0ff; border-radius:4px 4px 0 0; box-shadow:0 0 10px rgba(0,240,255,0.4); transition:all 0.3s ease;"></div>
-            <span class="sleep-bar-day" style="font-family:var(--font-hud); font-size:12px; color:#cbd5e1; margin-top:8px;">L</span>
+            <div class="sleep-bar-rect" style="width:78%; height:75%; background:var(--c-cyan); border-radius:4px 4px 0 0; box-shadow:0 0 10px rgba(0,240,255,0.4); transition:all 0.3s ease;"></div>
+            <span class="sleep-bar-day" style="font-family:var(--font-hud); font-size:12px; color:var(--text-secondary); margin-top:8px;">L</span>
           </div>
           <div class="sleep-bar-col" style="flex:1; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end;" title="Martes: 7.6 h (Óptimo)">
-            <div class="sleep-bar-rect" style="width:78%; height:86%; background:#00ff88; border-radius:4px 4px 0 0; box-shadow:0 0 10px rgba(0,255,136,0.4); transition:all 0.3s ease;"></div>
-            <span class="sleep-bar-day" style="font-family:var(--font-hud); font-size:12px; color:#cbd5e1; margin-top:8px;">M</span>
+            <div class="sleep-bar-rect" style="width:78%; height:86%; background:var(--c-green); border-radius:4px 4px 0 0; box-shadow:0 0 10px rgba(0,255,136,0.4); transition:all 0.3s ease;"></div>
+            <span class="sleep-bar-day" style="font-family:var(--font-hud); font-size:12px; color:var(--text-secondary); margin-top:8px;">M</span>
           </div>
           <div class="sleep-bar-col" style="flex:1; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end;" title="Miércoles: 5.6 h (Déficit)">
             <div class="sleep-bar-rect" style="width:78%; height:62%; background:#f59e0b; border-radius:4px 4px 0 0; box-shadow:0 0 10px rgba(245,158,11,0.4); transition:all 0.3s ease;"></div>
-            <span class="sleep-bar-day" style="font-family:var(--font-hud); font-size:12px; color:#cbd5e1; margin-top:8px;">X</span>
+            <span class="sleep-bar-day" style="font-family:var(--font-hud); font-size:12px; color:var(--text-secondary); margin-top:8px;">X</span>
           </div>
           <div class="sleep-bar-col" style="flex:1; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end;" title="Jueves: 7.8 h (Recuperación)">
-            <div class="sleep-bar-rect" style="width:78%; height:89%; background:#00f0ff; border-radius:4px 4px 0 0; box-shadow:0 0 10px rgba(0,240,255,0.4); transition:all 0.3s ease;"></div>
-            <span class="sleep-bar-day" style="font-family:var(--font-hud); font-size:12px; color:#cbd5e1; margin-top:8px;">J</span>
+            <div class="sleep-bar-rect" style="width:78%; height:89%; background:var(--c-cyan); border-radius:4px 4px 0 0; box-shadow:0 0 10px rgba(0,240,255,0.4); transition:all 0.3s ease;"></div>
+            <span class="sleep-bar-day" style="font-family:var(--font-hud); font-size:12px; color:var(--text-secondary); margin-top:8px;">J</span>
           </div>
           <div class="sleep-bar-col" style="flex:1; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end;" title="Viernes: 6.5 h">
-            <div class="sleep-bar-rect" style="width:78%; height:73%; background:#00ff88; border-radius:4px 4px 0 0; box-shadow:0 0 10px rgba(0,255,136,0.4); transition:all 0.3s ease;"></div>
-            <span class="sleep-bar-day" style="font-family:var(--font-hud); font-size:12px; color:#cbd5e1; margin-top:8px;">V</span>
+            <div class="sleep-bar-rect" style="width:78%; height:73%; background:var(--c-green); border-radius:4px 4px 0 0; box-shadow:0 0 10px rgba(0,255,136,0.4); transition:all 0.3s ease;"></div>
+            <span class="sleep-bar-day" style="font-family:var(--font-hud); font-size:12px; color:var(--text-secondary); margin-top:8px;">V</span>
           </div>
           <div class="sleep-bar-col" style="flex:1; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end;" title="Sábado: 8.2 h (Meta superada)">
             <div class="sleep-bar-rect" style="width:78%; height:96%; background:#ffb703; border-radius:4px 4px 0 0; box-shadow:0 0 10px rgba(255,183,3,0.5); transition:all 0.3s ease;"></div>
-            <span class="sleep-bar-day" style="font-family:var(--font-hud); font-size:12px; color:#cbd5e1; margin-top:8px;">S</span>
+            <span class="sleep-bar-day" style="font-family:var(--font-hud); font-size:12px; color:var(--text-secondary); margin-top:8px;">S</span>
           </div>
           <div class="sleep-bar-col" style="flex:1; display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end;" title="Domingo: 7.3 h">
-            <div class="sleep-bar-rect" style="width:78%; height:82%; background:#00f0ff; border-radius:4px 4px 0 0; box-shadow:0 0 10px rgba(0,240,255,0.4); transition:all 0.3s ease;"></div>
-            <span class="sleep-bar-day" style="font-family:var(--font-hud); font-size:12px; color:#cbd5e1; margin-top:8px;">D</span>
+            <div class="sleep-bar-rect" style="width:78%; height:82%; background:var(--c-cyan); border-radius:4px 4px 0 0; box-shadow:0 0 10px rgba(0,240,255,0.4); transition:all 0.3s ease;"></div>
+            <span class="sleep-bar-day" style="font-family:var(--font-hud); font-size:12px; color:var(--text-secondary); margin-top:8px;">D</span>
           </div>
         </div>
-        <div style="font-family:var(--font-data); font-size:12px; color:#94a3b8; margin-top:14px; text-align:left;">
+        <div style="font-family:var(--font-data); font-size:12px; color:var(--text-muted); margin-top:14px; text-align:left;">
           <span style="color:#ff4466; font-weight:bold;">Línea roja = meta 8 h</span> &nbsp;·&nbsp; L M X J V S D
         </div>
       </div>
     </div>
-
-    <!-- 2. TAREAS DIARIAS (CLIC PARA AVANZAR) -->
-    <div class="hud-panel">
-      <div class="panel-header">
-        <div class="panel-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-          TAREAS DIARIAS (clic para avanzar)
-        </div>
-        <div class="panel-subtitle">PROTOCOLO PREVENTIVO AEROESPACIAL · CLIC SUMA +20% Y +25 EXP</div>
-      </div>
-
-      <div class="tasks-list-container" style="display:flex; flex-direction:column; gap:10px;">
-        <!-- Tarea 1: Meditación -->
-        <div class="task-card-item" id="taskMeditacion" onclick="window.hudController.avanzarTarea('meditacion')" style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:12px 16px; cursor:pointer; transition:all 0.2s ease;">
-          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-hud); font-size:13px; color:#f1f5f9; margin-bottom:8px;">
-            <span>🧘 Meditación 30 min</span><span id="taskPercentMeditacion" style="color:var(--neon-green); font-weight:800;">100%</span>
-          </div>
-          <div class="hud-progress-track" style="height:6px; background:#040814; border-radius:3px; overflow:hidden;">
-            <div id="taskBarMeditacion" class="hud-progress-fill" style="width:100%; height:100%; background:linear-gradient(90deg, #00f0ff, #00ff88); box-shadow:0 0 8px rgba(0,255,136,0.6); transition:width 0.3s ease;"></div>
-          </div>
-        </div>
-        <!-- Tarea 2: Estiramiento -->
-        <div class="task-card-item" id="taskEstiramiento" onclick="window.hudController.avanzarTarea('estiramiento')" style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:12px 16px; cursor:pointer; transition:all 0.2s ease;">
-          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-hud); font-size:13px; color:#f1f5f9; margin-bottom:8px;">
-            <span>🤸 Estiramiento 15 min</span><span id="taskPercentEstiramiento" style="color:var(--neon-green); font-weight:800;">100%</span>
-          </div>
-          <div class="hud-progress-track" style="height:6px; background:#040814; border-radius:3px; overflow:hidden;">
-            <div id="taskBarEstiramiento" class="hud-progress-fill" style="width:100%; height:100%; background:linear-gradient(90deg, #00f0ff, #00ff88); box-shadow:0 0 8px rgba(0,255,136,0.6); transition:width 0.3s ease;"></div>
-          </div>
-        </div>
-        <!-- Tarea 3: Ejercicio -->
-        <div class="task-card-item" id="taskEjercicio" onclick="window.hudController.avanzarTarea('ejercicio')" style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:12px 16px; cursor:pointer; transition:all 0.2s ease;">
-          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-hud); font-size:13px; color:#f1f5f9; margin-bottom:8px;">
-            <span>🏋️ Ejercicio 45 min</span><span id="taskPercentEjercicio" style="color:var(--neon-cyan); font-weight:800;">60%</span>
-          </div>
-          <div class="hud-progress-track" style="height:6px; background:#040814; border-radius:3px; overflow:hidden;">
-            <div id="taskBarEjercicio" class="hud-progress-fill" style="width:60%; height:100%; background:linear-gradient(90deg, #00f0ff, #00ff88); box-shadow:0 0 8px rgba(0,240,255,0.6); transition:width 0.3s ease;"></div>
-          </div>
-        </div>
-        <!-- Tarea 4: Hidratación -->
-        <div class="task-card-item" id="taskHidratacion" onclick="window.hudController.avanzarTarea('hidratacion')" style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:12px 16px; cursor:pointer; transition:all 0.2s ease;">
-          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-hud); font-size:13px; color:#f1f5f9; margin-bottom:8px;">
-            <span>💧 Hidratación 2 L</span><span id="taskPercentHidratacion" style="color:var(--neon-cyan); font-weight:800;">80%</span>
-          </div>
-          <div class="hud-progress-track" style="height:6px; background:#040814; border-radius:3px; overflow:hidden;">
-            <div id="taskBarHidratacion" class="hud-progress-fill" style="width:80%; height:100%; background:linear-gradient(90deg, #00f0ff, #00ff88); box-shadow:0 0 8px rgba(0,240,255,0.6); transition:width 0.3s ease;"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 3. PUNTAJE DE GAMIFICACIÓN -->
-    <div class="hud-panel">
+<div class="hud-panel screen-panel" data-panel="progress">
       <div class="panel-header">
         <div class="panel-title">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
@@ -121,10 +60,10 @@
           <div style="flex:1;">
             <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;">
               <span id="userLevelTag" style="font-family:var(--font-hud); font-size:18px; font-weight:900; color:#ffffff; letter-spacing:1px;">NIVEL 6</span>
-              <span id="userExpTag" style="font-family:var(--font-data); font-size:13px; color:var(--neon-cyan);">EXP 1320 / 1500</span>
+              <span id="userExpTag" style="font-family:var(--font-data); font-size:13px; color:var(--c-cyan-ink);">EXP 1320 / 1500</span>
             </div>
             <div class="hud-progress-track" style="height:8px; background:#040814; border-radius:4px; overflow:hidden;">
-              <div id="userExpBar" class="hud-progress-fill" style="width:88%; height:100%; background:linear-gradient(90deg, #00f0ff, #00ff88); box-shadow:0 0 10px rgba(0,255,136,0.6); transition:width 0.4s ease;"></div>
+              <div id="userExpBar" class="hud-progress-fill" style="width:88%; height:100%; background:linear-gradient(90deg, var(--c-cyan), var(--c-green)); box-shadow:0 0 10px rgba(0,255,136,0.6); transition:width 0.4s ease;"></div>
             </div>
           </div>
         </div>
@@ -137,14 +76,56 @@
           <span title="Misión: Inferencia Edge 100% Nominal" style="opacity:0.35; filter:grayscale(1);">⬡</span>
         </div>
       </div>
-    </div>
-  </div>
+    </div></div>
+<div class="wellness-column" data-column="right"><div class="hud-panel screen-panel" data-panel="tasks">
+      <div class="panel-header">
+        <div class="panel-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+          TAREAS DIARIAS (clic para avanzar)
+        </div>
+        <div class="panel-subtitle">PROTOCOLO PREVENTIVO AEROESPACIAL · CLIC SUMA +20% Y +25 EXP</div>
+      </div>
 
-  <!-- COLUMNA DERECHA: HIDRATACIÓN, EVALUACIONES, CORREO Y ASISTENTE -->
-  <div style="display:flex; flex-direction:column; gap:20px;">
-    
-    <!-- 4. ESTADO DE HIDRATACIÓN (SEMÁFORO) -->
-    <div class="hud-panel">
+      <div class="tasks-list-container" style="display:flex; flex-direction:column; gap:10px;">
+        <!-- Tarea 1: Meditación -->
+        <div class="task-card-item" id="taskMeditacion" onclick="window.hudController.avanzarTarea('meditacion')" style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:12px 16px; cursor:pointer; transition:all 0.2s ease;">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-hud); font-size:13px; color:#f1f5f9; margin-bottom:8px;">
+            <span>🧘 Meditación 30 min</span><span id="taskPercentMeditacion" style="color:var(--c-green-ink); font-weight:800;">100%</span>
+          </div>
+          <div class="hud-progress-track" style="height:6px; background:#040814; border-radius:3px; overflow:hidden;">
+            <div id="taskBarMeditacion" class="hud-progress-fill" style="width:100%; height:100%; background:linear-gradient(90deg, var(--c-cyan), var(--c-green)); box-shadow:0 0 8px rgba(0,255,136,0.6); transition:width 0.3s ease;"></div>
+          </div>
+        </div>
+        <!-- Tarea 2: Estiramiento -->
+        <div class="task-card-item" id="taskEstiramiento" onclick="window.hudController.avanzarTarea('estiramiento')" style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:12px 16px; cursor:pointer; transition:all 0.2s ease;">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-hud); font-size:13px; color:#f1f5f9; margin-bottom:8px;">
+            <span>🤸 Estiramiento 15 min</span><span id="taskPercentEstiramiento" style="color:var(--c-green-ink); font-weight:800;">100%</span>
+          </div>
+          <div class="hud-progress-track" style="height:6px; background:#040814; border-radius:3px; overflow:hidden;">
+            <div id="taskBarEstiramiento" class="hud-progress-fill" style="width:100%; height:100%; background:linear-gradient(90deg, var(--c-cyan), var(--c-green)); box-shadow:0 0 8px rgba(0,255,136,0.6); transition:width 0.3s ease;"></div>
+          </div>
+        </div>
+        <!-- Tarea 3: Ejercicio -->
+        <div class="task-card-item" id="taskEjercicio" onclick="window.hudController.avanzarTarea('ejercicio')" style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:12px 16px; cursor:pointer; transition:all 0.2s ease;">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-hud); font-size:13px; color:#f1f5f9; margin-bottom:8px;">
+            <span>🏋️ Ejercicio 45 min</span><span id="taskPercentEjercicio" style="color:var(--c-cyan-ink); font-weight:800;">60%</span>
+          </div>
+          <div class="hud-progress-track" style="height:6px; background:#040814; border-radius:3px; overflow:hidden;">
+            <div id="taskBarEjercicio" class="hud-progress-fill" style="width:60%; height:100%; background:linear-gradient(90deg, var(--c-cyan), var(--c-green)); box-shadow:0 0 8px rgba(0,240,255,0.6); transition:width 0.3s ease;"></div>
+          </div>
+        </div>
+        <!-- Tarea 4: Hidratación -->
+        <div class="task-card-item" id="taskHidratacion" onclick="window.hudController.avanzarTarea('hidratacion')" style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:12px 16px; cursor:pointer; transition:all 0.2s ease;">
+          <div style="display:flex; justify-content:space-between; align-items:center; font-family:var(--font-hud); font-size:13px; color:#f1f5f9; margin-bottom:8px;">
+            <span>💧 Hidratación 2 L</span><span id="taskPercentHidratacion" style="color:var(--c-cyan-ink); font-weight:800;">80%</span>
+          </div>
+          <div class="hud-progress-track" style="height:6px; background:#040814; border-radius:3px; overflow:hidden;">
+            <div id="taskBarHidratacion" class="hud-progress-fill" style="width:80%; height:100%; background:linear-gradient(90deg, var(--c-cyan), var(--c-green)); box-shadow:0 0 8px rgba(0,240,255,0.6); transition:width 0.3s ease;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+<div class="hud-panel screen-panel" data-panel="hydration">
       <div class="panel-header">
         <div class="panel-title">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
@@ -154,134 +135,15 @@
       </div>
       <div style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:18px 20px;">
         <div class="hydration-semaphore-bar" style="display:flex; gap:8px; height:24px; border-radius:6px; overflow:hidden; background:#040814; padding:3px; margin-bottom:8px;">
-          <div id="semOptimo" class="sem-segment sem-active" style="flex:1; background:#00ff88; border-radius:4px; box-shadow:0 0 12px rgba(0,255,136,0.6); transition:all 0.3s ease;"></div>
+          <div id="semOptimo" class="sem-segment sem-active" style="flex:1; background:var(--c-green); border-radius:4px; box-shadow:0 0 12px rgba(0,255,136,0.6); transition:all 0.3s ease;"></div>
           <div id="semAviso" class="sem-segment" style="flex:1; background:#f59e0b; opacity:0.25; border-radius:4px; transition:all 0.3s ease;"></div>
-          <div id="semCritico" class="sem-segment" style="flex:1; background:#ff2255; opacity:0.25; border-radius:4px; transition:all 0.3s ease;"></div>
+          <div id="semCritico" class="sem-segment" style="flex:1; background:var(--c-red); opacity:0.25; border-radius:4px; transition:all 0.3s ease;"></div>
         </div>
-        <div style="display:flex; justify-content:space-between; font-family:var(--font-hud); font-size:12px; color:#cbd5e1;">
-          <span id="lblOptimo" style="color:var(--neon-green); font-weight:bold;">▲ Óptimo</span>
+        <div style="display:flex; justify-content:space-between; font-family:var(--font-hud); font-size:12px; color:var(--text-secondary);">
+          <span id="lblOptimo" style="color:var(--c-green-ink); font-weight:bold;">▲ Óptimo</span>
           <span id="lblAviso" style="color:#64748b;">Aviso</span>
           <span id="lblCritico" style="color:#64748b;">Crítico</span>
         </div>
       </div>
-    </div>
-
-    <!-- 5. EVALUACIONES COMPLEMENTARIAS -->
-    <div class="hud-panel">
-      <div class="panel-header">
-        <div class="panel-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-          EVALUACIONES PRELIMINARES COMPLEMENTARIAS
-        </div>
-        <div class="panel-subtitle">PROTOCOLO SANS (FONDO DE OJO) Y ECOGRAFÍA CARDIOVASCULAR</div>
-      </div>
-      <div style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:18px 20px; display:flex; gap:14px;">
-        <button id="btnExamenOftalmico" class="btn-hud" onclick="window.hudController.iniciarExamenOftalmico()" style="flex:1; font-size:12px; padding:12px 14px; display:flex; align-items:center; justify-content:center; gap:8px;">
-          👁️ Oftálmico · Iniciar
-        </button>
-        <button id="btnExamenSonar" class="btn-hud" onclick="window.hudController.iniciarExamenSonar()" style="flex:1; font-size:12px; padding:12px 14px; display:flex; align-items:center; justify-content:center; gap:8px;">
-          👂 Sonar · Iniciar
-        </button>
-      </div>
-    </div>
-
-    <!-- 6. CORREO DE TIERRA -->
-    <div class="hud-panel">
-      <div class="panel-header">
-        <div class="panel-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
-          CORREO
-        </div>
-        <div class="panel-subtitle">ENLACE ASÍNCRONO DE DEEP SPACE NETWORK (DSN)</div>
-      </div>
-      <div style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:16px 20px; display:flex; justify-content:space-between; align-items:center;">
-        <div id="mailStatusText" style="font-family:var(--font-data); font-size:13px; color:#94a3b8;">Sin mensajes nuevos pendientes en cola DSN.</div>
-        <button class="btn-hud" onclick="window.hudController.sincronizarCorreo()" style="font-size:11px; padding:6px 12px;">📡 SINCRONIZAR</button>
-      </div>
-    </div>
-
-    <!-- 7. EVALUACIÓN PSICOLÓGICA Y ASISTENTE (SISTEMA ASTRA) -->
-    <div class="hud-panel">
-      <div class="panel-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
-        <div>
-          <div class="panel-title">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-            EVALUACIÓN PSICOLÓGICA Y ASISTENTE (SISTEMA ASTRA)
-          </div>
-          <div class="panel-subtitle">PROTOCOLO NASA-BHP · ANÁLISIS DE VOZ, TIEMPO DE REACCIÓN Y COHERENCIA VECTORIAL</div>
-        </div>
-        <div id="psychStatusBadge" class="badge-status status-stable" style="font-size:10px; padding:3px 8px;">LISTO</div>
-      </div>
-
-      <!-- Barra de Telemetría Cognitiva en Tiempo Real -->
-      <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; margin-bottom:12px; padding:8px 12px; background:rgba(0,240,255,0.04); border:1px solid rgba(0,240,255,0.15); border-radius:6px; font-family:var(--font-data); font-size:11px;">
-        <div><span style="color:#64748b;">LATENCIA:</span> <strong id="psychMetricLatency" style="color:var(--neon-cyan);">210 ms</strong></div>
-        <div><span style="color:#64748b;">DENSIDAD:</span> <strong id="psychMetricDensity" style="color:var(--neon-green);">0.95</strong></div>
-        <div><span style="color:#64748b;">COSENO:</span> <strong id="psychMetricCosSim" style="color:var(--neon-cyan);">0.985</strong></div>
-        <div><span style="color:#64748b;">ESTADO:</span> <strong id="psychEvalSummary" style="color:var(--neon-green);">COHERENTE</strong></div>
-      </div>
-
-      <div style="background:#081326; border:1px solid rgba(0,240,255,0.25); border-radius:8px; padding:14px 16px;">
-        <!-- Historial interactivo de mensajes -->
-        <div id="assistantChatBox" style="font-family:var(--font-data); font-size:12.5px; line-height:1.6; color:#e2e8f0; display:flex; flex-direction:column; gap:8px; max-height:175px; overflow-y:auto; padding-right:4px;">
-          <div style="padding:8px 12px; background:rgba(0,240,255,0.06); border-left:3px solid var(--neon-cyan); border-radius:0 6px 6px 0;">
-            <strong style="color:var(--neon-cyan); font-family:var(--font-hud);">SISTEMA ASTRA:</strong> Hola, Comandante. Chequeo psicológico operacional Sol 120 listo. Evaluaremos tiempo de reacción, vocabulario y concordancia biológica. Presiona <strong>INICIAR PROTOCOLO</strong> o envía tu reporte.
-          </div>
-        </div>
-
-        <!-- Chips / Sugerencias rápidas de respuesta -->
-        <div id="psychSuggestionsContainer" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;">
-          <button class="btn-hud" onclick="window.hudController.seleccionarChipSugerido('100% enfocado y despejado para la jornada.')" style="font-size:10px; padding:4px 8px; text-transform:none;">100% enfocado</button>
-          <button class="btn-hud" onclick="window.hudController.seleccionarChipSugerido('Todo en orden en cabina, dentro de parámetros habituales.')" style="font-size:10px; padding:4px 8px; text-transform:none;">Parámetros habituales</button>
-          <button class="btn-hud" onclick="window.hudController.seleccionarChipSugerido('He sentido lentitud mental y fatiga atencional hoy.')" style="font-size:10px; padding:4px 8px; text-transform:none;">Fatiga atencional</button>
-        </div>
-
-        <!-- Barra de Entrada: Texto + Micrófono de Voz + Enviar -->
-        <div style="display:flex; gap:8px; align-items:center; margin-top:10px;">
-          <input type="text" id="inputPsychText" placeholder="Escribe o dicta tu reporte operacional..." style="flex:1; background:#040814; border:1px solid rgba(0,240,255,0.3); border-radius:4px; padding:8px 12px; color:#f1f5f9; font-family:var(--font-data); font-size:12px; outline:none;" onkeydown="if(event.key==='Enter') window.hudController.enviarRespuestaPsicologica()">
-          <button id="btnPsychMic" class="btn-hud" onclick="window.hudController.activarDictadoVoz()" title="Dictar por voz (Speech-to-Text)" style="font-size:13px; padding:7px 11px;">🎙️</button>
-          <button id="btnPsychSend" class="btn-hud" onclick="window.hudController.enviarRespuestaPsicologica()" style="font-size:11px; padding:7px 14px;">ENVIAR</button>
-        </div>
-
-        <!-- Barra de Control de Acciones y Guía 4-4-6 -->
-        <div style="margin-top:12px; padding-top:10px; border-top:1px solid rgba(0,240,255,0.15); display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <div id="breathingPacerCircle" style="width:32px; height:32px; border-radius:50%; background:radial-gradient(circle, #00f0ff 0%, #004488 100%); border:2px solid #fff; box-shadow:0 0 10px rgba(0,240,255,0.6); display:flex; align-items:center; justify-content:center; font-family:var(--font-hud); font-size:11px; font-weight:800; color:#fff;">4s</div>
-            <div style="font-family:var(--font-data); font-size:11px; color:#cbd5e1;">
-              <span id="breathingPacerText" style="color:var(--neon-cyan); font-weight:bold;">GUÍA 4-4-6 EN ESPERA</span><br>Inhala 4s · Sostén 4s · Exhala 6s
-            </div>
-          </div>
-          <div style="display:flex; gap:6px;">
-            <button id="btnStartPsychProtocol" class="btn-hud" onclick="window.hudController.iniciarProtocoloPsicologico()" style="font-size:10.5px; padding:7px 11px;">📋 PROTOCOLO BHP</button>
-            <button id="btnBreathingPacer" class="btn-hud" onclick="window.hudController.toggleGuiaRespiracion()" style="font-size:10.5px; padding:7px 11px;">🧘 RELAJACIÓN</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- SECCIÓN COLAPSABLE: MATRIZ TÉCNICA (15 CRUCES MARTINA) -->
-  <div style="grid-column: span 2; margin-top: 10px;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-      <button class="btn-hud" onclick="window.hudController.toggleMatrizTecnica()" style="font-size:12px; padding:10px 20px; display:flex; align-items:center; gap:8px;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line></svg>
-        <span id="btnTextMartinaToggle">VER MATRIZ TÉCNICA DE DECISIÓN (15 CRUCES MARTINA)</span>
-      </button>
-      <span style="font-family:var(--font-data); font-size:12px; color:#64748b;">REGLA NASA: MÁXIMO 3 ACCIONES · BASE EVIDENCIA CIENTÍFICA</span>
-    </div>
-    <div id="martinaMatrixDrawer" style="display:none; background:#060d1d; border:1px solid rgba(0,240,255,0.25); border-radius:8px; padding:16px; margin-top:8px;">
-      <div style="overflow-x:auto;">
-        <table style="width:100%; border-collapse:collapse; font-family:var(--font-data); font-size:13px;">
-          <thead>
-            <tr style="border-bottom:2px solid var(--neon-cyan); background:#060d1d; color:var(--neon-cyan); text-align:left;">
-              <th style="padding:12px 14px;">ID</th><th style="padding:12px 14px;">NIVEL</th><th style="padding:12px 14px;">DOMINIO</th>
-              <th style="padding:12px 14px;">EVALUACIÓN PRELIMINAR</th><th style="padding:12px 14px;">CONTRAMEDIDAS PRIORIZADAS (MÁX 3)</th>
-              <th style="padding:12px 14px;">DESTINATARIOS</th><th style="padding:12px 14px;">BASE EVIDENCIA</th>
-            </tr>
-          </thead>
-          <tbody id="matrixTableBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
+    </div></div>
 </div>

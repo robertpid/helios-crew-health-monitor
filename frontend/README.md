@@ -39,15 +39,23 @@ frontend/
    - Sensores ambientales de cabina en tiempo real: ppCO₂, Radiación, Presión, Temperatura y Humedad.
    - Grafo tensorial matricial de Kronecker ($\mathbb{R}^{12}$) y contramedidas de cabina.
 
-3. **Ventana 3: Bienestar, Rutinas & Asistente**:
+3. **Ventana 3: Bienestar y rutinas**:
    - **Horas de Sueño / Día**: Historial circadiano semanal de 7 días (L, M, X, J, V, S, D) con línea meta de 8 h.
    - **Tareas Diarias Interactivas**: Meditación, estiramiento, ejercicio e hidratación con avance reactivo por clic y asignación de experiencia (+25 EXP).
    - **Puntaje de Gamificación**: Nivel del astronauta, barra de experiencia dinámica y medallas/insignias aeroespaciales.
    - **Estado de Hidratación**: Calibrador tricolor de fluidos (Óptimo, Aviso, Crítico).
+
+4. **Ventana 4: Soporte y evaluaciones**:
    - **Exámenes Extra**: Protocolos guiados a bordo para examen oftálmico (SANS) y barrido sonar acústico.
    - **Correo de Espacio Profundo**: Buzón de enlace DSN con centro de control en Tierra.
    - **Asistente Psicológico H.E.L.I.O.S.**: Guía interactiva de respiración 4-4-6 (inhala, sostén, exhala), soporte emocional y diálogo empático sin sobrecargar con términos automatizados.
-   - **Inspección Técnica de Martina**: Cajón desplegable con la matriz formal de 15 cruces de datos críticos y contramedidas priorizadas (máximo 3 acciones).
+   - **Inspección Técnica de Martina**: Consulta de las 15 reglas mediante botones anterior/siguiente, con evaluación, contramedidas, destinatarios y evidencia.
+
+### Distribución sin desplazamiento
+
+Las cuatro vistas ocupan la altura disponible entre cabecera y pie de página. `css/hud-viewport.css` conserva el tema HUD y adapta diagramas, métricas y paneles. `js/controllers/viewport_controller.js` organiza los paneles según el ancho y la altura: en pantallas pequeñas, los botones **Anterior / Siguiente** permiten consultar el contenido completo sin scroll ni recortes. En móvil, los controles de respiración y la telemetría cognitiva tienen su propio panel dentro de Soporte.
+
+El historial de ASTRA se consulta por mensaje. Las reglas técnicas se consultan por regla y, en móvil, por grupos de campos. Los nodos de los diagramas conservan sus acciones y las tarjetas se distribuyen debajo del diagrama cuando no caben a sus lados. `components/view_support.html` se incluye en el ensamblador junto con las otras tres vistas.
 
 ### Compilación y Regeneración
 

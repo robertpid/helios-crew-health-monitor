@@ -11,8 +11,8 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 8px;
-  border: 1px dashed rgba(0, 240, 255, 0.25);
+  border-radius: var(--r-md);
+  border: 1px solid var(--line-subtle);
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -58,40 +58,43 @@
 /* Tarjetas ancladas por su centro vertical sobre la retícula del marco */
 .holo-frame .holo-card {
   position: absolute;
-  width: 29.118%; /* 198 / 680 */
+  width: 34.118%; /* 232 / 680 */
   transform: translateY(-50%);
 }
 
 .holo-frame .holo-card--l {
-  left: 1.176%; /* 8 / 680 */
+  left: 1.471%; /* 10 / 680 */
 }
 
 .holo-frame .holo-card--r {
-  left: 69.706%; /* 474 / 680 */
+  left: 64.412%; /* 438 / 680 */
 }
 
-/* La tipografía acompaña al marco para que el rótulo nunca desborde su caja */
+/* La tipografía acompaña al marco para que el rótulo nunca desborde su caja.
+   Los suelos del clamp están fijados para tableta: en iPad horizontal el marco
+   mide ~569px y un suelo de 9px dejaba los rótulos ilegibles a distancia de
+   brazo. Ninguno baja de 11px. */
 .holo-frame .holo-card {
-  padding: clamp(6px, 1.3cqw, 11px) clamp(8px, 1.9cqw, 15px);
+  padding: clamp(7px, 1.3cqw, 11px) clamp(9px, 1.9cqw, 15px);
 }
 
 .holo-frame .holo-card .callout-header {
-  font-size: clamp(9px, 1.72cqw, 12px);
+  font-size: clamp(11px, 1.72cqw, 13px);
 }
 
 .holo-frame .holo-card .callout-sub {
-  font-size: clamp(10px, 1.86cqw, 13px);
+  font-size: clamp(11px, 1.86cqw, 13px);
   flex-wrap: wrap;
   row-gap: 2px;
 }
 
 .holo-frame .holo-card .callout-val {
-  font-size: clamp(11px, 2.15cqw, 15px);
+  font-size: clamp(14px, 2.15cqw, 17px);
 }
 
 .holo-frame .holo-card .callout-tag {
-  font-size: clamp(9px, 1.57cqw, 11px);
-  color: #94a3b8;
+  font-size: clamp(10px, 1.57cqw, 11px);
+  color: var(--text-muted);
 }
 
 /* El énfasis conserva el centrado vertical: se compone sobre translateY(-50%) */
@@ -129,13 +132,21 @@
   stroke-width: 2.4px !important;
 }
 
-/* Tarjetas Holográficas (Callouts) */
+/* --------------------------------------------------------------------------
+   TARJETAS HOLOGRÁFICAS (CALLOUTS)
+   Son la codificación secundaria que legitima el aviso de CVD de la paleta:
+   el nombre del órgano siempre está escrito. El borde izquierdo grueso porta
+   el color; el resto del contorno es una línea fina neutra, de modo que cinco
+   tarjetas simultáneas no compitan entre sí.
+   -------------------------------------------------------------------------- */
 .hologram-callout {
-  background: rgba(5, 11, 24, 0.94);
-  border: 1.8px solid var(--neon-cyan);
-  border-radius: 6px;
-  padding: 10px 14px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.65), 0 0 14px rgba(0, 240, 255, 0.2);
+  --callout-accent: var(--c-cyan);
+  background: rgba(10, 16, 32, 0.93);
+  border: 1px solid var(--line-default);
+  border-left: 3px solid var(--callout-accent);
+  border-radius: var(--r-sm);
+  padding: var(--sp-2) var(--sp-3);
+  box-shadow: var(--shadow-2);
   z-index: 10;
   transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.25s ease, filter 0.25s ease;
   backdrop-filter: blur(6px);
@@ -144,56 +155,50 @@
 
 .hologram-callout:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.85), 0 0 18px rgba(0, 240, 255, 0.4);
+  box-shadow: var(--shadow-3);
+  border-color: var(--line-strong);
 }
 
 .callout-header {
-  font-family: var(--font-hud);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 1.2px;
+  font-family: var(--font-body);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-wide);
   text-transform: uppercase;
-  margin-bottom: 5px;
+  color: var(--text-secondary) !important;
+  margin-bottom: var(--sp-1);
+  line-height: var(--lh-tight);
 }
 
 .callout-sub {
-  font-family: var(--font-data);
-  font-size: 13px;
-  color: #cbd5e1;
+  font-family: var(--font-body);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--text-muted);
   display: flex;
   align-items: baseline;
-  gap: 5px;
+  gap: var(--sp-1);
+  letter-spacing: var(--tr-tight);
 }
 
+/* La cifra va en tinta neutra tabular; el color vive en el borde del rótulo */
 .callout-val {
-  font-weight: 800;
-  font-size: 15px;
+  font-family: var(--font-data);
+  font-weight: 400;
+  font-size: var(--fs-lg);
+  color: var(--text-primary) !important;
+  font-variant-numeric: tabular-nums;
 }
 
-.callout-brain {
-  border-color: var(--neon-cyan);
-  box-shadow: 0 0 14px rgba(0, 240, 255, 0.3);
+.callout-tag {
+  color: var(--text-muted);
 }
 
-.callout-heart {
-  border-color: var(--neon-red);
-  box-shadow: 0 0 14px rgba(255, 34, 85, 0.35);
-}
-
-.callout-hydration {
-  border-color: var(--neon-blue);
-  box-shadow: 0 0 14px rgba(0, 119, 255, 0.3);
-}
-
-.callout-lungs {
-  border-color: var(--neon-green);
-  box-shadow: 0 0 14px rgba(0, 255, 136, 0.3);
-}
-
-.callout-bone {
-  border-color: var(--neon-amber);
-  box-shadow: 0 0 14px rgba(255, 170, 0, 0.3);
-}
+.callout-brain     { --callout-accent: var(--c-cyan); }
+.callout-heart     { --callout-accent: var(--c-red); }
+.callout-hydration { --callout-accent: var(--c-blue); }
+.callout-lungs     { --callout-accent: var(--c-green); }
+.callout-bone      { --callout-accent: var(--c-amber); }
 
 /* ==========================================================================
    SISTEMA DE ÉNFASIS INTERACTIVO HOLOGRÁFICO (HOVER SPOTLIGHT)
@@ -237,9 +242,13 @@
 .hologram-callout.is-focused {
   opacity: 1 !important;
   transform: translateY(-4px) scale(1.04) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.95), 0 0 24px currentColor !important;
+  box-shadow: var(--shadow-3), 0 0 0 1px var(--callout-accent) !important;
   z-index: 30 !important;
-  background: rgba(6, 14, 28, 0.98) !important;
+  background: var(--surface-3) !important;
+}
+
+.hologram-callout.is-focused .callout-header {
+  color: var(--text-primary) !important;
 }
 
 /* Iluminación de Órganos y Módulos Específicos */
