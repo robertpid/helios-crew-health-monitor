@@ -84,7 +84,7 @@ class HologramRendererService {
       const { clave, habitat } = this._claveDe(nodo);
       nodo.setAttribute("tabindex", "0");
       nodo.setAttribute("role", "button");
-      nodo.setAttribute("aria-label", nombres[clave] || clave || "Nodo del holograma");
+      nodo.setAttribute("aria-label", nodo.getAttribute("aria-label") || nombres[clave] || clave || "Nodo del holograma");
 
       nodo.addEventListener("click", () => {
         if (!habitat) window.stateManager?.setOrganoSeleccionado(nombres[clave] || clave);

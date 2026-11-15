@@ -48,3 +48,14 @@
   box-shadow: 0 0 12px var(--glow-cyan);
   transition: width 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+/* Reserve space for all three cards in the full wellness column. */
+#viewMatrix[data-layout="full"] .wellness-column[data-column="right"] { gap: 8px; }
+#viewMatrix[data-layout="full"] .wellness-column[data-column="right"] > .screen-panel { padding: 10px 12px; flex-shrink: 0; }
+#viewMatrix[data-layout="full"] .wellness-column[data-column="right"] .panel-header { margin-bottom: 6px; padding-bottom: 6px; }
+#viewMatrix[data-layout="full"] .tasks-list-container { gap: 6px !important; }
+#viewMatrix[data-layout="full"] .task-card-item { padding: 8px 10px !important; }
+#viewMatrix[data-layout="full"] .task-card-item > div:first-child { margin-bottom: 5px !important; }
+#viewMatrix[data-layout="full"] [data-panel="hydration"] > div:last-child { padding: 8px 10px !important; }
+#viewMatrix[data-layout="full"] #fitNutriSummary { margin-bottom: 6px !important; }
+#viewMatrix[data-layout="full"] #fitLogMsg { margin-top: 6px !important; padding: 5px 8px !important; }

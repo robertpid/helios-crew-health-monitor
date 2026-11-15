@@ -161,6 +161,7 @@ class DashboardAssembler:
   <script src="/static/js/services/codebook_service.js?v={version_tag}"></script>
   <script src="/static/js/services/telemetry_service.js?v={version_tag}"></script>
   <script src="/static/js/services/ecg_service.js?v={version_tag}"></script>
+  <script src="/static/js/services/habitat_diagram_service.js?v={version_tag}"></script>
   <script src="/static/js/services/hologram_service.js?v={version_tag}"></script>
   <script src="/static/js/services/fit_service.js?v={version_tag}"></script>
   <script src="/static/js/services/oftalmico_service.js?v={version_tag}"></script>
@@ -180,7 +181,9 @@ class DashboardAssembler:
       const hologramService = new HologramRendererService("particlesCanvas", "svgHologramBody");
       hologramService.inicializar();
 
-      const habitatHologramService = new HologramRendererService("particlesHabitatCanvas", "svgHologramHabitat");
+      window.habitatDiagramService = new HabitatDiagramService();
+      window.habitatDiagramService.inicializar();
+      const habitatHologramService = new HologramRendererService(null, "habitatIllustration");
       habitatHologramService.inicializar();
 
       if (window.fitService?.inicializar) {{

@@ -36,7 +36,7 @@ frontend/
    - Osciloscopio ECG a 60 FPS en derivación II.
 
 2. **Ventana 2: Ambiente & Hábitat**:
-   - Corte estructural interactivo de Nave Orion, Base Marciana y Estación Espacial.
+   - Ilustraciones raster aportadas por el usuario de Nave Orion, Base Marciana y Estación Espacial, con cinco indicadores de cabina interactivos.
    - Sensores ambientales de cabina en tiempo real: ppCO₂, Radiación, Presión, Temperatura y Humedad.
    - Grafo tensorial matricial de Kronecker ($\mathbb{R}^{12}$) y contramedidas de cabina.
 
@@ -61,6 +61,10 @@ El historial de ASTRA se consulta por mensaje. Las reglas técnicas se consultan
 El panel de sueño adapta el patrón de resumen, fases e historial de [SOMA](https://soma.pe/experiencia#sueno) al tema HUD, sin reutilizar sus imágenes. `components/panel_sleep.html` se incorpora a Bienestar durante el ensamblado; `sleep_controller.js` coordina los ciclos, la telemetría y las fases de demostración. En móvil y en vistas compactas, las pestañas Resumen / Fases / 7 ciclos mantienen todos los detalles accesibles sin scroll. Las pruebas del perfil se ejecutan con `node --test tests/frontend_sleep.test.cjs`.
 
 ### Compilación y Regeneración
+
+### Imágenes de hábitats
+
+Los PNG originales del usuario se conservan en frontend/assets/habitats/ (orion.png, mars-base.png, iss.png). La interfaz usa las copias -transparent.png con canal alfa real y margen recortado. El script frontend/prepare_habitat_assets.ps1 extrae únicamente el fondo blanco conectado al borde y suaviza el contorno; no regenera las ilustraciones. HabitatDiagramService superpone cinco ramas y puntos de referencia, con anclajes propios para cada hábitat. En tableta y escritorio los indicadores rodean la imagen como en el diagrama original; en móvil se conservan las ramas y las etiquetas cortas abren el indicador seleccionado sin scroll. El dibujo anatómico de Biomédica se conserva.
 
 ### Juegos ligeros
 

@@ -82,6 +82,7 @@ class HudController {
     stg.querySelectorAll(".habitat-module-node, .habitat-connector-line, .hologram-callout").forEach(el => el.classList.remove("is-focused"));
     [`.habitat-module-node[data-habitat-module="${modulo}"]`, `.habitat-connector-line[data-habitat-line="${modulo}"]`, `.hologram-callout[data-habitat-card="${modulo}"]`]
       .forEach(sel => stg.querySelectorAll(sel).forEach(el => el.classList.add("is-focused")));
+    stg.querySelectorAll('button[data-habitat-module]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.habitatModule === modulo)));
   }
 
   desenfocarModuloHabitat() {
@@ -89,9 +90,26 @@ class HudController {
     if (!stg) return;
     stg.classList.remove("has-habitat-focus");
     stg.querySelectorAll(".habitat-module-node, .habitat-connector-line, .hologram-callout").forEach(el => el.classList.remove("is-focused"));
+    stg.querySelectorAll('button[data-habitat-module]').forEach(button => button.setAttribute('aria-pressed', 'false'));
+  }
+
+  cambiarDetalleHabitat(detalle) {
+    if (!['image', 'sensors'].includes(detalle)) return;
+    this.desenfocarModuloHabitat();
+    document.querySelector('[data-panel="habitat"]').dataset.habitatTab = detalle;
+    document.getElementById('habitatIllustration').dataset.habitatTab = detalle;
+    document.querySelectorAll('[data-habitat-tab-button]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.habitatTabButton === detalle)));
   }
 
   alternarModeloHabitat(modelo) {
+    const ilustraciones = {
+      orion: { archivo: 'orion-transparent.png', titulo: 'Nave espacial', alt: 'Ilustración de una nave tripulada con corte de cabina, módulo de servicio y paneles solares.' },
+      mars: { archivo: 'mars-base-transparent.png', titulo: 'Base marciana', alt: 'Ilustración de una base marciana con módulos habitacionales, laboratorio, soporte vital y paneles solares sobre terreno rojizo.' },
+      iss: { archivo: 'iss-transparent.png', titulo: 'Estación espacial', alt: 'Ilustración de una estación espacial modular con grandes paneles solares y un módulo abierto que muestra su interior.' }
+    };
+    const ilustracion = ilustraciones[modelo];
+    if (!ilustracion) return;
+    this.cambiarDetalleHabitat('image');
     if (this._sound?.reproducirCambioHabitat) this._sound.reproducirCambioHabitat();
     else this._sound?.reproducirClick?.();
     this.desenfocarModuloHabitat();
@@ -99,13 +117,16 @@ class HudController {
     ["orion", "mars", "iss"].forEach(m => {
       const cap = m.charAt(0).toUpperCase() + m.slice(1);
       const btn = document.getElementById(`btnHabitat${cap}`);
-      if (btn) btn.classList.toggle("active", m === modelo);
-      const grp = document.getElementById(`habitat${cap}Group`);
-      if (grp) {
-        if (m === modelo) { grp.style.display = "inline"; grp.removeAttribute("style"); }
-        else { grp.style.display = "none"; }
-      }
+      if (btn) { btn.classList.toggle("active", m === modelo); btn.setAttribute('aria-pressed', String(m === modelo)); }
     });
+    const imagen = document.getElementById('habitatImage');
+    if (imagen) {
+      imagen.src = `/static/assets/habitats/${ilustracion.archivo}?v=20261115_alpha`;
+      imagen.alt = ilustracion.alt;
+      imagen.dataset.habitat = modelo;
+    }
+    window.habitatDiagramService?.actualizar(modelo);
+    this._setTxt('habitatImageCaption', `${ilustracion.titulo} · Ilustración conceptual`);
     const sub = document.getElementById("habitatSubtitle");
     if (sub) {
       const titulos = {

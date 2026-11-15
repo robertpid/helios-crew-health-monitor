@@ -12,10 +12,12 @@
 @import url('./hud-panels.css?v=20261115_spacing');
 @import url('./hud-hologram.css?v=20261115_v4');
 @import url('./hud-matrix.css?v=20261115_v4');
-@import url('./hud-wellness.css?v=20261115_v4');
+@import url('./hud-wellness.css?v=20261115_games_spacing');
 
 @import url('./hud-viewport.css?v=20261115_compact_panels');
 
-@import url('./hud-sleep.css?v=20261115_sleep');
+@import url('./hud-sleep.css?v=20261115_sleep_cyan');
 
-@import url('./hud-games.css?v=20261115_games');
+@import url('./hud-games.css?v=20261115_games_spacing');
+
+@import url('./hud-habitat-images.css?v=20261115_alpha');

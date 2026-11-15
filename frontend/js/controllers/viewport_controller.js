@@ -44,7 +44,8 @@ class ViewportController {
       support: ['assistant', 'exams', 'mail', 'rules']
     };
     if (narrow) return (key === 'support' ? ['assistant', 'protocol', 'exams', 'mail', 'rules'] : panels[key]).map(p => [p]);
-    if (compact || (['environmental', 'matrix'].includes(key) && window.innerWidth < 1100)) return {
+    const compactWellness = key === 'matrix' && (window.innerWidth < 1200 || document.querySelector('.main-viewport').clientHeight < 620);
+    if (compact || compactWellness || (key === 'environmental' && window.innerWidth < 1100)) return {
       biomedical: [['anatomy', 'vitals'], ['ecg']],
       environmental: [['habitat', 'environment'], ['synergy', 'actions']],
       matrix: [['sleep', 'tasks'], ['games', 'hydration']],
