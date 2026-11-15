@@ -58,3 +58,25 @@
   border-color: var(--neon-cyan) !important;
   box-shadow: 0 0 12px rgba(0, 240, 255, 0.4) !important;
 }
+
+/* Optimización Responsive y Táctil para Apple iPad / Tabletas */
+@media (max-width: 1024px) {
+  .main-viewport {
+    padding: 14px 16px;
+  }
+  .view-container.active-view,
+  #viewBiomedical.active-view,
+  #viewMatrix.active-view {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  .hud-header {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .control-toolbar {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 16px;
+  }
+}

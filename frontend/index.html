@@ -2,8 +2,14 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>H.E.L.I.O.S. - Cockpit HUD &amp; Crew Health Monitor | NASA Space Apps 2026</title>
+  
+  <!-- Optimización Apple WebKit & PWA para iPadOS e iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="HELIOS HUD">
+  <meta name="theme-color" content="#030712">
   
   <!-- Tipografías Aeroespaciales de Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,8 +17,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   
   <!-- H.E.L.I.O.S. Capa de Estilos N-Capas Modular -->
-  <link rel="stylesheet" href="/static/css/hud-theme.css?v=1794754253">
-  <link rel="stylesheet" href="/static/css/animations.css?v=1794754253">
+  <link rel="stylesheet" href="/static/css/hud-theme.css?v=1794754990">
+  <link rel="stylesheet" href="/static/css/animations.css?v=1794754990">
 </head>
 <body>
 
@@ -1094,14 +1100,14 @@
   <!-- ========================================================================= -->
   <!-- 6. CARGA DE MÓDULOS DE ARQUITECTURA N-CAPAS EN JAVASCRIPT                 -->
   <!-- ========================================================================= -->
-  <script src="/static/js/state/state_manager.js?v=1794754253"></script>
-  <script src="/static/js/services/auth_service.js?v=1794754253"></script>
-  <script src="/static/js/services/sound_service.js?v=1794754253"></script>
-  <script src="/static/js/services/telemetry_service.js?v=1794754253"></script>
-  <script src="/static/js/services/ecg_service.js?v=1794754253"></script>
-  <script src="/static/js/services/hologram_service.js?v=1794754253"></script>
-  <script src="/static/js/controllers/wellness_controller.js?v=1794754253"></script>
-  <script src="/static/js/controllers/hud_controller.js?v=1794754253"></script>
+  <script src="/static/js/state/state_manager.js?v=1794754990"></script>
+  <script src="/static/js/services/auth_service.js?v=1794754990"></script>
+  <script src="/static/js/services/sound_service.js?v=1794754990"></script>
+  <script src="/static/js/services/telemetry_service.js?v=1794754990"></script>
+  <script src="/static/js/services/ecg_service.js?v=1794754990"></script>
+  <script src="/static/js/services/hologram_service.js?v=1794754990"></script>
+  <script src="/static/js/controllers/wellness_controller.js?v=1794754990"></script>
+  <script src="/static/js/controllers/hud_controller.js?v=1794754990"></script>
 
   <script>
     // Inicialización del ecosistema HUD N-Capas Modular

@@ -365,10 +365,10 @@ async def obtener_contramedidas_activas() -> dict[str, Any]:
 # PUNTO DE ENTRADA PRINCIPAL SEGURO (PEP 8)
 # ======================================================================================
 if __name__ == "__main__":
-    logger.info("Iniciando servidor web aeroespacial en http://127.0.0.1:8000...")
+    logger.info("Iniciando servidor web aeroespacial en http://0.0.0.0:8000 (red local activa)...")
     uvicorn.run(
         "main:app",
-        host="127.0.0.1",
+        host="0.0.0.0",
         port=8000,
         log_level="info",
         reload=False,
