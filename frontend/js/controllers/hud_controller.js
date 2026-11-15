@@ -53,6 +53,75 @@ class HudController {
     this._state.setVistaActiva(nombreVista);
   }
 
+  /**
+   * Ilumina y enfatiza un órgano anatómico específico, su línea guía y su tarjeta callout,
+   * atenuando los demás módulos para máxima concentración visual.
+   * @param {string} nombreOrgano - Identificador del órgano ('cerebro', 'corazon', 'pulmones', 'hidratacion', 'huesos')
+   */
+  enfocarOrgano(nombreOrgano) {
+    if (this._sound && this._sound.reproducirHover) {
+      this._sound.reproducirHover();
+    }
+    const stage = document.querySelector("#viewBiomedical .hologram-stage-wrapper");
+    if (!stage) return;
+    stage.classList.add("has-organ-focus");
+
+    stage.querySelectorAll(".is-focused").forEach(el => el.classList.remove("is-focused"));
+
+    const organNodes = stage.querySelectorAll(`.organ-node[data-organ="${nombreOrgano}"]`);
+    organNodes.forEach(node => node.classList.add("is-focused"));
+
+    const lineNodes = stage.querySelectorAll(`.organ-connector-line[data-organ-line="${nombreOrgano}"]`);
+    lineNodes.forEach(line => line.classList.add("is-focused"));
+
+    const cardNodes = stage.querySelectorAll(`.hologram-callout[data-organ-card="${nombreOrgano}"]`);
+    cardNodes.forEach(card => card.classList.add("is-focused"));
+  }
+
+  /**
+   * Restablece el brillo e iluminación nominal de todos los órganos y tarjetas al salir el mouse.
+   */
+  desenfocarOrgano() {
+    const stage = document.querySelector("#viewBiomedical .hologram-stage-wrapper");
+    if (!stage) return;
+    stage.classList.remove("has-organ-focus");
+    stage.querySelectorAll(".is-focused").forEach(el => el.classList.remove("is-focused"));
+  }
+
+  /**
+   * Ilumina y enfatiza un subsistema del hábitat espacial / nave al pasar el mouse.
+   * @param {string} modulo - Identificador del subsistema ('co2', 'rad', 'temp', 'press', 'hum')
+   */
+  enfocarModuloHabitat(modulo) {
+    if (this._sound && this._sound.reproducirHover) {
+      this._sound.reproducirHover();
+    }
+    const stage = document.querySelector("#viewEnvironmental .hologram-stage-wrapper");
+    if (!stage) return;
+    stage.classList.add("has-habitat-focus");
+
+    stage.querySelectorAll(".is-focused").forEach(el => el.classList.remove("is-focused"));
+
+    const modNodes = stage.querySelectorAll(`.habitat-module-node[data-habitat-module="${modulo}"]`);
+    modNodes.forEach(n => n.classList.add("is-focused"));
+
+    const lineNodes = stage.querySelectorAll(`.habitat-connector-line[data-habitat-line="${modulo}"]`);
+    lineNodes.forEach(l => l.classList.add("is-focused"));
+
+    const cardNodes = stage.querySelectorAll(`.hologram-callout[data-habitat-card="${modulo}"]`);
+    cardNodes.forEach(c => c.classList.add("is-focused"));
+  }
+
+  /**
+   * Restablece el brillo nominal del hábitat al retirar el cursor.
+   */
+  desenfocarModuloHabitat() {
+    const stage = document.querySelector("#viewEnvironmental .hologram-stage-wrapper");
+    if (!stage) return;
+    stage.classList.remove("has-habitat-focus");
+    stage.querySelectorAll(".is-focused").forEach(el => el.classList.remove("is-focused"));
+  }
+
   cambiarHabitat(habitatKey) {
     this._state.setHabitat(habitatKey);
   }

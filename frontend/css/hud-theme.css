@@ -608,3 +608,103 @@ footer.hud-footer {
   border-color: #ffffff;
   box-shadow: 0 0 14px rgba(255, 255, 255, 0.25);
 }
+
+/* ==========================================================================
+   SISTEMA DE ÉNFASIS INTERACTIVO HOLOGRÁFICO (HOVER SPOTLIGHT)
+   ========================================================================== */
+
+/* Transición suave para todos los órganos, líneas y tarjetas */
+.organ-node,
+.organ-connector-line,
+.hologram-callout,
+.habitat-module-node,
+.habitat-connector-line {
+  transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: center center;
+}
+
+.organ-node,
+.habitat-module-node {
+  cursor: pointer;
+}
+
+/* Estado de Atenuación (Dimmed): Cuando se enfoca un módulo específico */
+.hologram-stage-wrapper.has-organ-focus .organ-node:not(.is-focused),
+.hologram-stage-wrapper.has-organ-focus .organ-connector-line:not(.is-focused),
+.hologram-stage-wrapper.has-organ-focus .hologram-callout:not(.is-focused),
+.hologram-stage-wrapper.has-habitat-focus .habitat-module-node:not(.is-focused),
+.hologram-stage-wrapper.has-habitat-focus .habitat-connector-line:not(.is-focused),
+.hologram-stage-wrapper.has-habitat-focus .hologram-callout:not(.is-focused) {
+  opacity: 0.16 !important;
+  filter: grayscale(0.6) brightness(0.55) !important;
+}
+
+/* Estado de Énfasis Máximo (Highlighted / Focused) */
+.organ-node.is-focused,
+.habitat-module-node.is-focused {
+  opacity: 1 !important;
+  transform: scale(1.10);
+}
+
+.organ-connector-line.is-focused polyline,
+.habitat-connector-line.is-focused polyline {
+  stroke-width: 4.2px !important;
+  filter: drop-shadow(0 0 12px currentColor) drop-shadow(0 0 4px #ffffff) !important;
+}
+
+.organ-connector-line.is-focused circle,
+.habitat-connector-line.is-focused circle {
+  r: 7px !important;
+  filter: drop-shadow(0 0 14px currentColor) !important;
+}
+
+.hologram-callout.is-focused {
+  opacity: 1 !important;
+  transform: translateY(-5px) scale(1.06) !important;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.95), 0 0 28px currentColor !important;
+  z-index: 30 !important;
+  background: rgba(6, 14, 28, 0.98) !important;
+}
+
+/* Resplandores cromáticos específicos al enfocar */
+.hologram-callout.callout-brain.is-focused,
+.organ-node[data-organ="cerebro"].is-focused,
+.habitat-module-node[data-habitat-module="press"].is-focused {
+  color: var(--neon-cyan);
+  filter: drop-shadow(0 0 22px #00f0ff) brightness(1.6) !important;
+}
+
+.hologram-callout.callout-heart.is-focused,
+.organ-node[data-organ="corazon"].is-focused {
+  color: var(--neon-red);
+  filter: drop-shadow(0 0 26px #ff2255) brightness(1.6) !important;
+}
+
+.hologram-callout.callout-lungs.is-focused,
+.organ-node[data-organ="pulmones"].is-focused,
+.habitat-module-node[data-habitat-module="co2"].is-focused {
+  color: var(--neon-green);
+  filter: drop-shadow(0 0 22px #00ff88) brightness(1.6) !important;
+}
+
+.hologram-callout.callout-hydration.is-focused,
+.organ-node[data-organ="hidratacion"].is-focused,
+.habitat-module-node[data-habitat-module="hum"].is-focused {
+  color: var(--neon-blue);
+  filter: drop-shadow(0 0 22px #0088ff) brightness(1.6) !important;
+}
+
+.hologram-callout.callout-bone.is-focused,
+.organ-node[data-organ="huesos"].is-focused,
+.habitat-module-node[data-habitat-module="rad"].is-focused {
+  color: var(--neon-amber);
+  filter: drop-shadow(0 0 22px #ffaa00) brightness(1.6) !important;
+}
+
+.hologram-callout.callout-thermal.is-focused,
+.habitat-module-node[data-habitat-module="temp"].is-focused {
+  color: #ffffff;
+  filter: drop-shadow(0 0 22px rgba(255, 255, 255, 0.9)) brightness(1.5) !important;
+}

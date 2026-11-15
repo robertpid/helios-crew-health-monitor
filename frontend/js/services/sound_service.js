@@ -168,6 +168,33 @@ class SoundService {
   }
 
   /**
+   * Pulso ultrasónico muy sutil (25 ms) al colocar el mouse sobre un órgano holográfico.
+   */
+  reproducirHover() {
+    const ctx = this._obtenerContexto();
+    if (!ctx) return;
+
+    try {
+      const t = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(1400, t);
+      osc.frequency.exponentialRampToValueAtTime(2200, t + 0.022);
+
+      gain.gain.setValueAtTime(this._volumenGeneral * 0.35, t);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.025);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(t);
+      osc.stop(t + 0.03);
+    } catch (_) {}
+  }
+
+  /**
    * Resonancia holográfica al alternar entre hábitats espaciales (120 ms).
    */
   reproducirCambioHabitat() {
