@@ -91,7 +91,7 @@ class WellnessController {
       this._mostrarFeedback("👁️ <strong>EVALUACIÓN OFTÁLMICA:</strong> Abriendo módulo SANS...");
     }
   }
-  iniciarExamenSonar() { this._sound?.reproducirClick?.(); this._mostrarFeedback("👂 <strong>BARRIDO SONAR / AUDIOMETRÍA:</strong> 250-8000 Hz evaluadas. Ruido de cabina en 58 dBA nominal."); }
+  iniciarExamenSonar() { this._sound?.reproducirClick?.(); window.sonarService?.abrirModal ? window.sonarService.abrirModal() : this._mostrarFeedback("👂 <strong>BARRIDO SONAR / AUDIOMETRÍA:</strong> 250-8000 Hz evaluadas. Ruido de cabina en 58 dBA nominal."); }
   _mostrarFeedback(html) { const fb = document.getElementById("examenExtraFeedback"); if (!fb) return; fb.style.display = "block"; fb.innerHTML = html; setTimeout(() => { if (fb) fb.style.display = "none"; }, 6000); }
   sincronizarCorreo() { this._sound?.reproducirClick?.(); alert("📡 SINCRONIZACIÓN DSN COMPLETADA: Enlace activo con Houston. 0 mensajes pendientes."); }
 

@@ -91,10 +91,12 @@ class DashboardAssembler:
             "<!-- PANEL_SLEEP -->", self.leer_componente("panel_sleep.html")
         ).replace("<!-- PANEL_GAMES -->", self.leer_componente("panel_games.html"))
         view_support = self.leer_componente("view_support.html")
+        view_surgeon = self.leer_componente("view_surgeon.html")
         modal_alert = self.leer_componente("modal_alert.html")
         modal_login = self.leer_componente("modal_login.html")
         modal_games = self.leer_componente("modal_games.html")
         modal_oftalmico = self.leer_componente("modal_oftalmico.html")
+        modal_sonar = self.leer_componente("modal_sonar.html")
         footer_html = self.leer_componente("footer.html")
         version_tag = int(time.time())
 
@@ -140,6 +142,8 @@ class DashboardAssembler:
 
     {view_support}
 
+    {view_surgeon}
+
   </main>
 
   {modal_alert}
@@ -149,6 +153,8 @@ class DashboardAssembler:
   {modal_games}
 
   {modal_oftalmico}
+
+  {modal_sonar}
 
   {footer_html}
 
@@ -165,9 +171,11 @@ class DashboardAssembler:
   <script src="/static/js/services/hologram_service.js?v={version_tag}"></script>
   <script src="/static/js/services/fit_service.js?v={version_tag}"></script>
   <script src="/static/js/services/oftalmico_service.js?v={version_tag}"></script>
+  <script src="/static/js/services/sonar_service.js?v={version_tag}"></script>
   <script src="/static/js/controllers/wellness_controller.js?v={version_tag}"></script>
   <script src="/static/js/controllers/games_controller.js?v={version_tag}"></script>
   <script src="/static/js/controllers/sleep_controller.js?v={version_tag}"></script>
+  <script src="/static/js/controllers/surgeon_controller.js?v={version_tag}"></script>
   <script src="/static/js/controllers/viewport_controller.js?v={version_tag}"></script>
   <script src="/static/js/controllers/hud_controller.js?v={version_tag}"></script>
 
@@ -209,6 +217,7 @@ class DashboardAssembler:
       window.gamesController.inicializar();
       window.sleepController = new SleepController(window.stateManager);
       window.sleepController.inicializar();
+      window.surgeonController?.inicializar?.();
       window.hudController.inicializar();
     }});
   </script>

@@ -1,9 +1,19 @@
-<div class="hud-panel screen-panel" data-panel="games">
-  <div class="panel-header">
-    <div class="panel-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 7h12a3 3 0 0 1 3 3l1 7a2 2 0 0 1-3 2l-4-3H9l-4 3a2 2 0 0 1-3-2l1-7a3 3 0 0 1 3-3Z"/><path d="M6 12h5M8.5 9.5v5M16 11h.01M18 13h.01"/></svg>JUEGOS</div>
-    <div class="panel-subtitle">UNA PAUSA ENTRE TAREAS</div>
-  </div>
-  <p class="games-launch-description">Desconecta un momento con una partida corta.</p>
-  <button type="button" id="btnOpenGames" class="btn-hud games-launch-button" onclick="window.gamesController.abrir()" aria-haspopup="dialog" aria-controls="modalGames"><span>Explorar juegos</span><span aria-hidden="true">→</span></button>
-  <div class="games-launch-categories">8 juegos · Arcade · Lógica · Memoria</div>
-</div>
+    <div class="hud-panel screen-panel" data-panel="games" style="padding:10px 14px;">
+      <div class="panel-header"
+        style="margin-bottom:6px; padding-bottom:6px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div class="panel-title"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" aria-hidden="true">
+              <path d="M6 7h12a3 3 0 0 1 3 3l1 7a2 2 0 0 1-3 2l-4-3H9l-4 3a2 2 0 0 1-3-2l1-7a3 3 0 0 1 3-3Z" />
+              <path d="M6 12h5M8.5 9.5v5M16 11h.01M18 13h.01" />
+            </svg>JUEGOS · PAUSA ACTIVA</div>
+          <div class="panel-subtitle">8 JUEGOS · ARCADE · LÓGICA · MEMORIA</div>
+        </div>
+        <button type="button" id="btnOpenGames" class="btn-hud games-launch-button"
+          onclick="window.gamesController.abrir()" aria-haspopup="dialog" aria-controls="modalGames"
+          style="width:auto; min-height:34px; padding:6px 14px; font-size:11.5px;"><span>Explorar juegos</span><span
+            aria-hidden="true" style="margin-left:8px;">→</span></button>
+      </div>
+      <p class="games-launch-description" style="margin:0; font-size:11.5px;">Desconecta un momento con una partida
+        corta de estimulación cognitiva entre tareas.</p>
+    </div>
