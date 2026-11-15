@@ -484,7 +484,18 @@ Siguiendo los bocetos de cabina de la misión y los estándares de diseño visua
    - **Monitores Atmosféricos:** Concentración de $\text{CO}_2$, Radiación acumulada (mSv), Presión de cabina (kPa), Temperatura, Humedad y Evento solar.
    - **Heatmap de la Matriz de Kronecker ($3 \times 4$):** Visualización interactiva en tiempo real del acoplamiento entre los 3 estresores ambientales y los 4 biomarcadores fisiológicos calculados por el Cerebro 3.
 
-3. **Sistema de Audio Procedural Ultra-Ligero (`SoundService`):**
+3. **Ventana 3: Bienestar, Rutinas & Asistente Psicológico (Protocolo NASA-BHP / Sistema ASTRA):**
+   - **Evaluación Psicológica Operacional:** Protocolo interactivo de 3 preguntas estandarizadas de salud mental y alerta operacional (NASA Behavioral Health & Performance).
+   - **Entrada Multimodal (Voz & Texto):** Dictado por voz en tiempo real con Web Speech API nativa, entrada de texto y chips de respuesta rápida.
+   - **Métricas Vectoriales ASTRA en Tiempo Real:**
+     * **Latencia Verbal ($\Delta t$ en ms):** Mide el tiempo de reacción psicomotora frente a la línea base nominal (200 ms).
+     * **Densidad Léxica ($D \in [0.1, 1.0]$):** Evalúa la riqueza léxica y penaliza respuestas evasivas o monosilábicas.
+     * **Similitud Coseno:** Álgebra lineal pura en $\mathbb{R}^2$ contra el vector de línea base dinámica.
+   - **Cruce Fisiológico Multivariado:** Detecta incongruencias cognitivas (ej. fingir calma verbal con taquicardia $>95\text{ bpm}$ o latencia prolongada $>500\text{ ms}$ por fatiga oculta).
+   - **Guía de Respiración Táctica 4-4-6:** Marcapasos respiratorio visual y auditivo para relajación inmediata y reducción de cortisol.
+   - **Gamificación Aeroespacial:** Barra de experiencia acumulada (+25 EXP por tarea y reporte completado) y niveles de tripulante.
+
+4. **Sistema de Audio Procedural Ultra-Ligero (`SoundService`):**
    - **0 KB de Descargas:** Sintetizado puramente mediante la **Web Audio API** nativa del navegador (sin archivos MP3/WAV pesados ni lag de red).
    - **Efectos Táctiles Sci-Fi:** Clicks de interfaz, transiciones de frecuencia armónica al cambiar de hábitat, pulso de alarma en modo crisis y latido cardíaco de baja frecuencia.
    - **Control de Silenciado:** Botón táctico `🔊 AUDIO: ACTIVO` / `🔇 AUDIO: MUTE` en la barra de control para alternar el sonido al instante.

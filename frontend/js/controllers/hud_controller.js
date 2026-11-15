@@ -206,7 +206,10 @@ class HudController {
   iniciarExamenSonar() { this._wellness?.iniciarExamenSonar(); }
   sincronizarCorreo() { this._wellness?.sincronizarCorreo(); }
   toggleGuiaRespiracion() { this._wellness?.toggleGuiaRespiracion(); }
-  responderAsistente(t) { this._wellness?.responderAsistente(t); }
+  iniciarProtocoloPsicologico() { this._wellness?.iniciarProtocoloPsicologico(); }
+  enviarRespuestaPsicologica() { this._wellness?.enviarRespuestaPsicologica(); }
+  seleccionarChipSugerido(t) { this._wellness?.seleccionarChipSugerido(t); }
+  activarDictadoVoz() { this._wellness?.activarDictadoVoz(); }
   toggleMatrizTecnica() { this._wellness?.toggleMatrizTecnica(); }
 
   renderizar(state) {

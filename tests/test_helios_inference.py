@@ -259,6 +259,27 @@ class TestFastAPIEndpoints:
         assert data["max_acciones_permitidas"] == 3
         assert len(data["contramedidas_priorizadas"]) <= 3
 
+    def test_preguntas_psicologicas_endpoint(self, cliente_api: TestClient) -> None:
+        resp = cliente_api.get("/api/v1/psicologico/preguntas")
+        assert resp.status_code == 200
+        preguntas = resp.json()
+        assert len(preguntas) == 3
+        assert preguntas[0]["id_pregunta"] == 1
+
+    def test_evaluacion_psicologica_endpoint(self, cliente_api: TestClient) -> None:
+        payload = {
+            "id_pregunta": 1,
+            "texto_respuesta": "Me encuentro 100% enfocado y despejado para la jornada operativa de hoy.",
+            "latencia_ms": 220.0,
+            "ritmo_cardiaco_bpm": 68.0,
+        }
+        resp = cliente_api.post("/api/v1/psicologico/evaluar", json=payload)
+        assert resp.status_code == 200
+        res = resp.json()
+        assert res["estado_cognitivo"] == "NOMINAL"
+        assert res["similitud_coseno"] > 0.85
+        assert not res["incongruencia_detectada"]
+
 
 class TestDecisionMatrixEvaluator:
     """Pruebas del evaluador de la matriz de 15 cruces de la NASA."""

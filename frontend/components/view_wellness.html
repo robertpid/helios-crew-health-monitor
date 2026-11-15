@@ -200,38 +200,60 @@
       </div>
     </div>
 
-    <!-- 7. ASISTENTE PSICOLÓGICO H.E.L.I.O.S. -->
+    <!-- 7. EVALUACIÓN PSICOLÓGICA Y ASISTENTE (SISTEMA ASTRA) -->
     <div class="hud-panel">
-      <div class="panel-header">
-        <div class="panel-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-          ASISTENTE PSICOLÓGICO H.E.L.I.O.S.
+      <div class="panel-header" style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div>
+          <div class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+            EVALUACIÓN PSICOLÓGICA Y ASISTENTE (SISTEMA ASTRA)
+          </div>
+          <div class="panel-subtitle">PROTOCOLO NASA-BHP · ANÁLISIS DE VOZ, TIEMPO DE REACCIÓN Y COHERENCIA VECTORIAL</div>
         </div>
-        <div class="panel-subtitle">SOPORTE DE BIENESTAR MENTAL, REGISTRO EMOCIONAL Y RELAJACIÓN</div>
+        <div id="psychStatusBadge" class="badge-status status-stable" style="font-size:10px; padding:3px 8px;">LISTO</div>
       </div>
-      <div style="background:#081326; border:1px solid rgba(0,240,255,0.25); border-radius:8px; padding:18px 20px;">
-        <div id="assistantChatBox" style="font-family:var(--font-data); font-size:13px; line-height:1.7; color:#e2e8f0; display:flex; flex-direction:column; gap:10px;">
+
+      <!-- Barra de Telemetría Cognitiva en Tiempo Real -->
+      <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px; margin-bottom:12px; padding:8px 12px; background:rgba(0,240,255,0.04); border:1px solid rgba(0,240,255,0.15); border-radius:6px; font-family:var(--font-data); font-size:11px;">
+        <div><span style="color:#64748b;">LATENCIA:</span> <strong id="psychMetricLatency" style="color:var(--neon-cyan);">210 ms</strong></div>
+        <div><span style="color:#64748b;">DENSIDAD:</span> <strong id="psychMetricDensity" style="color:var(--neon-green);">0.95</strong></div>
+        <div><span style="color:#64748b;">COSENO:</span> <strong id="psychMetricCosSim" style="color:var(--neon-cyan);">0.985</strong></div>
+        <div><span style="color:#64748b;">ESTADO:</span> <strong id="psychEvalSummary" style="color:var(--neon-green);">COHERENTE</strong></div>
+      </div>
+
+      <div style="background:#081326; border:1px solid rgba(0,240,255,0.25); border-radius:8px; padding:14px 16px;">
+        <!-- Historial interactivo de mensajes -->
+        <div id="assistantChatBox" style="font-family:var(--font-data); font-size:12.5px; line-height:1.6; color:#e2e8f0; display:flex; flex-direction:column; gap:8px; max-height:175px; overflow-y:auto; padding-right:4px;">
           <div style="padding:8px 12px; background:rgba(0,240,255,0.06); border-left:3px solid var(--neon-cyan); border-radius:0 6px 6px 0;">
-            <strong style="color:var(--neon-cyan); font-family:var(--font-hud);">H.E.L.I.O.S.:</strong> Hola, Comandante. Percibo algo de estrés. ¿Hacemos una relajación guiada de 5 minutos?
-          </div>
-          <div style="padding:8px 12px; background:rgba(0,255,136,0.06); border-left:3px solid var(--neon-green); border-radius:0 6px 6px 0;">
-            <strong style="color:var(--neon-green); font-family:var(--font-hud);">H.E.L.I.O.S.:</strong> Respira 4 s, sostén 4 s, exhala 6 s. Repite 5 veces conmigo.
-          </div>
-          <div style="padding:8px 12px; background:rgba(0,240,255,0.06); border-left:3px solid var(--neon-cyan); border-radius:0 6px 6px 0;">
-            <strong style="color:var(--neon-cyan); font-family:var(--font-hud);">H.E.L.I.O.S.:</strong> Recuerda: tu equipo en tierra está contigo. ¿Quieres hablar de lo que te preocupa?
+            <strong style="color:var(--neon-cyan); font-family:var(--font-hud);">SISTEMA ASTRA:</strong> Hola, Comandante. Chequeo psicológico operacional Sol 120 listo. Evaluaremos tiempo de reacción, vocabulario y concordancia biológica. Presiona <strong>INICIAR PROTOCOLO</strong> o envía tu reporte.
           </div>
         </div>
-        <!-- Widget 4-4-6 -->
-        <div style="margin-top:16px; padding-top:14px; border-top:1px solid rgba(0,240,255,0.15); display:flex; align-items:center; justify-content:space-between; gap:14px;">
-          <div style="display:flex; align-items:center; gap:12px;">
-            <div id="breathingPacerCircle" style="width:36px; height:36px; border-radius:50%; background:radial-gradient(circle, #00f0ff 0%, #004488 100%); border:2px solid #fff; box-shadow:0 0 12px rgba(0,240,255,0.6); display:flex; align-items:center; justify-content:center; font-family:var(--font-hud); font-size:12px; font-weight:800; color:#fff;">4s</div>
-            <div style="font-family:var(--font-data); font-size:12px; color:#cbd5e1;">
+
+        <!-- Chips / Sugerencias rápidas de respuesta -->
+        <div id="psychSuggestionsContainer" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:10px;">
+          <button class="btn-hud" onclick="window.hudController.seleccionarChipSugerido('100% enfocado y despejado para la jornada.')" style="font-size:10px; padding:4px 8px; text-transform:none;">100% enfocado</button>
+          <button class="btn-hud" onclick="window.hudController.seleccionarChipSugerido('Todo en orden en cabina, dentro de parámetros habituales.')" style="font-size:10px; padding:4px 8px; text-transform:none;">Parámetros habituales</button>
+          <button class="btn-hud" onclick="window.hudController.seleccionarChipSugerido('He sentido lentitud mental y fatiga atencional hoy.')" style="font-size:10px; padding:4px 8px; text-transform:none;">Fatiga atencional</button>
+        </div>
+
+        <!-- Barra de Entrada: Texto + Micrófono de Voz + Enviar -->
+        <div style="display:flex; gap:8px; align-items:center; margin-top:10px;">
+          <input type="text" id="inputPsychText" placeholder="Escribe o dicta tu reporte operacional..." style="flex:1; background:#040814; border:1px solid rgba(0,240,255,0.3); border-radius:4px; padding:8px 12px; color:#f1f5f9; font-family:var(--font-data); font-size:12px; outline:none;" onkeydown="if(event.key==='Enter') window.hudController.enviarRespuestaPsicologica()">
+          <button id="btnPsychMic" class="btn-hud" onclick="window.hudController.activarDictadoVoz()" title="Dictar por voz (Speech-to-Text)" style="font-size:13px; padding:7px 11px;">🎙️</button>
+          <button id="btnPsychSend" class="btn-hud" onclick="window.hudController.enviarRespuestaPsicologica()" style="font-size:11px; padding:7px 14px;">ENVIAR</button>
+        </div>
+
+        <!-- Barra de Control de Acciones y Guía 4-4-6 -->
+        <div style="margin-top:12px; padding-top:10px; border-top:1px solid rgba(0,240,255,0.15); display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div id="breathingPacerCircle" style="width:32px; height:32px; border-radius:50%; background:radial-gradient(circle, #00f0ff 0%, #004488 100%); border:2px solid #fff; box-shadow:0 0 10px rgba(0,240,255,0.6); display:flex; align-items:center; justify-content:center; font-family:var(--font-hud); font-size:11px; font-weight:800; color:#fff;">4s</div>
+            <div style="font-family:var(--font-data); font-size:11px; color:#cbd5e1;">
               <span id="breathingPacerText" style="color:var(--neon-cyan); font-weight:bold;">GUÍA 4-4-6 EN ESPERA</span><br>Inhala 4s · Sostén 4s · Exhala 6s
             </div>
           </div>
-          <div style="display:flex; gap:8px;">
-            <button id="btnBreathingPacer" class="btn-hud" onclick="window.hudController.toggleGuiaRespiracion()" style="font-size:11px; padding:8px 14px;">🧘 INICIAR RELAJACIÓN</button>
-            <button class="btn-hud" onclick="window.hudController.responderAsistente('nominal')" style="font-size:11px; padding:8px 12px;">🟢 ESTOY BIEN</button>
+          <div style="display:flex; gap:6px;">
+            <button id="btnStartPsychProtocol" class="btn-hud" onclick="window.hudController.iniciarProtocoloPsicologico()" style="font-size:10.5px; padding:7px 11px;">📋 PROTOCOLO BHP</button>
+            <button id="btnBreathingPacer" class="btn-hud" onclick="window.hudController.toggleGuiaRespiracion()" style="font-size:10.5px; padding:7px 11px;">🧘 RELAJACIÓN</button>
           </div>
         </div>
       </div>

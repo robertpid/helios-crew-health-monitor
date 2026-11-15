@@ -259,6 +259,27 @@ class StateManager {
 
     this.notify();
   }
+
+  actualizarCognicion(datosCognitivos) {
+    if (!datosCognitivos) return;
+    const cog = this._state.telemetria.cognicion;
+    if (datosCognitivos.latencia_ms !== undefined) {
+      cog.latencia_voz_ms = Number(datosCognitivos.latencia_ms);
+    }
+    if (datosCognitivos.densidad_lexica !== undefined) {
+      cog.densidad_lexica_score = Number(datosCognitivos.densidad_lexica);
+    }
+    if (datosCognitivos.similitud_coseno !== undefined) {
+      cog.similitud_coseno = Number(datosCognitivos.similitud_coseno);
+    }
+    if (datosCognitivos.incongruencia_detectada !== undefined) {
+      cog.incongruencia_detectada = Boolean(datosCognitivos.incongruencia_detectada);
+    }
+    if (datosCognitivos.alerta_astra !== undefined) {
+      cog.alerta_astra = datosCognitivos.alerta_astra;
+    }
+    this.notify();
+  }
 }
 
 window.stateManager = new StateManager();

@@ -63,6 +63,34 @@ class TelemetryService {
     }
     return null;
   }
+
+  async obtenerPreguntasPsicologicas() {
+    try {
+      const resp = await fetch("/api/v1/psicologico/preguntas");
+      if (resp.ok) {
+        return await resp.json();
+      }
+    } catch (err) {
+      console.warn("TelemetryService: Fallo al cargar preguntas BHP:", err);
+    }
+    return null;
+  }
+
+  async evaluarRespuestaPsicologica(payload) {
+    try {
+      const resp = await fetch("/api/v1/psicologico/evaluar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      if (resp.ok) {
+        return await resp.json();
+      }
+    } catch (err) {
+      console.warn("TelemetryService: Fallo en evaluación psicológica remota:", err);
+    }
+    return null;
+  }
 }
 
 window.telemetryService = new TelemetryService(window.stateManager);
