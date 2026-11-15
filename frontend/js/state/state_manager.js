@@ -2,6 +2,7 @@
  * ==============================================================================
  * CAPA DE ESTADO (STATE MANAGEMENT): StateManager
  * Patrón Observer / Singleton reactivo para sincronizar el Cockpit HUD.
+ * Mantenido estrictamente bajo 300 líneas (Clean Code & SRP).
  * ==============================================================================
  */
 
@@ -9,15 +10,13 @@ class StateManager {
   constructor() {
     this._listeners = [];
 
-    // Estado centralizado inmutable por mutadores controlados
     this._state = {
       habitatActivo: "TRANSITO_MARTE",
-      vistaActiva: "biomedical", // 'biomedical' | 'environmental' | 'matrix'
+      vistaActiva: "biomedical",
       modoCrisis: false,
       modalAlertaAbierto: false,
       organoSeleccionado: null,
       
-      // Datos de telemetría nominales por defecto
       telemetria: {
         id_mision: "ARES-VI-MARS-EXPEDITION",
         dia_mision: 120,
@@ -72,10 +71,8 @@ class StateManager {
     };
   }
 
-  // Patrón Observer
   subscribe(listener) {
     this._listeners.push(listener);
-    // Ejecutar inmediatamente con el estado actual
     listener(this._state);
     return () => {
       this._listeners = this._listeners.filter(l => l !== listener);
@@ -124,7 +121,6 @@ class StateManager {
       amb.humedad_relativa_pct = 42.0;
       amb.evento_solar_activo = false;
     } else {
-      // TRANSITO_MARTE / NAVE ESPACIAL ORION
       amb.gravedad_g = 0.0;
       amb.radiacion_acumulada_mSv = 85.0;
       amb.radiacion_tasa_diaria_mSv = 1.80;
@@ -138,6 +134,15 @@ class StateManager {
     this.notify();
   }
 
+  setModeloHabitat(modelo) {
+    const mapa = {
+      orion: "TRANSITO_MARTE",
+      mars: "BASE_MARTE",
+      iss: "ESTACION_ESPACIAL"
+    };
+    this.setHabitat(mapa[modelo] || modelo);
+  }
+
   setOrganoSeleccionado(organo) {
     this._state.organoSeleccionado = organo;
     this.notify();
@@ -148,11 +153,19 @@ class StateManager {
     this.notify();
   }
 
+  toggleModalAlerta() {
+    this.setModalAlerta(!this._state.modalAlertaAbierto);
+  }
+
+  setModoOperacion(modo) {
+    if (modo === "crisis") this.activarModoCrisis();
+    else this.restablecerModoNominal();
+  }
+
   activarModoCrisis() {
     this._state.modoCrisis = true;
     this._state.modalAlertaAbierto = true;
 
-    // Mutar telemetría hacia el escenario crítico del boceto
     this._state.telemetria.fisiologia.ritmo_cardiaco_bpm = 132.0;
     this._state.telemetria.fisiologia.spo2_pct = 88.0;
     this._state.telemetria.fisiologia.temperatura_corporal_c = 38.4;
@@ -221,11 +234,9 @@ class StateManager {
   }
 
   actualizarDesdeBackend(reporteConsolidado) {
-    if (this._state.modoCrisis) return; // No sobreescribir si el usuario está en demo de crisis
+    if (this._state.modoCrisis) return;
 
     if (!reporteConsolidado) return;
-    const c1 = reporteConsolidado.cerebro_1_ambiental;
-    const c2 = reporteConsolidado.cerebro_2_biometrico;
     const c3 = reporteConsolidado.cerebro_3_grafo_fusion;
     const c4 = reporteConsolidado.cerebro_4_astra;
 
@@ -242,13 +253,33 @@ class StateManager {
       this._state.telemetria.cognicion.alerta_astra = c4.alerta_astra;
     }
 
-    if (reporteConsolidado.contramedidas_priorizadas && reporteConsolidado.contramedidas_priorizadas.length > 0) {
+    if (reporteConsolidado.contramedidas_priorizadas?.length > 0) {
       this._state.telemetria.contramedidas_priorizadas = reporteConsolidado.contramedidas_priorizadas;
     }
 
     this.notify();
   }
+
+  actualizarCognicion(datosCognitivos) {
+    if (!datosCognitivos) return;
+    const cog = this._state.telemetria.cognicion;
+    if (datosCognitivos.latencia_ms !== undefined) {
+      cog.latencia_voz_ms = Number(datosCognitivos.latencia_ms);
+    }
+    if (datosCognitivos.densidad_lexica !== undefined) {
+      cog.densidad_lexica_score = Number(datosCognitivos.densidad_lexica);
+    }
+    if (datosCognitivos.similitud_coseno !== undefined) {
+      cog.similitud_coseno = Number(datosCognitivos.similitud_coseno);
+    }
+    if (datosCognitivos.incongruencia_detectada !== undefined) {
+      cog.incongruencia_detectada = Boolean(datosCognitivos.incongruencia_detectada);
+    }
+    if (datosCognitivos.alerta_astra !== undefined) {
+      cog.alerta_astra = datosCognitivos.alerta_astra;
+    }
+    this.notify();
+  }
 }
 
-// Instancia global compartida (Singleton)
 window.stateManager = new StateManager();

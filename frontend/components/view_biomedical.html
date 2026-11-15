@@ -1,0 +1,334 @@
+<!-- ----------------------------------------------------------------------- -->
+<!-- VENTANA 1: BIOMÉDICA & CUERPO HOLOGRÁFICO 3D                            -->
+<!-- ----------------------------------------------------------------------- -->
+<div id="viewBiomedical" class="view-container active-view" style="grid-template-columns: 1.15fr 1fr; gap: 20px;">
+  
+  <!-- LADO IZQUIERDO: RESUMEN ANATÓMICO HOLOGRAMA 3D CON PARTÍCULAS -->
+  <div class="hud-panel">
+    <div class="panel-header">
+      <div class="panel-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+        RESUMEN ANATÓMICO HOLOGRAMA
+      </div>
+      <div class="panel-subtitle">BIO-MONITOR ASTROSKIN (CSA) · ESCANEO MULTIVARIADO 3D</div>
+    </div>
+
+    <!-- ESCENARIO HOLOGRÁFICO -->
+    <div class="hologram-stage-wrapper holo-stage--auto" style="background:radial-gradient(circle at center, rgba(0,240,255,0.09) 0%, transparent 72%);">
+      <canvas id="particlesCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1;"></canvas>
+
+      <!-- MARCO DE COMPOSICIÓN DE RELACIÓN FIJA 680x500:
+           garantiza que 1 unidad del viewBox SVG == 1 porcentaje exacto del marco,
+           de modo que las líneas guía y las tarjetas HTML quedan alineadas
+           milimétricamente en cualquier resolución de pantalla. -->
+      <div class="holo-frame">
+          <div class="holo-scan-beam"></div>
+
+        <!-- SILUETA ANATÓMICA REALISTA VECTORIAL HOLOGRÁFICA FUTURISTA -->
+        <svg id="svgHologramBody" viewBox="0 0 680 500" preserveAspectRatio="xMidYMid meet" style="filter:drop-shadow(0 0 14px rgba(0,240,255,0.3));">
+          <defs>
+            <linearGradient id="bodySkinGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="rgba(0, 240, 255, 0.08)"></stop><stop offset="25%" stop-color="rgba(0, 200, 255, 0.16)"></stop>
+              <stop offset="60%" stop-color="rgba(0, 140, 255, 0.10)"></stop><stop offset="100%" stop-color="rgba(0, 80, 220, 0.04)"></stop>
+            </linearGradient>
+            <radialGradient id="organBrainGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#ffffff"></stop><stop offset="35%" stop-color="#00f0ff"></stop>
+              <stop offset="75%" stop-color="rgba(0, 150, 255, 0.7)"></stop><stop offset="100%" stop-color="rgba(0, 60, 180, 0.3)"></stop>
+            </radialGradient>
+            <radialGradient id="organHeartGrad" cx="40%" cy="40%" r="60%">
+              <stop offset="0%" stop-color="#ff7799"></stop><stop offset="30%" stop-color="#ff2255"></stop>
+              <stop offset="70%" stop-color="#b3002d"></stop><stop offset="100%" stop-color="rgba(80, 0, 20, 0.6)"></stop>
+            </radialGradient>
+            <linearGradient id="organLungGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="rgba(0, 255, 170, 0.65)"></stop><stop offset="60%" stop-color="rgba(0, 220, 130, 0.35)"></stop>
+              <stop offset="100%" stop-color="rgba(0, 160, 90, 0.15)"></stop>
+            </linearGradient>
+            <linearGradient id="boneSpineGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ffffff"></stop><stop offset="40%" stop-color="#b3f3ff"></stop>
+              <stop offset="100%" stop-color="rgba(0, 200, 255, 0.4)"></stop>
+            </linearGradient>
+            <linearGradient id="kidneyGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#00d4ff"></stop><stop offset="70%" stop-color="#0066cc"></stop>
+              <stop offset="100%" stop-color="rgba(0, 40, 120, 0.5)"></stop>
+            </linearGradient>
+            <pattern id="holoScanLinesPattern" width="100" height="6" patternUnits="userSpaceOnUse">
+              <line x1="0" y1="3" x2="100" y2="3" stroke="rgba(0, 240, 255, 0.12)" stroke-width="1"></line>
+            </pattern>
+          </defs>
+
+          <!-- CUERPO HUMANO CENTRADO (DESPLAZAMIENTO A X=340).
+               Las capas decorativas (corona, silueta, esqueleto, vísceras y anillos)
+               declaran pointer-events="none": sólo los órganos interactivos capturan
+               el puntero, evitando que la silueta intercepte el hover. -->
+          <g id="bodyAnatomyGroup" transform="translate(180, 10)">
+            <!-- 1. CORONA EXTERIOR VOLUMÉTRICA DE BRILLO NEÓN -->
+            <path d="M160 14 C175 14, 185 24, 186 40 C187 52, 183 62, 178 70 C173 78, 166 82, 160 83 C154 82, 147 78, 142 70 C137 62, 133 52, 134 40 C135 24, 145 14, 160 14 Z M160 83 C166 83, 170 98, 174 104 C188 110, 204 114, 214 116 C222 124, 222 136, 222 152 C228 178, 234 206, 238 226 C246 256, 252 284, 256 318 C252 326, 246 324, 238 290 C234 268, 226 238, 220 216 C216 196, 210 172, 204 148 C202 164, 198 184, 196 206 C194 220, 196 234, 198 246 C200 256, 200 268, 196 280 C192 300, 190 326, 188 354 C186 368, 188 382, 190 398 C192 414, 190 436, 186 454 C184 466, 188 474, 184 476 C178 477, 172 477, 170 472 C172 458, 176 434, 176 406 C176 384, 174 366, 172 352 C170 334, 166 314, 160 298 C154 314, 150 334, 148 352 C146 366, 144 384, 144 406 C144 434, 148 458, 150 472 C148 477, 142 477, 136 476 C132 474, 136 466, 134 454 C130 436, 128 414, 130 398 C132 382, 134 368, 132 354 C130 326, 128 300, 124 280 C120 268, 120 256, 122 246 C124 234, 126 220, 124 206 C122 184, 118 164, 116 148 C110 172, 104 196, 100 216 C94 238, 86 268, 82 290 C74 324, 68 326, 64 318 C68 284, 74 256, 82 226 C86 206, 92 178, 98 152 C98 136, 98 124, 106 116 C116 114, 132 110, 146 104 C150 98, 154 83, 160 83 Z" fill="none" stroke="var(--neon-blue)" stroke-width="7" opacity="0.18" pointer-events="none" style="filter:blur(5px);"></path>
+
+            <!-- 2. SILUETA CORPORAL ANATÓMICA HUMANA REALISTA (MALLA VECTORIAL) -->
+            <path id="bodyContourPath" d="M160 14 C175 14, 185 24, 186 40 C187 52, 183 62, 178 70 C173 78, 166 82, 160 83 C154 82, 147 78, 142 70 C137 62, 133 52, 134 40 C135 24, 145 14, 160 14 Z M160 83 C166 83, 170 98, 174 104 C188 110, 204 114, 214 116 C222 124, 222 136, 222 152 C228 178, 234 206, 238 226 C246 256, 252 284, 256 318 C252 326, 246 324, 238 290 C234 268, 226 238, 220 216 C216 196, 210 172, 204 148 C202 164, 198 184, 196 206 C194 220, 196 234, 198 246 C200 256, 200 268, 196 280 C192 300, 190 326, 188 354 C186 368, 188 382, 190 398 C192 414, 190 436, 186 454 C184 466, 188 474, 184 476 C178 477, 172 477, 170 472 C172 458, 176 434, 176 406 C176 384, 174 366, 172 352 C170 334, 166 314, 160 298 C154 314, 150 334, 148 352 C146 366, 144 384, 144 406 C144 434, 148 458, 150 472 C148 477, 142 477, 136 476 C132 474, 136 466, 134 454 C130 436, 128 414, 130 398 C132 382, 134 368, 132 354 C130 326, 128 300, 124 280 C120 268, 120 256, 122 246 C124 234, 126 220, 124 206 C122 184, 118 164, 116 148 C110 172, 104 196, 100 216 C94 238, 86 268, 82 290 C74 324, 68 326, 64 318 C68 284, 74 256, 82 226 C86 206, 92 178, 98 152 C98 136, 98 124, 106 116 C116 114, 132 110, 146 104 C150 98, 154 83, 160 83 Z" fill="url(#bodySkinGrad)" stroke="var(--neon-cyan)" stroke-width="1.8" stroke-linejoin="round" opacity="0.95" pointer-events="none"></path>
+
+            <!-- Trama de Escaneo Tomográfico sobre el Cuerpo -->
+            <path d="M160 14 C175 14, 185 24, 186 40 C187 52, 183 62, 178 70 C173 78, 166 82, 160 83 C154 82, 147 78, 142 70 C137 62, 133 52, 134 40 C135 24, 145 14, 160 14 Z M160 83 C166 83, 170 98, 174 104 C188 110, 204 114, 214 116 C222 124, 222 136, 222 152 C228 178, 234 206, 238 226 C246 256, 252 284, 256 318 C252 326, 246 324, 238 290 C234 268, 226 238, 220 216 C216 196, 210 172, 204 148 C202 164, 198 184, 196 206 C194 220, 196 234, 198 246 C200 256, 200 268, 196 280 C192 300, 190 326, 188 354 C186 368, 188 382, 190 398 C192 414, 190 436, 186 454 C184 466, 188 474, 184 476 C178 477, 172 477, 170 472 C172 458, 176 434, 176 406 C176 384, 174 366, 172 352 C170 334, 166 314, 160 298 C154 314, 150 334, 148 352 C146 366, 144 384, 144 406 C144 434, 148 458, 150 472 C148 477, 142 477, 136 476 C132 474, 136 466, 134 454 C130 436, 128 414, 130 398 C132 382, 134 368, 132 354 C130 326, 128 300, 124 280 C120 268, 120 256, 122 246 C124 234, 126 220, 124 206 C122 184, 118 164, 116 148 C110 172, 104 196, 100 216 C94 238, 86 268, 82 290 C74 324, 68 326, 64 318 C68 284, 74 256, 82 226 C86 206, 92 178, 98 152 C98 136, 98 124, 106 116 C116 114, 132 110, 146 104 C150 98, 154 83, 160 83 Z" fill="url(#holoScanLinesPattern)" pointer-events="none"></path>
+
+            <!-- 3. SISTEMA ESQUELÉTICO Y COLUMNA VERTEBRAL HOLOGRÁFICA -->
+            <g id="skeletalSystem" stroke="rgba(180, 235, 255, 0.45)" stroke-width="1.2" fill="none" pointer-events="none">
+              <path d="M160 102 Q140 100 120 114" stroke-width="1.6"></path>
+              <path d="M160 102 Q180 100 200 114" stroke-width="1.6"></path>
+              <line x1="160" y1="104" x2="160" y2="168" stroke="url(#boneSpineGrad)" stroke-width="2.5"></line>
+
+              <!-- Columna Vertebral Segmentada (Cervical, Torácica, Lumbar, Sacro) -->
+              <g id="spineVertebrae">
+                <circle cx="160" cy="74" r="2.2" fill="#fff"></circle><circle cx="160" cy="82" r="2.2" fill="#fff"></circle>
+                <circle cx="160" cy="90" r="2.2" fill="#fff"></circle><circle cx="160" cy="98" r="2.2" fill="#fff"></circle>
+                <circle cx="160" cy="110" r="2.5" fill="#00f0ff"></circle><circle cx="160" cy="122" r="2.5" fill="#00f0ff"></circle>
+                <circle cx="160" cy="134" r="2.5" fill="#00f0ff"></circle><circle cx="160" cy="146" r="2.5" fill="#00f0ff"></circle>
+                <circle cx="160" cy="158" r="2.5" fill="#00f0ff"></circle><circle cx="160" cy="170" r="2.5" fill="#00f0ff"></circle>
+                <circle cx="160" cy="182" r="2.8" fill="#fff"></circle><circle cx="160" cy="194" r="2.8" fill="#fff"></circle>
+                <circle cx="160" cy="206" r="2.8" fill="#fff"></circle><circle cx="160" cy="218" r="2.8" fill="#fff"></circle>
+                <circle cx="160" cy="230" r="3.0" fill="#00f0ff"></circle><circle cx="160" cy="242" r="3.2" fill="#00f0ff"></circle>
+                <path d="M156 254 L164 254 L161 270 L159 270 Z" fill="rgba(0, 240, 255, 0.4)"></path>
+              </g>
+
+              <!-- Caja Torácica: Costillas Anatómicas Curvadas Bilaterales -->
+              <g opacity="0.55" stroke="rgba(120, 220, 255, 0.6)" stroke-width="1.3">
+                <path d="M157 114 C144 116 132 122 124 130"></path><path d="M157 124 C140 128 128 136 122 144"></path>
+                <path d="M157 136 C138 142 126 150 120 160"></path><path d="M157 150 C138 156 126 166 122 176"></path>
+                <path d="M157 164 C140 170 128 180 124 190"></path><path d="M157 178 C144 184 132 194 128 202"></path>
+                <path d="M163 114 C176 116 188 122 196 130"></path><path d="M163 124 C180 128 192 136 198 144"></path>
+                <path d="M163 136 C182 142 194 150 200 160"></path><path d="M163 150 C182 156 194 166 198 176"></path>
+                <path d="M163 164 C180 170 192 180 196 190"></path><path d="M163 178 C176 184 188 194 192 202"></path>
+              </g>
+
+              <!-- Cintura Pélvica Anatómica -->
+              <path d="M160 252 C146 244 134 246 128 256 C124 266 132 276 142 278 Q150 280 160 274 Q170 280 178 278 C188 276 196 266 192 256 C186 246 174 244 160 252 Z" fill="rgba(0, 240, 255, 0.12)" stroke="var(--neon-cyan)" stroke-width="1.4"></path>
+            </g>
+
+            <!-- 4. ANILLOS DE PROFUNDIDAD TOMOGRÁFICA (CAPA DE FONDO) -->
+            <g stroke="rgba(0, 240, 255, 0.25)" stroke-dasharray="2 3" fill="none" pointer-events="none">
+              <ellipse cx="160" cy="46" rx="28" ry="8"></ellipse>
+              <ellipse cx="160" cy="155" rx="36" ry="10"></ellipse>
+              <ellipse cx="160" cy="235" rx="34" ry="9"></ellipse>
+              <ellipse cx="132" cy="360" rx="14" ry="5"></ellipse>
+              <ellipse cx="188" cy="360" rx="14" ry="5"></ellipse>
+            </g>
+
+            <!-- 5. ÓRGANOS INTERNOS REALISTAS DETALLADOS (CAPA INTERACTIVA SUPERIOR).
+                 Cada órgano delimita su propia área de selección ajustada a su forma
+                 visible: no existen rectángulos invisibles que se solapen entre sí. -->
+
+            <!-- ÓRGANO: PULMONES ANATÓMICOS (EMERALD GLOW) -->
+            <g class="organ-node" data-organ="pulmones" onmouseenter="window.hudController.enfocarOrgano('pulmones')" onmouseleave="window.hudController.desenfocarOrgano()">
+              <!-- Geometría de impacto estática, ceñida a cada lóbulo: permanece
+                   inmóvil mientras la capa visible respira, evitando que el borde
+                   animado entre y salga del cursor y dispare el foco en bucle. -->
+              <ellipse cx="140" cy="153" rx="15" ry="33" fill="transparent" pointer-events="all"></ellipse>
+              <ellipse cx="181" cy="153" rx="15" ry="33" fill="transparent" pointer-events="all"></ellipse>
+              <g class="pulse-lungs" pointer-events="none">
+                <path class="organ-interactive-path" d="M153 124 C142 121 132 126 128 138 C124 150 123 166 126 180 C128 186 135 188 142 185 C149 181 153 172 154 158 Z" fill="url(#organLungGrad)" stroke="#00ff88" stroke-width="1.6" filter="drop-shadow(0 0 8px rgba(0,255,136,0.6))"></path>
+                <path d="M153 138 Q144 146 136 156 M144 148 Q138 162 134 172" stroke="rgba(255,255,255,0.7)" stroke-width="1" fill="none"></path>
+                <path class="organ-interactive-path" d="M167 124 C178 121 188 126 192 138 C196 150 197 166 194 180 C192 186 185 188 178 185 C173 177 170 163 167 148 Z" fill="url(#organLungGrad)" stroke="#00ff88" stroke-width="1.6" filter="drop-shadow(0 0 8px rgba(0,255,136,0.6))"></path>
+                <path d="M167 138 Q176 146 184 156 M176 148 Q182 162 186 172" stroke="rgba(255,255,255,0.7)" stroke-width="1" fill="none"></path>
+              </g>
+            </g>
+
+            <!-- ÓRGANO: HÍGADO Y ESTÓMAGO -->
+            <g id="visceraAbdominal" opacity="0.75" pointer-events="none">
+              <path d="M134 192 C134 186 146 186 156 190 C156 202 152 212 142 213 C136 213 134 204 134 192 Z" fill="rgba(255, 170, 0, 0.25)" stroke="var(--neon-amber)" stroke-width="1.2"></path>
+              <path d="M164 190 C172 188 180 192 180 200 C180 208 174 216 166 216 C162 216 162 208 164 198 Z" fill="rgba(0, 240, 255, 0.2)" stroke="var(--neon-cyan)" stroke-width="1.2"></path>
+            </g>
+
+            <!-- ÓRGANO: CORAZÓN ANATÓMICO (RUBY GLOW - CARDIO BEAT) -->
+            <g class="organ-node" id="nodeHeart" data-organ="corazon" onmouseenter="window.hudController.enfocarOrgano('corazon')" onmouseleave="window.hudController.desenfocarOrgano()">
+              <!-- Área de impacto estática del miocardio. Se dibuja después de los
+                   pulmones, por lo que gana la prioridad del puntero en la franja
+                   mediastínica que ambos comparten, tal como se ve en pantalla. -->
+              <ellipse cx="162" cy="160" rx="17" ry="22" fill="transparent" pointer-events="all"></ellipse>
+              <g class="pulse-organ-heart" pointer-events="none">
+                <path d="M158 142 C158 135 163 130 168 132 C172 134 172 138 170 144" stroke="#ff2255" stroke-width="2.5" fill="none"></path>
+                <line x1="164" y1="131" x2="164" y2="124" stroke="#ff7799" stroke-width="1.6"></line>
+                <line x1="168" y1="132" x2="170" y2="126" stroke="#ff7799" stroke-width="1.6"></line>
+                <path class="organ-interactive-path" d="M156 146 C150 144 146 149 146 156 C146 164 152 173 158 181 C160 183 163 183 165 179 C172 171 178 161 176 151 C174 144 168 142 162 146 C160 148 158 148 156 146 Z" fill="url(#organHeartGrad)" stroke="var(--neon-red)" stroke-width="1.8" filter="drop-shadow(0 0 12px var(--neon-red))"></path>
+                <path d="M161 150 Q162 160 159 172 M161 157 Q167 163 170 170" stroke="#ffea70" stroke-width="1.2" fill="none" opacity="0.85"></path>
+                <circle cx="160" cy="162" r="3" fill="#ffffff" filter="drop-shadow(0 0 6px #fff)"></circle>
+              </g>
+            </g>
+
+            <!-- ÓRGANO: RIÑONES ANATÓMICOS (HIDRATACIÓN) -->
+            <g class="organ-node" data-organ="hidratacion" onmouseenter="window.hudController.enfocarOrgano('hidratacion')" onmouseleave="window.hudController.desenfocarOrgano()">
+              <ellipse cx="160" cy="222" rx="28" ry="13" fill="transparent" pointer-events="all"></ellipse>
+              <path class="organ-interactive-path" d="M141 214 C145 214 147 218 147 223 C147 228 144 231 140 231 C137 231 136 226 137 221 C137 217 139 214 141 214 Z" fill="url(#kidneyGrad)" stroke="var(--neon-blue)" stroke-width="1.4" filter="drop-shadow(0 0 6px rgba(0,119,255,0.6))"></path>
+              <circle cx="142" cy="213" r="2" fill="var(--neon-amber)" title="Glándula Suprarrenal"></circle>
+              <path class="organ-interactive-path" d="M179 214 C175 214 173 218 173 223 C173 228 176 231 180 231 C183 231 184 226 183 221 C183 217 181 214 179 214 Z" fill="url(#kidneyGrad)" stroke="var(--neon-blue)" stroke-width="1.4" filter="drop-shadow(0 0 6px rgba(0,119,255,0.6))"></path>
+              <circle cx="178" cy="213" r="2" fill="var(--neon-amber)" title="Glándula Suprarrenal"></circle>
+            </g>
+
+            <!-- ÓRGANO: CEREBRO ANATÓMICO (ENCÉFALO Y RED NEURONAL ASTRA) -->
+            <g class="organ-node" data-organ="cerebro" onmouseenter="window.hudController.enfocarOrgano('cerebro')" onmouseleave="window.hudController.desenfocarOrgano()">
+              <circle cx="160" cy="45" r="26" fill="transparent" pointer-events="all"></circle>
+              <path class="organ-interactive-path" d="M158 24 C150 23 141 28 139 37 C137 43 139 49 142 53 C138 57 140 65 146 67 C152 69 156 67 158 64 Z" fill="url(#organBrainGrad)" stroke="#00f0ff" stroke-width="1.6" filter="drop-shadow(0 0 10px #00f0ff)"></path>
+              <path d="M144 34 Q151 37 155 33 M142 45 Q150 43 156 47 M145 56 Q151 58 156 54" stroke="#ffffff" stroke-width="1" fill="none" opacity="0.8"></path>
+              <path class="organ-interactive-path" d="M162 24 C170 23 179 28 181 37 C183 43 181 49 178 53 C182 57 180 65 174 67 C168 69 164 67 162 64 Z" fill="url(#organBrainGrad)" stroke="#00f0ff" stroke-width="1.6" filter="drop-shadow(0 0 10px #00f0ff)"></path>
+              <path d="M165 33 Q169 37 176 34 M164 47 Q170 43 178 45 M164 54 Q169 58 175 56" stroke="#ffffff" stroke-width="1" fill="none" opacity="0.8"></path>
+              <line x1="160" y1="24" x2="160" y2="65" stroke="#ffffff" stroke-width="1.4"></line>
+              <circle cx="149" cy="36" r="2" fill="#fff" filter="drop-shadow(0 0 4px #00f0ff)"></circle>
+              <circle cx="171" cy="36" r="2" fill="#fff" filter="drop-shadow(0 0 4px #00f0ff)"></circle>
+              <circle cx="147" cy="51" r="2" fill="#fff" filter="drop-shadow(0 0 4px #00f0ff)"></circle>
+              <circle cx="173" cy="51" r="2" fill="#fff" filter="drop-shadow(0 0 4px #00f0ff)"></circle>
+              <circle cx="160" cy="45" r="3.2" fill="#00f0ff" stroke="#fff" stroke-width="1.2" filter="drop-shadow(0 0 8px #00f0ff)"></circle>
+              <path d="M148 53 Q160 50 172 53" stroke="var(--neon-green)" stroke-width="2.5" fill="none" filter="drop-shadow(0 0 6px var(--neon-green))"></path>
+              <circle cx="152" cy="53" r="2.5" fill="#fff"></circle><circle cx="168" cy="53" r="2.5" fill="#fff"></circle>
+            </g>
+
+            <!-- ÓRGANO: SISTEMA ÓSEO - FÉMURES, RODILLAS Y DENSIDAD MINERAL -->
+            <g class="organ-node" data-organ="huesos" onmouseenter="window.hudController.enfocarOrgano('huesos')" onmouseleave="window.hudController.desenfocarOrgano()">
+              <circle cx="132" cy="360" r="22" fill="transparent" pointer-events="all"></circle>
+              <circle cx="188" cy="360" r="22" fill="transparent" pointer-events="all"></circle>
+              <line class="organ-interactive-path" x1="140" y1="276" x2="132" y2="360" stroke="url(#boneSpineGrad)" stroke-width="4.5" stroke-linecap="round"></line>
+              <line x1="132" y1="360" x2="128" y2="455" stroke="rgba(180, 235, 255, 0.6)" stroke-width="3" stroke-linecap="round"></line>
+              <circle cx="132" cy="360" r="7.5" fill="rgba(255, 170, 0, 0.45)" stroke="var(--neon-amber)" stroke-width="2" filter="drop-shadow(0 0 8px var(--neon-amber))"></circle>
+              <circle cx="132" cy="360" r="2.5" fill="#fff"></circle>
+              <line class="organ-interactive-path" x1="180" y1="276" x2="188" y2="360" stroke="url(#boneSpineGrad)" stroke-width="4.5" stroke-linecap="round"></line>
+              <line x1="188" y1="360" x2="192" y2="455" stroke="rgba(180, 235, 255, 0.6)" stroke-width="3" stroke-linecap="round"></line>
+              <circle cx="188" cy="360" r="7.5" fill="rgba(255, 170, 0, 0.45)" stroke="var(--neon-amber)" stroke-width="2" filter="drop-shadow(0 0 8px var(--neon-amber))"></circle>
+              <circle cx="188" cy="360" r="2.5" fill="#fff"></circle>
+            </g>
+
+          </g>
+
+          <!-- 6. LÍNEAS GUÍA HUD DE ALTA PRECISIÓN.
+               Retícula de composición sobre el lienzo de 680x500:
+                 · Canal izquierdo de tarjetas : x =   8 .. 206  (terminal de guía x = 212)
+                 · Cuerpo holográfico          : x = 244 .. 436
+                 · Canal derecho de tarjetas   : x = 474 .. 672  (terminal de guía x = 468)
+               Cada terminal comparte la ordenada exacta del centro de su tarjeta,
+               de modo que la guía siempre aterriza en el borde del rótulo. -->
+          <g class="organ-connector-line" data-organ-line="cerebro" pointer-events="none">
+            <polyline points="336,58 212,58" fill="none" stroke="var(--neon-cyan)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-cyan))"></polyline>
+            <circle cx="336" cy="58" r="5" fill="#00f0ff" stroke="#ffffff" stroke-width="1.8"></circle>
+            <circle cx="212" cy="58" r="3.5" fill="#00f0ff"></circle>
+          </g>
+          <g class="organ-connector-line" data-organ-line="corazon" pointer-events="none">
+            <polyline points="338,172 212,172" fill="none" stroke="var(--neon-red)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-red))"></polyline>
+            <circle cx="338" cy="172" r="5.5" fill="#ff2255" stroke="#ffffff" stroke-width="2"></circle>
+            <circle cx="212" cy="172" r="3.5" fill="#ff2255"></circle>
+          </g>
+          <g class="organ-connector-line" data-organ-line="hidratacion" pointer-events="none">
+            <polyline points="320,232 236,232 236,266 212,266" fill="none" stroke="var(--neon-blue)" stroke-width="2.5" stroke-linejoin="round" filter="drop-shadow(0 0 6px var(--neon-blue))"></polyline>
+            <circle cx="320" cy="232" r="5" fill="#0088ff" stroke="#ffffff" stroke-width="1.8"></circle>
+            <circle cx="212" cy="266" r="3.5" fill="#0088ff"></circle>
+          </g>
+          <g class="organ-connector-line" data-organ-line="pulmones" pointer-events="none">
+            <polyline points="372,140 468,140" fill="none" stroke="var(--neon-green)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-green))"></polyline>
+            <circle cx="372" cy="140" r="5" fill="#00ff88" stroke="#ffffff" stroke-width="1.8"></circle>
+            <circle cx="468" cy="140" r="3.5" fill="#00ff88"></circle>
+          </g>
+          <g class="organ-connector-line" data-organ-line="huesos" pointer-events="none">
+            <polyline points="368,370 468,370" fill="none" stroke="var(--neon-amber)" stroke-width="2.5" filter="drop-shadow(0 0 6px var(--neon-amber))"></polyline>
+            <circle cx="368" cy="370" r="5" fill="#ffaa00" stroke="#ffffff" stroke-width="1.8"></circle>
+            <circle cx="468" cy="370" r="3.5" fill="#ffaa00"></circle>
+          </g>
+        </svg>
+
+        <!-- TARJETAS FLOTANTES (CALLOUTS).
+             Se posicionan en porcentaje del marco y se anclan por su CENTRO vertical
+             (translateY(-50%) en CSS), por lo que el rótulo acompaña a su línea guía
+             sin depender de la altura del texto ni del tamaño de la ventana.
+             top = ordenada del viewBox / 500 · 100 -->
+        <div class="hologram-callout holo-card holo-card--l callout-brain" data-organ-card="cerebro"
+             onmouseenter="window.hudController.enfocarOrgano('cerebro')"
+             onmouseleave="window.hudController.desenfocarOrgano()"
+             style="top:11.6%;">
+          <div class="callout-header" style="color:var(--neon-cyan);">CEREBRO (ASTRA)</div>
+          <div class="callout-sub">ESTADO: <span id="calloutAstra" class="callout-val" style="color:var(--neon-cyan);">COHERENTE</span></div>
+        </div>
+
+        <div class="hologram-callout holo-card holo-card--l callout-heart" data-organ-card="corazon"
+             onmouseenter="window.hudController.enfocarOrgano('corazon')"
+             onmouseleave="window.hudController.desenfocarOrgano()"
+             style="top:34.4%;">
+          <div class="callout-header" style="color:var(--neon-red);">CORAZÓN (ECG)</div>
+          <div class="callout-sub">PULSO: <span id="calloutHeart" class="callout-val" style="color:var(--neon-red);">76 lpm</span> <span class="callout-tag">/ SINUSAL</span></div>
+        </div>
+
+        <div class="hologram-callout holo-card holo-card--l callout-hydration" data-organ-card="hidratacion"
+             onmouseenter="window.hudController.enfocarOrgano('hidratacion')"
+             onmouseleave="window.hudController.desenfocarOrgano()"
+             style="top:53.2%;">
+          <div class="callout-header" style="color:var(--neon-blue);">HIDRATACIÓN &amp; RENAL</div>
+          <div class="callout-sub">BALANCE: <span id="calloutFluid" class="callout-val" style="color:var(--neon-blue);">2.2 L/d</span></div>
+        </div>
+
+        <div class="hologram-callout holo-card holo-card--r callout-lungs" data-organ-card="pulmones"
+             onmouseenter="window.hudController.enfocarOrgano('pulmones')"
+             onmouseleave="window.hudController.desenfocarOrgano()"
+             style="top:28%;">
+          <div class="callout-header" style="color:var(--neon-green);">PULMONES</div>
+          <div class="callout-sub">SpO₂: <span id="calloutSpo2" class="callout-val" style="color:var(--neon-green);">98 %</span> <span class="callout-tag">/ ÓPTIMO</span></div>
+        </div>
+
+        <div class="hologram-callout holo-card holo-card--r callout-bone" data-organ-card="huesos"
+             onmouseenter="window.hudController.enfocarOrgano('huesos')"
+             onmouseleave="window.hudController.desenfocarOrgano()"
+             style="top:74%;">
+          <div class="callout-header" style="color:var(--neon-amber);">ESCUDO ÓSEO</div>
+          <div class="callout-sub">DENSIDAD: <span id="calloutBone" class="callout-val" style="color:var(--neon-amber);">-1.8%</span></div>
+        </div>
+        </div>
+    </div>
+  </div>
+
+  <!-- LADO DERECHO: INDICADORES EN TIEMPO REAL -->
+  <div class="hud-panel">
+    <div class="panel-header">
+        <div class="panel-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+          </svg>
+          INDICADORES EN TIEMPO REAL
+        </div>
+        <div class="panel-subtitle">INFERENCIA EDGE: &lt; 0.3 MS · FRECUENCIA: 0.5 HZ</div>
+    </div>
+
+    <div class="metrics-grid-2x">
+        <div class="metric-tile" id="cardHeart">
+          <div class="tile-label">FRECUENCIA CARDÍACA</div>
+          <div class="tile-value"><span id="valHeart">76</span> <span class="tile-unit">lpm</span></div>
+          <div class="tile-status" id="statusHeart">RITMO SINUSAL NOMINAL</div>
+        </div>
+        <div class="metric-tile" id="cardSpo2">
+          <div class="tile-label">SATURACIÓN SpO₂</div>
+          <div class="tile-value"><span id="valSpo2">98</span> <span class="tile-unit">%</span></div>
+          <div class="tile-status" id="statusSpo2">OXIGENACIÓN ÓPTIMA</div>
+        </div>
+        <div class="metric-tile" id="cardBp">
+          <div class="tile-label">PRESIÓN ARTERIAL</div>
+          <div class="tile-value"><span id="valBp">118/76</span> <span class="tile-unit">mmHg</span></div>
+          <div class="tile-status">NORMO-TENSIÓN VASCULAR</div>
+        </div>
+        <div class="metric-tile" id="cardTemp">
+          <div class="tile-label">TEMPERATURA CORPORAL</div>
+          <div class="tile-value"><span id="valTemp">36.6</span> <span class="tile-unit">°C</span></div>
+          <div class="tile-status">EUTERMIA REGULADA</div>
+        </div>
+        <div class="metric-tile" id="cardAstra">
+          <div class="tile-label">COGNICIÓN ASTRA (VOZ)</div>
+          <div class="tile-value"><span id="valVoiceLatency">210</span> <span class="tile-unit">ms</span></div>
+          <div class="tile-status" id="statusAstra">SIMILITUD COSENO: 0.985</div>
+        </div>
+        <div class="metric-tile" id="cardBone">
+          <div class="tile-label">DESMINERALIZACIÓN ÓSEA</div>
+          <div class="tile-value"><span id="valBone">-1.8</span> <span class="tile-unit">%</span></div>
+          <div class="tile-status" id="statusBone">LÍMITE HSRB (DÍA 120)</div>
+        </div>
+    </div>
+
+    <!-- OSCILOSCOPIO ECG CONTINUO A 60 FPS -->
+    <div class="ecg-monitor-frame">
+        <div class="ecg-topbar">
+          <span>ELECTROCARDIOGRAMA EN TIEMPO REAL (DERIVACIÓN II)</span>
+          <span id="ecgHrTag" style="color:var(--neon-green); font-weight:bold;">76 BPM</span>
+        </div>
+        <canvas id="ecgDisplayCanvas" width="550" height="95"></canvas>
+      </div>
+  </div>
+</div>

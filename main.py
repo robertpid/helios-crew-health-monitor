@@ -34,6 +34,7 @@ from helios_inference.domain.inference_models import ReporteInferenciaConsolidad
 from helios_inference.infrastructure.redis_consumer import AsyncRedisTelemetryConsumer
 from helios_inference.services.decision_matrix_evaluator import DecisionMatrixEvaluator
 from helios_inference.services.inference_engine import InferenceEngine
+from helios_inference.api.psicologia_router import router as psicologia_router
 
 # Configuración del subsistema de logging según normas aeroespaciales
 logging.basicConfig(
@@ -49,38 +50,21 @@ logger = logging.getLogger("helios_inference")
 # INYECCIÓN DE DEPENDENCIAS (SOLID - DIP): CONSTRUCCIÓN MODULAR DE LOS 4 CEREBROS
 # ======================================================================================
 def instanciar_motor_inferencia() -> InferenceEngine:
-    """
-    Ensambla el motor inyectando instancias independientes para cada cerebro.
-    Garantiza el desacoplamiento total y facilita pruebas unitarias aisladas.
-
-    Returns:
-        Instancia configurada de InferenceEngine.
-    """
+    """Ensambla el motor inyectando instancias independientes para cada cerebro (DIP)."""
     cerebro_ambiental = CerebroAmbiental(
-        umbral_co2_mmhg=3.0,
-        umbral_radiacion_msv=600.0,
-        presion_minima_kpa=95.0,
-        presion_maxima_kpa=103.0,
+        umbral_co2_mmhg=3.0, umbral_radiacion_msv=600.0,
+        presion_minima_kpa=95.0, presion_maxima_kpa=103.0,
     )
     cerebro_biometrico = CerebroBiometrico(
-        umbral_taquicardia_bpm=95.0,
-        umbral_bradicardia_bpm=50.0,
-        umbral_sueno_minimo_horas=6.0,
-        dia_mision_inicio_riesgo_oseo=30,
+        umbral_taquicardia_bpm=95.0, umbral_bradicardia_bpm=50.0,
+        umbral_sueno_minimo_horas=6.0, dia_mision_inicio_riesgo_oseo=30,
         umbral_perdida_osea_pct=1.5,
     )
-    # Cerebro 3: Modela la topología de grafo bipartito mediante producto tensorial de Kronecker
-    cerebro_grafo = CerebroGrafoFusion(
-        umbral_peligro_severo=6.5,
-    )
-    # Cerebro 4: Detección de sesgo psicológico mediante similitud coseno en R^2
+    cerebro_grafo = CerebroGrafoFusion(umbral_peligro_severo=6.5)
     cerebro_astra = CerebroCognitivoAstra(
-        latencia_base_ms=200.0,
-        densidad_base_score=1.0,
-        umbral_caida_similitud=0.88,
-        umbral_latencia_fatiga_ms=500.0,
+        latencia_base_ms=200.0, densidad_base_score=1.0,
+        umbral_caida_similitud=0.88, umbral_latencia_fatiga_ms=500.0,
     )
-    # Evaluador de las 15 reglas críticas de cruce de la NASA
     evaluador_matriz = DecisionMatrixEvaluator()
 
     return InferenceEngine(
@@ -140,6 +124,26 @@ ruta_frontend = os.path.join(os.path.dirname(__file__), "frontend")
 if os.path.exists(ruta_frontend):
     app.mount("/static", StaticFiles(directory=ruta_frontend), name="static")
 
+# Inclusión del router para evaluación psicológica y bienestar del astronauta (ASTRA BHP)
+app.include_router(psicologia_router, prefix="/api/v1/psicologico", tags=["Evaluación Psicológica"])
+
+
+def servir_dashboard_html() -> HTMLResponse:
+    """Retorna el documento HTML del Cockpit HUD con cabeceras anti-caché estrictas."""
+    ruta_html = os.path.join(os.path.dirname(__file__), "frontend", "index.html")
+    if not os.path.exists(ruta_html):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Archivo de interfaz frontend/index.html no encontrado.",
+        )
+    headers = {
+        "Cache-Control": "no-cache, no-store, must-revalidate, max-age=0",
+        "Pragma": "no-cache",
+        "Expires": "0",
+    }
+    with open(ruta_html, "r", encoding="utf-8") as f:
+        return HTMLResponse(content=f.read(), headers=headers)
+
 
 # Esquema para inyección directa HTTP (pruebas sin Redis)
 class TelemetriaInputSchema(BaseModel):
@@ -186,14 +190,10 @@ async def estado_sistema(request: Request) -> Any:
     o los metadatos JSON operacionales en llamadas API de máquina (Accept application/json).
     """
     accept = request.headers.get("accept", "")
-    # Si el cliente es un navegador web buscando HTML
     if "text/html" in accept and not (
         "application/json" in accept and accept.index("application/json") < accept.index("text/html")
     ):
-        ruta_html = os.path.join(os.path.dirname(__file__), "frontend", "index.html")
-        if os.path.exists(ruta_html):
-            with open(ruta_html, "r", encoding="utf-8") as f:
-                return HTMLResponse(content=f.read())
+        return servir_dashboard_html()
 
     return {
         "sistema": "H.E.L.I.O.S. Edge AI Inference Engine",
@@ -227,14 +227,7 @@ async def estado_sistema(request: Request) -> Any:
 )
 async def ver_dashboard() -> HTMLResponse:
     """Despliega directamente la interfaz visual de cabina con el cuerpo holográfico y hábitat."""
-    ruta_html = os.path.join(os.path.dirname(__file__), "frontend", "index.html")
-    if not os.path.exists(ruta_html):
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Archivo de interfaz frontend/index.html no encontrado.",
-        )
-    with open(ruta_html, "r", encoding="utf-8") as f:
-        return HTMLResponse(content=f.read())
+    return servir_dashboard_html()
 
 
 @app.get(
@@ -372,10 +365,10 @@ async def obtener_contramedidas_activas() -> dict[str, Any]:
 # PUNTO DE ENTRADA PRINCIPAL SEGURO (PEP 8)
 # ======================================================================================
 if __name__ == "__main__":
-    logger.info("Iniciando servidor web aeroespacial en http://127.0.0.1:8000...")
+    logger.info("Iniciando servidor web aeroespacial en http://0.0.0.0:8000 (red local activa)...")
     uvicorn.run(
         "main:app",
-        host="127.0.0.1",
+        host="0.0.0.0",
         port=8000,
         log_level="info",
         reload=False,

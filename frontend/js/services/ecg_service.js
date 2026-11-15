@@ -1,20 +1,23 @@
 /**
  * ==============================================================================
- * CAPA DE SERVICIOS (CLIENT SERVICES): EcgOscilloscopeService
- * Motor de renderizado en Canvas HTML5 para trazo de ECG médico continuo a 60 FPS.
+ * CAPA DE SERVICIOS: EcgOscilloscopeService (MODO LIVIANO PERMANENTE)
+ * Osciloscopio médico P-Q-R-S-T optimizado:
+ * - Se pausa automáticamente cuando la pestaña Biomédica no está activa.
+ * - Elimina compositing pesado de shadowBlur continuo.
  * ==============================================================================
  */
 
 class EcgOscilloscopeService {
   constructor(canvasId) {
     this._canvas = document.getElementById(canvasId);
-    this._ctx = this._canvas ? this._canvas.getContext("2d") : null;
+    this._ctx = this._canvas ? this._canvas.getContext("2d", { alpha: false }) : null;
     this._heartRate = 76;
     this._sweepX = 0;
     this._lastY = 45;
     this._phase = 0;
     this._animId = null;
     this._step = 2.4;
+    this._estaPausado = false;
   }
 
   inicializar() {
@@ -22,6 +25,21 @@ class EcgOscilloscopeService {
     this.redimensionar();
     window.addEventListener("resize", () => this.redimensionar());
     this._iniciarBucle();
+  }
+
+  pausar() {
+    if (this._animId) {
+      cancelAnimationFrame(this._animId);
+      this._animId = null;
+    }
+    this._estaPausado = true;
+  }
+
+  reanudar() {
+    if (this._estaPausado) {
+      this._estaPausado = false;
+      this._iniciarBucle();
+    }
   }
 
   redimensionar() {
@@ -49,13 +67,13 @@ class EcgOscilloscopeService {
     if (!this._ctx) return;
     this._ctx.strokeStyle = "rgba(0, 240, 255, 0.05)";
     this._ctx.lineWidth = 1;
-    for (let x = 0; x < this._canvas.width; x += 18) {
+    for (let x = 0; x < this._canvas.width; x += 22) {
       this._ctx.beginPath();
       this._ctx.moveTo(x, 0);
       this._ctx.lineTo(x, this._canvas.height);
       this._ctx.stroke();
     }
-    for (let y = 0; y < this._canvas.height; y += 18) {
+    for (let y = 0; y < this._canvas.height; y += 22) {
       this._ctx.beginPath();
       this._ctx.moveTo(0, y);
       this._ctx.lineTo(this._canvas.width, y);
@@ -64,9 +82,12 @@ class EcgOscilloscopeService {
   }
 
   _iniciarBucle() {
+    if (this._animId) return;
     const render = () => {
-      this._dibujarPaso();
-      this._animId = requestAnimationFrame(render);
+      if (!this._estaPausado) {
+        this._dibujarPaso();
+        this._animId = requestAnimationFrame(render);
+      }
     };
     this._animId = requestAnimationFrame(render);
   }
@@ -74,7 +95,7 @@ class EcgOscilloscopeService {
   _dibujarPaso() {
     if (!this._ctx) return;
 
-    // Calcular velocidad angular en función de la frecuencia cardíaca
+    // Velocidad angular según frecuencia cardíaca
     const velocidad = (this._heartRate / 60.0) * 0.048;
     this._phase += velocidad;
     if (this._phase > Math.PI * 2) {
@@ -88,28 +109,23 @@ class EcgOscilloscopeService {
     if (p > 0.4 && p < 0.7) {
       deflexion = -Math.sin((p - 0.4) / 0.3 * Math.PI) * 7.0; // Onda P
     } else if (p > 0.95 && p < 1.05) {
-      deflexion = 6.0; // Onda Q (negativa)
+      deflexion = 6.0; // Onda Q
     } else if (p > 1.05 && p < 1.22) {
-      deflexion = -44.0; // Onda R (pico agudo positivo despolarización ventricular)
+      deflexion = -44.0; // Onda R
     } else if (p > 1.22 && p < 1.35) {
-      deflexion = 14.0; // Onda S (negativa)
+      deflexion = 14.0; // Onda S
     } else if (p > 1.75 && p < 2.25) {
-      deflexion = -Math.sin((p - 1.75) / 0.5 * Math.PI) * 10.0; // Onda T (repolarización)
+      deflexion = -Math.sin((p - 1.75) / 0.5 * Math.PI) * 10.0; // Onda T
     }
 
-    // Micro-ruido biomédico natural
-    deflexion += (Math.random() - 0.5) * 1.8;
+    deflexion += (Math.random() - 0.5) * 1.5;
 
     const lineaBase = this._canvas.height / 2;
     const currentY = lineaBase + deflexion;
 
-    // Efecto barrido de haz de fósforo (borrar franja frontal)
+    // Borrado limpio de franja frontal
     this._ctx.fillStyle = "#020409";
     this._ctx.fillRect(this._sweepX, 0, 18, this._canvas.height);
-
-    // Redibujar cuadrícula sobre la franja borrada
-    this._ctx.strokeStyle = "rgba(0, 240, 255, 0.05)";
-    this._ctx.strokeRect(this._sweepX, 0, 18, this._canvas.height);
 
     // Color del trazo: verde sinusal en reposo, rojo neón en taquicardia/crisis
     const esTaquicardia = this._heartRate > 100;
@@ -117,13 +133,10 @@ class EcgOscilloscopeService {
 
     this._ctx.beginPath();
     this._ctx.strokeStyle = colorTrazo;
-    this._ctx.lineWidth = 2.2;
-    this._ctx.shadowColor = colorTrazo;
-    this._ctx.shadowBlur = esTaquicardia ? 10 : 6;
+    this._ctx.lineWidth = 2.0;
     this._ctx.moveTo(this._sweepX, this._lastY);
     this._ctx.lineTo(this._sweepX + this._step, currentY);
     this._ctx.stroke();
-    this._ctx.shadowBlur = 0;
 
     this._lastY = currentY;
     this._sweepX += this._step;
@@ -133,10 +146,7 @@ class EcgOscilloscopeService {
   }
 
   destruir() {
-    if (this._animId) {
-      cancelAnimationFrame(this._animId);
-      this._animId = null;
-    }
+    this.pausar();
   }
 }
 

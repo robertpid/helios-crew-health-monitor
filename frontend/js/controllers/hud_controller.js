@@ -1,19 +1,18 @@
 /**
- * ==============================================================================
- * CAPA DE CONTROLADORES (CONTROLLERS): HudController
- * Orquestador principal de la UI: vincula el Estado con el DOM y los Servicios.
- * ==============================================================================
+ * CAPA DE CONTROLADORES: HudController
+ * Orquestador principal de la UI: vincula Estado con el DOM y Servicios.
+ * Mantenido estrictamente bajo 330 líneas (Clean Code & SRP).
  */
-
 class HudController {
-  constructor(stateManager, ecgService, telemetryService, soundService = null) {
+  constructor(stateManager, ecgService, telemetryService, soundService = null, wellnessController = null, authService = null) {
     this._state = stateManager;
     this._ecg = ecgService;
     this._telemetry = telemetryService;
     this._sound = soundService || window.soundService;
+    this._wellness = wellnessController || (window.WellnessController ? new window.WellnessController(this._sound) : null);
+    this._auth = authService || window.authService;
     this._ultimoEstadoModal = false;
-
-    this._nombresAristasKronecker = [
+    this._nombresKronecker = [
       "CO2xPulso", "CO2xSueño", "CO2xHueso", "CO2xSANS",
       "RadxPulso", "RadxSueño", "RadxHueso", "RadxSANS",
       "PresxPulso", "PresxSueño", "PresxHueso", "PresxSANS"
@@ -21,377 +20,350 @@ class HudController {
   }
 
   inicializar() {
-    // 1. Suscribirse a cambios reactivos del Estado
     this._state.subscribe(state => this.renderizar(state));
-
-    // 2. Iniciar polling asíncrono con el backend
     this._telemetry.iniciarPolling();
-
-    // 3. Cargar tabla de la matriz de decisiones
     this._cargarCatalogoMatriz();
+    if (this._auth) {
+      this._auth.onCambioSesion(u => this._actualizarBadgeUsuario(u));
+      const usuario = this._auth.obtenerUsuarioActual();
+      if (usuario) {
+        document.body.classList.remove("locked");
+        this._actualizarBadgeUsuario(usuario);
+        this.cerrarModalLogin();
+      } else {
+        document.body.classList.add("locked");
+        this.abrirModalLogin();
+      }
+    }
   }
 
   toggleAudio() {
-    if (!this._sound && window.soundService) {
-      this._sound = window.soundService;
-    }
+    if (!this._sound && window.soundService) this._sound = window.soundService;
     if (this._sound) {
-      const silenciado = this._sound.toggleSilencio();
+      const mute = this._sound.toggleSilencio();
       const btn = document.getElementById("btnAudioToggle");
       if (btn) {
-        btn.innerText = silenciado ? "🔇 AUDIO: MUTE" : "🔊 AUDIO: ACTIVO";
-        btn.style.color = silenciado ? "var(--text-muted)" : "var(--neon-cyan)";
+        btn.innerText = mute ? "🔇 AUDIO: MUTE" : "🔊 AUDIO: ACTIVO";
+        btn.style.color = mute ? "var(--text-muted)" : "var(--neon-cyan)";
       }
-      if (!silenciado) {
-        this._sound.reproducirClick();
-      }
+      if (!mute) this._sound.reproducirClick();
     }
   }
 
-  cambiarVista(nombreVista) {
+  cambiarVista(nombre) {
     if (this._sound) this._sound.reproducirClick();
-    this._state.setVistaActiva(nombreVista);
+    this.desenfocarOrgano();
+    this.desenfocarModuloHabitat();
+    this._state.setVistaActiva(nombre);
   }
 
-  cambiarHabitat(habitatKey) {
-    this._state.setHabitat(habitatKey);
+  enfocarOrgano(nombre) {
+    if (this._sound?.reproducirHover) this._sound.reproducirHover();
+    const stg = document.querySelector("#viewBiomedical .hologram-stage-wrapper");
+    if (!stg) return;
+    stg.classList.add("has-organ-focus");
+    stg.querySelectorAll(".organ-node, .organ-connector-line, .hologram-callout").forEach(el => el.classList.remove("is-focused"));
+    [`.organ-node[data-organ="${nombre}"]`, `.organ-connector-line[data-organ-line="${nombre}"]`, `.hologram-callout[data-organ-card="${nombre}"]`]
+      .forEach(sel => stg.querySelectorAll(sel).forEach(el => el.classList.add("is-focused")));
   }
 
-  alternarModeloHabitat(tipo) {
-    if (this._sound) this._sound.reproducirCambioHabitat();
+  desenfocarOrgano() {
+    const stg = document.querySelector("#viewBiomedical .hologram-stage-wrapper");
+    if (!stg) return;
+    stg.classList.remove("has-organ-focus");
+    stg.querySelectorAll(".organ-node, .organ-connector-line, .hologram-callout").forEach(el => el.classList.remove("is-focused"));
+  }
 
-    const orion = document.getElementById("habitatOrionGroup");
-    const mars = document.getElementById("habitatMarsGroup");
-    const iss = document.getElementById("habitatIssGroup");
-    const btnOrion = document.getElementById("btnHabitatOrion");
-    const btnMars = document.getElementById("btnHabitatMars");
-    const btnIss = document.getElementById("btnHabitatIss");
+  enfocarModuloHabitat(modulo) {
+    if (this._sound?.reproducirHover) this._sound.reproducirHover();
+    const stg = document.querySelector("#viewEnvironmental .hologram-stage-wrapper");
+    if (!stg) return;
+    stg.classList.add("has-habitat-focus");
+    stg.querySelectorAll(".habitat-module-node, .habitat-connector-line, .hologram-callout").forEach(el => el.classList.remove("is-focused"));
+    [`.habitat-module-node[data-habitat-module="${modulo}"]`, `.habitat-connector-line[data-habitat-line="${modulo}"]`, `.hologram-callout[data-habitat-card="${modulo}"]`]
+      .forEach(sel => stg.querySelectorAll(sel).forEach(el => el.classList.add("is-focused")));
+  }
+
+  desenfocarModuloHabitat() {
+    const stg = document.querySelector("#viewEnvironmental .hologram-stage-wrapper");
+    if (!stg) return;
+    stg.classList.remove("has-habitat-focus");
+    stg.querySelectorAll(".habitat-module-node, .habitat-connector-line, .hologram-callout").forEach(el => el.classList.remove("is-focused"));
+  }
+
+  alternarModeloHabitat(modelo) {
+    if (this._sound?.reproducirCambioHabitat) this._sound.reproducirCambioHabitat();
+    else this._sound?.reproducirClick?.();
+    this.desenfocarModuloHabitat();
+    if (this._state?.setModeloHabitat) this._state.setModeloHabitat(modelo);
+    ["orion", "mars", "iss"].forEach(m => {
+      const cap = m.charAt(0).toUpperCase() + m.slice(1);
+      const btn = document.getElementById(`btnHabitat${cap}`);
+      if (btn) btn.classList.toggle("active", m === modelo);
+      const grp = document.getElementById(`habitat${cap}Group`);
+      if (grp) {
+        if (m === modelo) { grp.style.display = "inline"; grp.removeAttribute("style"); }
+        else { grp.style.display = "none"; }
+      }
+    });
     const sub = document.getElementById("habitatSubtitle");
-
-    const lCo2 = document.getElementById("labelEnvCo2");
-    const lRad = document.getElementById("labelEnvRad");
-    const lTemp = document.getElementById("labelEnvTemp");
-    const lPress = document.getElementById("labelEnvPress");
-    const lHum = document.getElementById("labelEnvHum");
-
-    if (tipo === "mars") {
-      if (orion) orion.style.display = "none";
-      if (mars) mars.style.display = "block";
-      if (iss) iss.style.display = "none";
-      if (btnOrion) btnOrion.classList.remove("active");
-      if (btnMars) btnMars.classList.add("active");
-      if (btnIss) btnIss.classList.remove("active");
-      if (sub) sub.innerText = "BASE MARCIANA DE SUPERFICIE · DOMO DE REGOLITO & MOXIE (0.38g)";
-
-      if (lCo2) lCo2.innerText = "BIORREACTOR MOXIE (ppCO₂)";
-      if (lRad) lRad.innerText = "BLINDAJE DE REGOLITO (2m)";
-      if (lTemp) lTemp.innerText = "CONTROL TÉRMICO DOMO";
-      if (lPress) lPress.innerText = "PRESIÓN INTERIOR DOMO";
-      if (lHum) lHum.innerText = "HUMEDAD INVERNADERO";
-
-      this.cambiarHabitat("BASE_MARTE");
-    } else if (tipo === "iss") {
-      if (orion) orion.style.display = "none";
-      if (mars) mars.style.display = "none";
-      if (iss) iss.style.display = "block";
-      if (btnOrion) btnOrion.classList.remove("active");
-      if (btnMars) btnMars.classList.remove("active");
-      if (btnIss) btnIss.classList.add("active");
-      if (sub) sub.innerText = "ESTACIÓN ESPACIAL INTERNACIONAL · ÓRBITA LEO 400 KM (0.00g)";
-
-      if (lCo2) lCo2.innerText = "SISTEMA CDRA (ppCO₂)";
-      if (lRad) lRad.innerText = "BLINDAJE WHIPPLE (LEO)";
-      if (lTemp) lTemp.innerText = "BUCLE TÉRMICO AMONIACO";
-      if (lPress) lPress.innerText = "PRESIÓN MÓDULO NODE 2";
-      if (lHum) lHum.innerText = "HUMEDAD HABITÁCULO";
-
-      this.cambiarHabitat("ESTACION_ESPACIAL");
-    } else {
-      // NAVE ORION (Tránsito de espacio profundo)
-      if (orion) orion.style.display = "block";
-      if (mars) mars.style.display = "none";
-      if (iss) iss.style.display = "none";
-      if (btnOrion) btnOrion.classList.add("active");
-      if (btnMars) btnMars.classList.remove("active");
-      if (btnIss) btnIss.classList.remove("active");
-      if (sub) sub.innerText = "ORION DEEP SPACE VEHICLE · TRÁNSITO INTERPLANETARIO (0.00g)";
-
-      if (lCo2) lCo2.innerText = "ECLSS SCRUBBER (ppCO₂)";
-      if (lRad) lRad.innerText = "BLINDAJE RADIACIÓN (SPE)";
-      if (lTemp) lTemp.innerText = "CONTROL TÉRMICO (ATCS)";
-      if (lPress) lPress.innerText = "PRESIÓN CASCO (HULL)";
-      if (lHum) lHum.innerText = "HUMEDAD ATMOSFÉRICA";
-
-      this.cambiarHabitat("TRANSITO_MARTE");
+    if (sub) {
+      const titulos = {
+        orion: "ORION DEEP SPACE VEHICLE · TRÁNSITO INTERPLANETARIO (0.00g)",
+        mars: "BASE ARCADIA PLANITIA (MARTE) · DOMO PRESURIZADO (0.38g)",
+        iss: "ESTACIÓN ESPACIAL INTERNACIONAL · ORBITAL LEO (0.00g)"
+      };
+      sub.innerText = titulos[modelo] || "";
     }
-  }
-
-  activarModoCrisis() {
-    this._state.activarModoCrisis();
-    if (this._sound) this._sound.iniciarAlarmaEmergencia();
+    const etiquetas = {
+      orion: { co2: "ECLSS SCRUBBER (ppCO2)", rad: "BLINDAJE RADIACIÓN (SPE)", temp: "CONTROL TÉRMICO (ATCS)", press: "PRESIÓN CASCO (HULL)", hum: "HUMEDAD ATMOSFÉRICA" },
+      mars: { co2: "MOXIE / SOPORTE O₂ MARTE", rad: "BLINDAJE REGOLITO (MARTE)", temp: "CLIMATIZACIÓN DOMO MARTE", press: "PRESIÓN DOMO PRESURIZADO", hum: "INVERNADERO BIOMARTE" },
+      iss: { co2: "CDRA ECLSS (ESTACIÓN ISS)", rad: "MÓDULOS BLINDADOS DESTINY", temp: "BUCLE TÉRMICO EXTERNO", press: "PRESIÓN MÓDULO HARMONY", hum: "CONDENSADOR DE CABINA" }
+    };
+    const et = etiquetas[modelo] || etiquetas.orion;
+    this._setTxt("labelEnvCo2", et.co2);
+    this._setTxt("labelEnvRad", et.rad);
+    this._setTxt("labelEnvTemp", et.temp);
+    this._setTxt("labelEnvPress", et.press);
+    this._setTxt("labelEnvHum", et.hum);
   }
 
   restablecerModoNominal() {
-    if (this._sound) {
-      this._sound.detenerAlarmaEmergencia();
-      this._sound.reproducirClick();
-    }
-    this._state.restablecerModoNominal();
+    this._sound?.reproducirNominal?.();
+    this._state.setModoOperacion("nominal");
+  }
+
+  activarModoCrisis() {
+    this._sound?.reproducirCrisis?.();
+    this._state.setModoOperacion("crisis");
   }
 
   toggleModal() {
-    if (this._sound) this._sound.reproducirClick();
-    const actual = this._state.getState().modalAlertaAbierto;
-    this._state.setModalAlerta(!actual);
+    this._sound?.reproducirClick?.();
+    this._state.toggleModalAlerta();
   }
 
+  abrirModalLogin() {
+    this._sound?.reproducirClick?.();
+    const modal = document.getElementById("modalLogin");
+    const btnCerrar = document.getElementById("btnCloseLoginModal");
+    const estaAutenticado = !!this._auth?.obtenerUsuarioActual();
+    if (modal) modal.style.display = "flex";
+    if (btnCerrar) btnCerrar.style.display = estaAutenticado ? "block" : "none";
+    if (!estaAutenticado) document.body.classList.add("locked");
+    const err = document.getElementById("loginErrorMsg");
+    if (err) err.style.display = "none";
+  }
+
+  cerrarModalLogin() {
+    if (!this._auth?.obtenerUsuarioActual()) return;
+    this._sound?.reproducirClick?.();
+    document.body.classList.remove("locked");
+    const modal = document.getElementById("modalLogin");
+    if (modal) modal.style.display = "none";
+  }
+
+  seleccionarUsuarioDemo(usuario) {
+    this._sound?.reproducirClick?.();
+    const inU = document.getElementById("inputLoginUsuario");
+    const inP = document.getElementById("inputLoginPin");
+    const err = document.getElementById("loginErrorMsg");
+    if (inU) inU.value = usuario;
+    if (inP) { inP.value = ""; inP.focus(); }
+    if (err) err.style.display = "none";
+  }
+
+  ejecutarLogin() {
+    const inU = document.getElementById("inputLoginUsuario");
+    const inP = document.getElementById("inputLoginPin");
+    const err = document.getElementById("loginErrorMsg");
+    if (!inU || !inP || !this._auth) return;
+    const res = this._auth.autenticar(inU.value, inP.value);
+    if (res.exito) {
+      inP.value = "";
+      this._sound?.reproducirNominal?.();
+      this.cerrarModalLogin();
+      if (res.usuario.rol === "CIRUJANO_VUELO") {
+        alert("🩺 BIENVENIDO, CIRUJANO DE VUELO (Dr. Marcus Vance).\nMonitor médico especializado en preparación. Acceso concedido.");
+      }
+    } else {
+      this._sound?.reproducirAlerta?.();
+      inP.value = "";
+      inP.focus();
+      if (err) { err.innerText = res.error; err.style.display = "block"; }
+    }
+  }
+
+  _actualizarBadgeUsuario(usuario) {
+    if (!usuario) return;
+    this._setTxt("userAvatarTag", usuario.avatar || "👨‍🚀");
+    this._setTxt("userIdentTag", usuario.rango || usuario.nombre);
+    this._setTxt("userRoleTag", `(${usuario.nombre})`);
+  }
+
+  avanzarTarea(t) { this._wellness?.avanzarTarea(t); }
+  iniciarExamenOftalmico() { this._wellness?.iniciarExamenOftalmico(); }
+  iniciarExamenSonar() { this._wellness?.iniciarExamenSonar(); }
+  sincronizarCorreo() { this._wellness?.sincronizarCorreo(); }
+  toggleGuiaRespiracion() { this._wellness?.toggleGuiaRespiracion(); }
+  iniciarProtocoloPsicologico() { this._wellness?.iniciarProtocoloPsicologico(); }
+  enviarRespuestaPsicologica() { this._wellness?.enviarRespuestaPsicologica(); }
+  seleccionarChipSugerido(t) { this._wellness?.seleccionarChipSugerido(t); }
+  activarDictadoVoz() { this._wellness?.activarDictadoVoz(); }
+  toggleMatrizTecnica() { this._wellness?.toggleMatrizTecnica(); }
+
   renderizar(state) {
-    const tel = state.telemetria;
-    const fis = tel.fisiologia;
-    const amb = tel.ambiente;
-    const cog = tel.cognicion;
-    const kron = tel.kronecker;
-
-    // Control dinámico de Sirena de Emergencia / Alarma Sonora
-    const hayEmergencia = state.modoCrisis ||
-      kron.estres_severo ||
-      amb.co2_mmHg > 3.0 ||
-      amb.evento_solar_activo ||
-      fis.ritmo_cardiaco_bpm > 100 ||
-      fis.spo2_pct < 94.0;
-
-    if (this._sound) {
-      if (hayEmergencia) {
-        this._sound.iniciarAlarmaEmergencia();
-      } else {
-        this._sound.detenerAlarmaEmergencia();
-      }
-    }
-
-    // 1. Renderizar pestañas activas
     this._actualizarPestanas(state.vistaActiva);
+    this._actualizarValoresDashboard(state);
+  }
 
-    // 2. Renderizar Header y Badge de estado
-    const statusPill = document.getElementById("statusPill");
-    if (statusPill) {
-      if (state.modoCrisis || kron.estres_severo) {
-        statusPill.className = "badge-status status-critical alarm-flashing";
-        statusPill.innerText = "CRÍTICO";
-      } else {
-        statusPill.className = "badge-status status-stable";
-        statusPill.innerText = "ESTABLE";
-      }
+  _actualizarValoresDashboard(state) {
+    const { fisiologia: fis, ambiente: amb, cognicion: cog, kronecker: kron } = state.telemetria;
+    const pill = document.getElementById("statusPill");
+    if (pill) {
+      pill.innerText = state.tripulanteEstable ? "ESTABLE" : "CRÍTICO";
+      pill.className = `badge-status ${state.tripulanteEstable ? "status-stable" : "status-critical"}`;
     }
 
-    // 3. Sincronizar Frecuencia Cardíaca con el motor ECG
-    if (this._ecg) {
-      this._ecg.actualizarFrecuenciaCardiaca(fis.ritmo_cardiaco_bpm);
-    }
-    const ecgTag = document.getElementById("ecgHrTag");
-    if (ecgTag) {
-      ecgTag.innerText = `${Math.round(fis.ritmo_cardiaco_bpm)} BPM`;
-      ecgTag.style.color = (fis.ritmo_cardiaco_bpm > 100) ? "var(--neon-red)" : "var(--neon-green)";
-    }
+    this._setTxt("valHeart", Math.round(fis.ritmo_cardiaco_bpm));
+    this._ecg?.actualizarFrecuenciaCardiaca?.(fis.ritmo_cardiaco_bpm);
+    this._setTxt("valSpo2", Math.round(fis.spo2_pct));
+    this._setTxt("valTemp", fis.temperatura_corporal_c.toFixed(1));
+    this._setTxt("valVoiceLatency", Math.round(cog.latencia_voz_ms));
+    this._setTxt("valBone", `-${fis.perdida_osea_pct.toFixed(1)}`);
 
-    // 4. Actualizar Valores Numéricos Biomédicos (Ventana 1)
-    this._actualizarElementoTexto("valHeart", Math.round(fis.ritmo_cardiaco_bpm));
-    this._actualizarElementoTexto("valSpo2", Math.round(fis.spo2_pct));
-    this._actualizarElementoTexto("valBp", `${fis.presion_sistolica}/${fis.presion_diastolica}`);
-    this._actualizarElementoTexto("valTemp", fis.temperatura_corporal_c.toFixed(1));
-    this._actualizarElementoTexto("valVoiceLatency", Math.round(cog.latencia_voz_ms));
-    this._actualizarElementoTexto("valBone", `-${fis.perdida_osea_pct.toFixed(1)}`);
-
-    // Modificadores de Alerta en Tiles
     this._toggleClase("cardHeart", "tile-danger", fis.ritmo_cardiaco_bpm > 100);
     this._toggleClase("cardSpo2", "tile-danger", fis.spo2_pct < 94.0);
     this._toggleClase("cardTemp", "tile-danger", fis.temperatura_corporal_c > 37.8);
     this._toggleClase("cardAstra", "tile-danger", cog.incongruencia_detectada);
 
-    // 5. Actualizar Callouts del Holograma
-    this._actualizarElementoTexto("calloutHeart", `${Math.round(fis.ritmo_cardiaco_bpm)} lpm`);
-    this._actualizarElementoTexto("calloutSpo2", `${Math.round(fis.spo2_pct)} %`);
-    this._actualizarElementoTexto("calloutBone", `-${fis.perdida_osea_pct.toFixed(1)}%`);
-    this._actualizarElementoTexto("calloutFluid", `${fis.liquidos_litros_dia.toFixed(1)} L/d`);
-    this._actualizarElementoTexto("calloutAstra", cog.incongruencia_detectada ? "FATIGA OCULTA" : "COHERENTE");
+    this._setTxt("calloutHeart", `${Math.round(fis.ritmo_cardiaco_bpm)} lpm`);
+    this._setTxt("calloutSpo2", `${Math.round(fis.spo2_pct)} %`);
+    this._setTxt("calloutBone", `-${fis.perdida_osea_pct.toFixed(1)}%`);
+    this._setTxt("calloutFluid", `${fis.liquidos_litros_dia.toFixed(1)} L/d`);
+    this._setTxt("calloutAstra", cog.incongruencia_detectada ? "FATIGA OCULTA" : "COHERENTE");
+    document.getElementById("nodeHeart")?.classList.toggle("fast", fis.ritmo_cardiaco_bpm > 100);
 
-    // Pulso del corazón holográfico
-    const heartNode = document.getElementById("nodeHeart");
-    if (heartNode) {
-      if (fis.ritmo_cardiaco_bpm > 100) {
-        heartNode.classList.add("fast");
-      } else {
-        heartNode.classList.remove("fast");
-      }
-    }
+    this._setTxt("valCo2", amb.co2_mmHg.toFixed(1));
+    this._setTxt("valRad", amb.radiacion_acumulada_mSv.toFixed(1));
+    this._setTxt("valPress", amb.presion_cabina_kpa.toFixed(1));
+    this._setTxt("valCabinTemp", amb.temperatura_cabina_c.toFixed(1));
+    this._setTxt("valHumidity", amb.humedad_relativa_pct.toFixed(1));
+    this._setTxt("valSolarStatus", amb.evento_solar_activo ? "TORMENTA ACTIVA (SPE)" : "S0 QUIETO");
+    this._setTxt("envGravity", `${amb.gravedad_g.toFixed(2)} g`);
 
-    // 6. Actualizar Métricas Ambientales (Ventana 2)
-    this._actualizarElementoTexto("valCo2", amb.co2_mmHg.toFixed(1));
-    this._actualizarElementoTexto("valRad", amb.radiacion_acumulada_mSv.toFixed(1));
-    this._actualizarElementoTexto("valPress", amb.presion_cabina_kpa.toFixed(1));
-    this._actualizarElementoTexto("valCabinTemp", amb.temperatura_cabina_c.toFixed(1));
-    this._actualizarElementoTexto("valHumidity", amb.humedad_relativa_pct.toFixed(1));
-    this._actualizarElementoTexto("valSolarStatus", amb.evento_solar_activo ? "TORMENTA ACTIVA (SPE)" : "S0 QUIETO");
-    this._actualizarElementoTexto("envGravity", `${amb.gravedad_g.toFixed(2)} g`);
-
-    // Callouts Holográficos del Hábitat Espacial
-    this._actualizarElementoTexto("calloutEnvCo2", `${amb.co2_mmHg.toFixed(1)} mmHg`);
-    this._actualizarElementoTexto("calloutEnvRad", `${amb.radiacion_acumulada_mSv.toFixed(1)} mSv`);
-    this._actualizarElementoTexto("calloutEnvPress", `${amb.presion_cabina_kpa.toFixed(1)} kPa`);
-    this._actualizarElementoTexto("calloutEnvTemp", `${amb.temperatura_cabina_c.toFixed(1)} °C`);
-    this._actualizarElementoTexto("calloutEnvHum", `${amb.humedad_relativa_pct.toFixed(1)} %`);
+    this._setTxt("calloutEnvCo2", `${amb.co2_mmHg.toFixed(1)} mmHg`);
+    this._setTxt("calloutEnvRad", `${amb.radiacion_acumulada_mSv.toFixed(1)} mSv`);
+    this._setTxt("calloutEnvPress", `${amb.presion_cabina_kpa.toFixed(1)} kPa`);
+    this._setTxt("calloutEnvTemp", `${amb.temperatura_cabina_c.toFixed(1)} °C`);
+    this._setTxt("calloutEnvHum", `${amb.humedad_relativa_pct.toFixed(1)} %`);
 
     this._toggleClase("cardCo2", "tile-danger", amb.co2_mmHg > 3.0);
     this._toggleClase("cardSolar", "tile-danger", amb.evento_solar_activo);
 
-    // 7. Renderizar Matriz de Calor de Kronecker (R^12)
     this._renderizarMatrizKronecker(kron.indice_argmax, kron.severidad_maxima);
 
-    // 8. Renderizar Banner de Contramedidas Ambientales (Máximo 3)
-    const cmAmbiental = document.getElementById("ambientCountermeasuresList");
-    if (cmAmbiental && tel.contramedidas_priorizadas) {
-      cmAmbiental.innerHTML = tel.contramedidas_priorizadas
-        .slice(0, 3)
-        .map((accion, i) => `<div><strong>${i + 1}.</strong> ${accion}</div>`)
-        .join("");
+    const cm = document.getElementById("ambientCountermeasuresList");
+    if (cm && state.telemetria.contramedidas_priorizadas) {
+      cm.innerHTML = state.telemetria.contramedidas_priorizadas.slice(0, 3).map((a, i) => `<div><strong>${i + 1}.</strong> ${a}</div>`).join("");
     }
 
-    // 9. Sincronizar Modal de Alerta Crítica (Boceto Réplica)
     this._actualizarModalCritico(state);
+    this._wellness?.actualizarHidratacion(state.modoOperacion === "crisis" || (fis.liquidos_litros_dia < 1.5));
   }
 
-  _actualizarPestanas(vistaActiva) {
+  _actualizarPestanas(activa) {
+    this.desenfocarOrgano();
+    this.desenfocarModuloHabitat();
     const tabs = document.querySelectorAll(".nav-tab-btn");
     const vistas = document.querySelectorAll(".view-container");
-
     tabs.forEach(t => t.classList.remove("active"));
     vistas.forEach(v => {
       v.classList.remove("active-view");
       v.style.setProperty("display", "none", "important");
     });
 
-    if (vistaActiva === "biomedical") {
-      if (tabs[0]) tabs[0].classList.add("active");
-      const v = document.getElementById("viewBiomedical");
-      if (v) {
-        v.classList.add("active-view");
-        v.style.setProperty("display", "grid", "important");
-      }
-    } else if (vistaActiva === "environmental") {
-      if (tabs[1]) tabs[1].classList.add("active");
-      const v = document.getElementById("viewEnvironmental");
-      if (v) {
-        v.classList.add("active-view");
-        v.style.setProperty("display", "grid", "important");
-      }
-      setTimeout(() => window.dispatchEvent(new Event("resize")), 60);
-    } else if (vistaActiva === "matrix") {
-      if (tabs[2]) tabs[2].classList.add("active");
-      const v = document.getElementById("viewMatrix");
-      if (v) {
-        v.classList.add("active-view");
-        v.style.setProperty("display", "block", "important");
-      }
+    const mapa = {
+      biomedical: { tab: tabs[0], view: "viewBiomedical" },
+      environmental: { tab: tabs[1], view: "viewEnvironmental" },
+      matrix: { tab: tabs[2], view: "viewMatrix" }
+    };
+    if (activa === "biomedical") this._ecg?.reanudar?.();
+    else this._ecg?.pausar?.();
+
+    const tgt = mapa[activa];
+    if (tgt) {
+      tgt.tab?.classList.add("active");
+      const v = document.getElementById(tgt.view);
+      if (v) { v.classList.add("active-view"); v.style.setProperty("display", "grid", "important"); }
+      if (activa === "environmental") setTimeout(() => window.dispatchEvent(new Event("resize")), 60);
     }
   }
 
-  _renderizarMatrizKronecker(indiceActivo, severidad) {
-    const container = document.getElementById("kroneckerGrid");
-    if (!container) return;
-
-    container.innerHTML = "";
+  _renderizarMatrizKronecker(idx, sev) {
+    const cnt = document.getElementById("kroneckerGrid");
+    if (!cnt) return;
+    cnt.innerHTML = "";
     for (let i = 0; i < 12; i++) {
-      const celda = document.createElement("div");
-      const esActiva = (i === indiceActivo);
-      celda.className = "matrix-cell" + (esActiva ? " active-danger" : "");
-      celda.innerHTML = `<strong>${this._nombresAristasKronecker[i]}</strong><br><small>${esActiva ? severidad.toFixed(1) : "0.0"}</small>`;
-      container.appendChild(celda);
+      const cel = document.createElement("div");
+      const act = (i === idx);
+      cel.className = "matrix-cell" + (act ? " active-danger" : "");
+      cel.innerHTML = `<strong>${this._nombresKronecker[i]}</strong><br><small>${act ? sev.toFixed(1) : "0.0"}</small>`;
+      cnt.appendChild(cel);
     }
-
-    const tagSeveridad = document.getElementById("matrixMaxSeverity");
-    if (tagSeveridad) {
-      if (indiceActivo >= 0) {
-        tagSeveridad.innerText = `Arista Crítica: ${this._nombresAristasKronecker[indiceActivo]} (${severidad.toFixed(1)}/10)`;
-        tagSeveridad.style.color = "var(--neon-red)";
-      } else {
-        tagSeveridad.innerText = "Sin sinergias adversas (0.0/10)";
-        tagSeveridad.style.color = "var(--neon-green)";
-      }
+    const tag = document.getElementById("matrixMaxSeverity");
+    if (tag) {
+      tag.innerText = (idx >= 0) ? `Arista Crítica: ${this._nombresKronecker[idx]} (${sev.toFixed(1)}/10)` : "Sin sinergias adversas (0.0/10)";
+      tag.style.color = (idx >= 0) ? "var(--neon-red)" : "var(--neon-green)";
     }
   }
 
   _actualizarModalCritico(state) {
-    const modalBackdrop = document.getElementById("modalAlerta");
-    if (!modalBackdrop) return;
-
+    const modal = document.getElementById("modalAlerta");
+    if (!modal) return;
     if (state.modalAlertaAbierto) {
-      modalBackdrop.style.setProperty("display", "flex", "important");
-      modalBackdrop.classList.add("open");
-      if (!this._ultimoEstadoModal && this._sound) {
-        this._sound.iniciarAlarmaEmergencia();
-      }
+      modal.style.setProperty("display", "flex", "important");
+      modal.classList.add("open");
+      if (!this._ultimoEstadoModal && this._sound) this._sound.iniciarAlarmaEmergencia();
     } else {
-      modalBackdrop.style.setProperty("display", "none", "important");
-      modalBackdrop.classList.remove("open");
+      modal.style.setProperty("display", "none", "important");
+      modal.classList.remove("open");
     }
     this._ultimoEstadoModal = !!state.modalAlertaAbierto;
 
-    // Actualizar valores numéricos dinámicos de los parámetros de alerta
-    const fis = state.telemetria.fisiologia;
-    const amb = state.telemetria.ambiente;
-    this._actualizarElementoTexto("modalHrVal", Math.round(fis.ritmo_cardiaco_bpm));
-    this._actualizarElementoTexto("modalSpo2Val", Math.round(fis.spo2_pct));
-    this._actualizarElementoTexto("modalCo2Val", amb.co2_mmHg.toFixed(1));
-    this._actualizarElementoTexto("modalTempVal", fis.temperatura_corporal_c.toFixed(1));
+    const { fisiologia: fis, ambiente: amb } = state.telemetria;
+    this._setTxt("modalHrVal", Math.round(fis.ritmo_cardiaco_bpm));
+    this._setTxt("modalSpo2Val", Math.round(fis.spo2_pct));
+    this._setTxt("modalCo2Val", amb.co2_mmHg.toFixed(1));
+    this._setTxt("modalTempVal", fis.temperatura_corporal_c.toFixed(1));
 
-    const cmContainer = document.getElementById("modalCountermeasures");
-    if (cmContainer && state.telemetria.contramedidas_priorizadas) {
-      cmContainer.innerHTML = state.telemetria.contramedidas_priorizadas
-        .slice(0, 3)
-        .map((cm, idx) => `<div class="countermeasure-item" style="margin-bottom:4px;"><strong>${idx + 1}.</strong> ${cm}</div>`)
-        .join("");
+    const cm = document.getElementById("modalCountermeasures");
+    if (cm && state.telemetria.contramedidas_priorizadas) {
+      cm.innerHTML = state.telemetria.contramedidas_priorizadas.slice(0, 3).map((c, i) => `<div class="countermeasure-item" style="margin-bottom:4px;"><strong>${i + 1}.</strong> ${c}</div>`).join("");
     }
   }
 
   async _cargarCatalogoMatriz() {
     const tbody = document.getElementById("matrixTableBody");
     if (!tbody) return;
-
     const reglas = await this._telemetry.obtenerCatalogoMatriz();
-    if (!reglas || reglas.length === 0) return;
-
+    if (!reglas?.length) return;
     tbody.innerHTML = "";
     reglas.forEach(r => {
-      const badgeClass = (r.nivel === "CRITICA") ? "badge-crit" : (r.nivel === "ALERTA") ? "badge-warn" : "badge-info";
+      const cls = (r.nivel === "CRITICA") ? "badge-crit" : (r.nivel === "ALERTA") ? "badge-warn" : "badge-info";
       const row = document.createElement("tr");
       row.innerHTML = `
-        <td><strong>${r.id_regla}</strong></td>
-        <td><span class="${badgeClass}">${r.nivel}</span></td>
-        <td>${r.dominio}</td>
-        <td><strong>${r.evaluacion_preliminar}</strong></td>
-        <td>
-          <ol style="padding-left:14px; margin:0;">
-            ${r.contramedidas.map(c => `<li>${c}</li>`).join("")}
-          </ol>
-        </td>
-        <td>${r.destinatarios.join(", ")}</td>
-        <td><small>${r.base_evidencia}</small></td>
+        <td><strong>${r.id_regla}</strong></td><td><span class="${cls}">${r.nivel}</span></td>
+        <td>${r.dominio}</td><td><strong>${r.evaluacion_preliminar}</strong></td>
+        <td><ol style="padding-left:14px; margin:0;">${r.contramedidas.map(c => `<li>${c}</li>`).join("")}</ol></td>
+        <td>${r.destinatarios.join(", ")}</td><td><small>${r.base_evidencia}</small></td>
       `;
       tbody.appendChild(row);
     });
   }
 
-  _actualizarElementoTexto(id, valor) {
-    const el = document.getElementById(id);
-    if (el) el.innerText = valor;
-  }
-
-  _toggleClase(id, clase, condicion) {
-    const el = document.getElementById(id);
-    if (el) {
-      if (condicion) el.classList.add(clase);
-      else el.classList.remove(clase);
-    }
-  }
+  _setTxt(id, val) { const el = document.getElementById(id); if (el) el.innerText = val; }
+  _toggleClase(id, cls, cond) { document.getElementById(id)?.classList.toggle(cls, !!cond); }
 }
 
 window.HudController = HudController;
