@@ -63,12 +63,22 @@
   }
 }
 
-.pulse-organ-heart {
-  animation: cardiacBeat 0.9s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
-  transform-origin: 162px 162px;
+/* La capa animada se referencia a su propia caja de relleno y gira sobre su
+   centro geométrico. Un origen en píxeles se mediría desde la esquina del
+   bounding-box y catapultaría el órgano fuera de su sitio al escalar. */
+.pulse-organ-heart,
+.pulse-lungs {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
 }
 
-.pulse-organ-heart.fast {
+.pulse-organ-heart {
+  animation: cardiacBeat 0.9s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+/* El marcador .fast lo aplica el controlador sobre el nodo #nodeHeart */
+.pulse-organ-heart.fast,
+.fast .pulse-organ-heart {
   animation-duration: 0.45s !important; /* Taquicardia 132 bpm */
 }
 
@@ -108,7 +118,6 @@
 
 .pulse-lungs {
   animation: lungBreathe 4.2s infinite ease-in-out;
-  transform-origin: 160px 155px;
 }
 
 /* 5. Rotación Orbital del Hábitat Espacial */

@@ -17,6 +17,92 @@
   box-sizing: border-box;
 }
 
+/* --------------------------------------------------------------------------
+   MARCO DE COMPOSICIÓN DE RELACIÓN FIJA (680 x 500)
+   El viewBox del SVG y el marco comparten exactamente la misma relación de
+   aspecto, por lo que el escalado es uniforme y sin franjas muertas: una
+   unidad del viewBox equivale siempre a (1/680) del ancho y (1/500) del alto.
+   Gracias a ello las líneas guía SVG y las tarjetas HTML, posicionadas en
+   porcentaje, permanecen alineadas en cualquier resolución de pantalla.
+   -------------------------------------------------------------------------- */
+.hologram-stage-wrapper.holo-stage--auto {
+  min-height: 0;
+  max-height: none;
+  padding: 16px 0;
+  flex: 1 1 auto;
+}
+
+.holo-frame {
+  position: relative;
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 700px;
+  aspect-ratio: 680 / 500;
+  margin: 0 auto;
+  container-type: inline-size;
+}
+
+.holo-frame > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 5;
+}
+
+.holo-frame > .holo-scan-beam {
+  z-index: 4;
+}
+
+/* Tarjetas ancladas por su centro vertical sobre la retícula del marco */
+.holo-frame .holo-card {
+  position: absolute;
+  width: 29.118%; /* 198 / 680 */
+  transform: translateY(-50%);
+}
+
+.holo-frame .holo-card--l {
+  left: 1.176%; /* 8 / 680 */
+}
+
+.holo-frame .holo-card--r {
+  left: 69.706%; /* 474 / 680 */
+}
+
+/* La tipografía acompaña al marco para que el rótulo nunca desborde su caja */
+.holo-frame .holo-card {
+  padding: clamp(6px, 1.3cqw, 11px) clamp(8px, 1.9cqw, 15px);
+}
+
+.holo-frame .holo-card .callout-header {
+  font-size: clamp(9px, 1.72cqw, 12px);
+}
+
+.holo-frame .holo-card .callout-sub {
+  font-size: clamp(10px, 1.86cqw, 13px);
+  flex-wrap: wrap;
+  row-gap: 2px;
+}
+
+.holo-frame .holo-card .callout-val {
+  font-size: clamp(11px, 2.15cqw, 15px);
+}
+
+.holo-frame .holo-card .callout-tag {
+  font-size: clamp(9px, 1.57cqw, 11px);
+  color: #94a3b8;
+}
+
+/* El énfasis conserva el centrado vertical: se compone sobre translateY(-50%) */
+.holo-frame .holo-card:hover {
+  transform: translateY(-50%) scale(1.03);
+}
+
+.holo-frame .holo-card.is-focused {
+  transform: translateY(-50%) scale(1.05) !important;
+}
+
 .organ-node,
 .habitat-module-node {
   cursor: pointer;
@@ -133,7 +219,7 @@
 .organ-node.is-focused,
 .habitat-module-node.is-focused {
   opacity: 1 !important;
-  transform: scale(1.08);
+  transform: scale(1.05);
 }
 
 .organ-connector-line.is-focused polyline,
