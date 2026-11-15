@@ -31,29 +31,33 @@ class SonarAcousticService {
         id_regla: "CX-16", dominio: "ACUSTICA_HABITAT", nivel: "CRITICA",
         condicion_disparo: "Ruido instantáneo >= 85 dBA en cualquier módulo del hábitat",
         evaluacion_preliminar: "Exposición a nivel acústico peligroso (>= 85 dBA)",
+        contramedidas: ["Colocarse protección auditiva de inmediato.", "Alejarse de la fuente acústica y aislar el compartimento.", "Notificar a control de misión para inspeccionar el equipo ruidoso."],
         contramedidas_sugeridas: ["Colocarse protección auditiva de inmediato.", "Alejarse de la fuente acústica y aislar el compartimento.", "Notificar a control de misión para inspeccionar el equipo ruidoso."],
-        destinatarios: ["ASTRONAUTA", "CONTROL_MISION"], estandar_base: "NASA-STD-3001 (Límite de peligro 85 dBA)", ventana_tiempo: "Inmediata (0 s)"
+        destinatarios: ["ASTRONAUTA", "CONTROL_MISION"], base_evidencia: "NASA-STD-3001 (Límite de peligro 85 dBA)", estandar_base: "NASA-STD-3001 (Límite de peligro 85 dBA)", ventana_tiempo: "Inmediata (0 s)"
       },
       {
         id_regla: "CX-17", dominio: "ACUSTICA_SUENO", nivel: "ALERTA",
         condicion_disparo: "LEQ8 del sueño > 50 dBA + sueño < 6 h o despertares frecuentes",
         evaluacion_preliminar: "Descanso alterado por ruido ambiental en cabina de sueño",
+        contramedidas: ["Utilizar tapones auditivos durante el periodo de sueño.", "Revisar ventilador o válvula cercana a la cabina de descanso.", "Avisar al médico de vuelo (regla de vuelo ISS LEQ8 > 50 dBA)."],
         contramedidas_sugeridas: ["Utilizar tapones auditivos durante el periodo de sueño.", "Revisar ventilador o válvula cercana a la cabina de descanso.", "Avisar al médico de vuelo (regla de vuelo ISS LEQ8 > 50 dBA)."],
-        destinatarios: ["ASTRONAUTA", "MEDICO_VUELO"], estandar_base: "Regla de vuelo ISS / NASA-STD-3001 (NC-40 ~50 dBA)", ventana_tiempo: "Ciclo de sueño (8 h)"
+        destinatarios: ["ASTRONAUTA", "MEDICO_VUELO"], base_evidencia: "Regla de vuelo ISS / NASA-STD-3001 (NC-40 ~50 dBA)", estandar_base: "Regla de vuelo ISS / NASA-STD-3001 (NC-40 ~50 dBA)", ventana_tiempo: "Ciclo de sueño (8 h)"
       },
       {
         id_regla: "CX-18", dominio: "ACUSTICA_TRABAJO", nivel: "ALERTA",
         condicion_disparo: "LEQ16 de la jornada > 72 dBA (o > 60 dBA varios días) + cefalea o irritabilidad",
         evaluacion_preliminar: "Fatiga y malestar por exposición acústica acumulada en jornada",
+        contramedidas: ["Protección auditiva obligatoria en tareas ruidosas (ej. cinta de correr 77 dBA).", "Programar pausas de recuperación en módulos silenciosos.", "Registrar síntomas de cefalea o zumbido (tinnitus) en bitácora."],
         contramedidas_sugeridas: ["Protección auditiva obligatoria en tareas ruidosas (ej. cinta de correr 77 dBA).", "Programar pausas de recuperación en módulos silenciosos.", "Registrar síntomas de cefalea o zumbido (tinnitus) en bitácora."],
-        destinatarios: ["ASTRONAUTA", "MEDICO_VUELO"], estandar_base: "Regla de vuelo ISS / NASA NTRS (LEQ16 > 72 dBA)", ventana_tiempo: "Jornada de trabajo (16 h)"
+        destinatarios: ["ASTRONAUTA", "MEDICO_VUELO"], base_evidencia: "Regla de vuelo ISS / NASA NTRS (LEQ16 > 72 dBA)", estandar_base: "Regla de vuelo ISS / NASA NTRS (LEQ16 > 72 dBA)", ventana_tiempo: "Jornada de trabajo (16 h)"
       },
       {
         id_regla: "CX-19", dominio: "ACUSTICA_VOZ_BHP", nivel: "ALERTA",
         condicion_disparo: "Cambio de voz frente a línea base en vuelo (latencia/pausas suben, HNR baja) + lapsos PVT + buena relación señal-ruido",
         evaluacion_preliminar: "Patrón compatible con fatiga cognitiva verificado en voz y atención PVT",
+        contramedidas: ["Confirmar con prueba de atención PVT completa.", "Proteger el siguiente ciclo de sueño (8 h bajo 50 dBA).", "Reprogramar maniobras críticas si la fatiga persiste."],
         contramedidas_sugeridas: ["Confirmar con prueba de atención PVT completa.", "Proteger el siguiente ciclo de sueño (8 h bajo 50 dBA).", "Reprogramar maniobras críticas si la fatiga persiste."],
-        destinatarios: ["ASTRONAUTA", "MEDICO_VUELO"], estandar_base: "DLR Pilot / Gao 2022 / Protocolo ASTRA-BHP", ventana_tiempo: "Evaluación diaria a bordo"
+        destinatarios: ["ASTRONAUTA", "MEDICO_VUELO"], base_evidencia: "DLR Pilot / Gao 2022 / Protocolo ASTRA-BHP", estandar_base: "DLR Pilot / Gao 2022 / Protocolo ASTRA-BHP", ventana_tiempo: "Evaluación diaria a bordo"
       }
     ];
   }
@@ -209,18 +213,30 @@ class SonarAcousticService {
   simularEscenarioRuido(codigo) {
     this._escenarioRuido = codigo;
     const mapa = {
-      A1: { leq16: 59.5, leq8: 48.5, leq24: 57.6, pico: 68.0, cruce: null, freq: 220, gain: 0.04,
-            txt: "✅ <strong>Prueba A1 (Nominal ISS):</strong> 16 h trabajo (59.5 dBA) y 8 h sueño (48.5 dBA). Cumple curvas NC-50 y NC-40." },
-      A2: { leq16: 60.2, leq8: 55.4, leq24: 58.9, pico: 69.0, cruce: "CX-17", freq: 310, gain: 0.08,
-            txt: "🟠 <strong>Prueba A2 (Dispara CX-17):</strong> Periodo de sueño con LEQ8 = 55.4 dBA (> 50 dBA). Se activa aviso al tripulante y al médico de vuelo (usar tapones y revisar ventilador)." },
-      A3: { leq16: 74.2, leq8: 49.0, leq24: 71.1, pico: 77.0, cruce: "CX-18", freq: 440, gain: 0.12,
-            txt: "🟠 <strong>Prueba A3 (Dispara CX-18):</strong> Jornada con cinta de correr (77 dBA) eleva LEQ16 a 74.2 dBA (> 72 dBA). Protección auditiva obligatoria y pausas en zona silenciosa." },
-      A4: { leq16: 63.0, leq8: 49.0, leq24: 60.8, pico: 88.5, cruce: "CX-16", freq: 880, gain: 0.20,
-            txt: "🔴 <strong>Prueba A4 (Dispara CX-16 Inmediato):</strong> Pico instantáneo de 88.5 dBA (>= 85 dBA). Alerta roja inmediata NASA-STD-3001: colocarse protección y aislar fuente." },
-      A5: { leq16: 60.1, leq8: 48.8, leq24: 58.1, pico: 81.0, cruce: null, freq: 520, gain: 0.07,
-            txt: "🛡️ <strong>Prueba A5 (Regla de Persistencia):</strong> Golpe aislado de 2 segundos (81 dBA). No altera el promedio LEQ16 (60.1 dBA) y NO dispara falsa alarma de exposición acumulada." },
-      E2: { leq16: 69.8, leq8: 51.2, leq24: 66.8, pico: 76.0, cruce: "CX-17", freq: 280, gain: 0.10,
-            txt: "🪐 <strong>Prueba E2 (Tormenta de Polvo en Marte):</strong> Confinamiento prolongado suma exposición diaria (LEQ16 = 69.8 dBA). El sistema a bordo propone pausas programadas de silencio." }
+      A1: {
+        leq16: 59.5, leq8: 48.5, leq24: 57.6, pico: 68.0, cruce: null, freq: 220, gain: 0.04,
+        txt: "✅ <strong>Prueba A1 (Nominal ISS):</strong> 16 h trabajo (59.5 dBA) y 8 h sueño (48.5 dBA). Cumple curvas NC-50 y NC-40."
+      },
+      A2: {
+        leq16: 60.2, leq8: 55.4, leq24: 58.9, pico: 69.0, cruce: "CX-17", freq: 310, gain: 0.08,
+        txt: "🟠 <strong>Prueba A2 (Dispara CX-17):</strong> Periodo de sueño con LEQ8 = 55.4 dBA (> 50 dBA). Se activa aviso al tripulante y al médico de vuelo (usar tapones y revisar ventilador)."
+      },
+      A3: {
+        leq16: 74.2, leq8: 49.0, leq24: 71.1, pico: 77.0, cruce: "CX-18", freq: 440, gain: 0.12,
+        txt: "🟠 <strong>Prueba A3 (Dispara CX-18):</strong> Jornada con cinta de correr (77 dBA) eleva LEQ16 a 74.2 dBA (> 72 dBA). Protección auditiva obligatoria y pausas en zona silenciosa."
+      },
+      A4: {
+        leq16: 63.0, leq8: 49.0, leq24: 60.8, pico: 88.5, cruce: "CX-16", freq: 880, gain: 0.20,
+        txt: "🔴 <strong>Prueba A4 (Dispara CX-16 Inmediato):</strong> Pico instantáneo de 88.5 dBA (>= 85 dBA). Alerta roja inmediata NASA-STD-3001: colocarse protección y aislar fuente."
+      },
+      A5: {
+        leq16: 60.1, leq8: 48.8, leq24: 58.1, pico: 81.0, cruce: null, freq: 520, gain: 0.07,
+        txt: "🛡️ <strong>Prueba A5 (Regla de Persistencia):</strong> Golpe aislado de 2 segundos (81 dBA). No altera el promedio LEQ16 (60.1 dBA) y NO dispara falsa alarma de exposición acumulada."
+      },
+      E2: {
+        leq16: 69.8, leq8: 51.2, leq24: 66.8, pico: 76.0, cruce: "CX-17", freq: 280, gain: 0.10,
+        txt: "🪐 <strong>Prueba E2 (Tormenta de Polvo en Marte):</strong> Confinamiento prolongado suma exposición diaria (LEQ16 = 69.8 dBA). El sistema a bordo propone pausas programadas de silencio."
+      }
     };
     const d = mapa[codigo] || mapa.A1;
     this._datosDosimetria = d;
@@ -370,6 +386,14 @@ class SonarAcousticService {
       fb.style.display = "block";
       fb.innerHTML = `🎧 <strong>EVALUACIÓN ACÚSTICA Y VOCAL:</strong> Audiometría ${pctAudio}% · LEQ16 ${this._datosDosimetria.leq16} dBA · ${crucesActivos.length ? `Cruce ${crucesActivos.join("/")}` : "Nominal"}.`;
     }
+    window.surgeonController?.registrarResultadoExamen?.("sonar", {
+      estado: hayAlerta ? (crucesActivos[0] || "OBSERVACIÓN") : "NOMINAL",
+      resumen: `${this._datosDosimetria.leq16} dBA ${hayAlerta ? "Aviso" : "OK"}`,
+      audiometria: `${this._aciertosAudio}/${this._pruebasAudio.length} (${pctAudio}%)`,
+      leq16: `${this._datosDosimetria.leq16} dBA`,
+      leq8: `${this._datosDosimetria.leq8} dBA`,
+      voz: `F0 ${this._datosVoz.f0} Hz · HNR ${this._datosVoz.hnr} dB`
+    });
     window.wellnessController?.sumarExp?.(60);
   }
 

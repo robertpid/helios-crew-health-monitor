@@ -51,6 +51,11 @@ class HudController {
   }
 
   cambiarVista(nombre) {
+    if (nombre === "surgeon" && this._auth?.obtenerUsuarioActual()?.rol !== "CIRUJANO_VUELO") {
+      alert("🔒 ACCESO RESTRINGIDO: La Consola Médica requiere credenciales del Cirujano de Vuelo (Dr. Marcus Vance).");
+      this.abrirModalLogin();
+      return;
+    }
     if (this._sound) this._sound.reproducirClick();
     this.desenfocarOrgano();
     this.desenfocarModuloHabitat();
@@ -183,9 +188,6 @@ class HudController {
       inP.value = "";
       this._sound?.reproducirNominal?.();
       this.cerrarModalLogin();
-      if (res.usuario.rol === "CIRUJANO_VUELO") {
-        alert("🩺 BIENVENIDO, CIRUJANO DE VUELO (Dr. Marcus Vance).\nMonitor médico especializado en preparación. Acceso concedido.");
-      }
     } else {
       this._sound?.reproducirAlerta?.();
       inP.value = "";
@@ -199,6 +201,21 @@ class HudController {
     this._setTxt("userAvatarTag", usuario.avatar || "👨‍🚀");
     this._setTxt("userIdentTag", usuario.rango || usuario.nombre);
     this._setTxt("userRoleTag", `(${usuario.nombre})`);
+
+    const esCirujano = usuario.rol === "CIRUJANO_VUELO";
+    const tabSurgeon = document.getElementById("navTabSurgeon");
+    if (tabSurgeon) {
+      tabSurgeon.style.display = esCirujano ? "inline-flex" : "none";
+    }
+
+    if (esCirujano) {
+      window.surgeonController?.renderizar();
+      this.cambiarVista("surgeon");
+    } else {
+      if (this._state?._state?.vistaActiva === "surgeon") {
+        this.cambiarVista("biomedical");
+      }
+    }
   }
 
   avanzarTarea(t) { this._wellness?.avanzarTarea(t); }
@@ -290,7 +307,8 @@ class HudController {
       biomedical: { tab: tabs[0], view: "viewBiomedical" },
       environmental: { tab: tabs[1], view: "viewEnvironmental" },
       matrix: { tab: tabs[2], view: "viewMatrix" },
-      support: { tab: tabs[3], view: "viewSupport" }
+      support: { tab: tabs[3], view: "viewSupport" },
+      surgeon: { tab: document.getElementById("navTabSurgeon") || tabs[4], view: "viewSurgeon" }
     };
     if (activa === "biomedical") this._ecg?.reanudar?.();
     else this._ecg?.pausar?.();

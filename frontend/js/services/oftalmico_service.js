@@ -311,6 +311,16 @@ class OftalmicoService {
   guardarYTransmitir() {
     this._sound?.reproducirClick?.();
     window.wellnessController?.sumarExp?.(50);
+    const pctAg = Math.round((this._aciertosAgudeza / 10) * 100);
+    const pctCon = Math.round((this._aciertosContraste / 8) * 100);
+    window.surgeonController?.registrarResultadoExamen?.("sans", {
+      estado: this._aciertosAgudeza >= 8 && this._aciertosContraste >= 7 ? "ESTABLE" : "OBSERVACIÓN",
+      resumen: `${this._aciertosAgudeza}/10 (${pctAg}%)`,
+      agudeza: `${this._aciertosAgudeza}/10 (${pctAg}%)`,
+      contraste: `${pctCon}% (${this._aciertosContraste}/8)`,
+      amsler: (this._astigmatismoOD || this._astigmatismoOI) ? "Asimetría radial" : "Sin distorsión",
+      ishihara: `${this._aciertosCromatica}/7 láminas`
+    });
     this.cerrarModal();
 
     const msg = `📡 <strong>EVALUACIÓN OFTALMOLÓGICA SANS:</strong> Batería Sol 120 completada. Agudeza: ${this._aciertosAgudeza}/10 · Contraste: ${this._aciertosContraste}/8. Datos transmitidos a Houston Flight Surgeon.`;

@@ -7,7 +7,7 @@ class ViewportController {
     this._ruleIndex = 0;
     this._ruleSection = 0;
     this._chatIndex = 0;
-    this._ids = { biomedical: 'viewBiomedical', environmental: 'viewEnvironmental', matrix: 'viewMatrix', support: 'viewSupport' };
+    this._ids = { biomedical: 'viewBiomedical', environmental: 'viewEnvironmental', matrix: 'viewMatrix', support: 'viewSupport', surgeon: 'viewSurgeon' };
   }
 
   inicializar() {
@@ -41,16 +41,18 @@ class ViewportController {
       biomedical: ['anatomy', 'vitals', 'ecg'],
       environmental: ['habitat', 'environment', 'synergy', 'actions'],
       matrix: ['sleep', 'tasks', 'games', 'hydration'],
-      support: ['assistant', 'exams', 'mail', 'rules']
+      support: ['assistant', 'exams', 'mail', 'rules'],
+      surgeon: ['surgeon_dashboard']
     };
-    if (narrow) return (key === 'support' ? ['assistant', 'protocol', 'exams', 'mail', 'rules'] : panels[key]).map(p => [p]);
+    if (narrow) return (key === 'support' ? ['assistant', 'protocol', 'exams', 'mail', 'rules'] : (key === 'surgeon' ? ['surgeon_dashboard'] : panels[key])).map(p => [p]);
     if (compact || (['environmental', 'matrix'].includes(key) && window.innerWidth < 1100)) return {
       biomedical: [['anatomy', 'vitals'], ['ecg']],
       environmental: [['habitat', 'environment'], ['synergy', 'actions']],
       matrix: [['sleep', 'tasks'], ['games', 'hydration']],
-      support: [['assistant'], ['exams', 'mail'], ['rules']]
+      support: [['assistant'], ['exams', 'mail'], ['rules']],
+      surgeon: [['surgeon_dashboard']]
     }[key];
-    return key === 'support' ? [['assistant', 'exams', 'mail'], ['rules']] : [panels[key]];
+    return key === 'support' ? [['assistant', 'exams', 'mail'], ['rules']] : (key === 'surgeon' ? [['surgeon_dashboard']] : [panels[key]]);
   }
 
   actualizarVista(key) {
