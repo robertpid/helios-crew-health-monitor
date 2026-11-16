@@ -17,8 +17,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
   <!-- H.E.L.I.O.S. modular N-layer style layer -->
-  <link rel="stylesheet" href="/static/css/hud-theme.css?v=1794778839">
-  <link rel="stylesheet" href="/static/css/animations.css?v=1794778839">
+  <link rel="stylesheet" href="/static/css/hud-theme.css?v=1794794798">
+  <link rel="stylesheet" href="/static/css/animations.css?v=1794794798">
 </head>
 <body>
 
@@ -104,6 +104,8 @@
     <span id="dsnLatency" class="link-value">14 min · Store-and-Forward · Sol 120</span>
   </div>
   <div class="toolbar-group">
+    <button id="btnWatchdogToolbar" class="btn-hud" onclick="window.sensorWatchdogService?.toggleModal()"
+            title="Hardware Sensor Watchdog &amp; Real-Time WebSocket Bus">🛡️ SENSORS 8/8 · WS LIVE</button>
     <button id="btnAudioToggle" class="btn-hud" onclick="window.hudController.toggleAudio()"
             title="Enable or mute the procedural audio effects">🔊 AUDIO</button>
     <button class="btn-hud" onclick="window.hudController.restoreNominalMode()"
@@ -938,17 +940,28 @@
       </div>
       <div id="extraExamFeedback" role="status" style="display:none;"></div>
     </div>
-<div class="hud-panel screen-panel" data-panel="mail">
-      <div class="panel-header">
-        <div class="panel-title">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
-          MAIL
+<div class="hud-panel screen-panel" data-panel="mail" style="display:flex; flex-direction:column; gap:8px;">
+      <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div class="panel-title" style="display:flex; align-items:center; gap:6px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
+            MAIL
+          </div>
+          <span id="mailPendingBadge" class="badge-status status-warning" style="display:none; font-size:9.5px; padding:2px 6px;">
+            1 PENDING PACKET
+          </span>
         </div>
         <div class="panel-subtitle">ASYNCHRONOUS DEEP SPACE NETWORK (DSN) LINK</div>
       </div>
-      <div style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:16px 20px; display:flex; justify-content:space-between; align-items:center;">
-        <div id="mailStatusText" style="font-family:var(--font-data); font-size:13px; color:var(--text-muted);">No new messages pending in the DSN queue.</div>
-        <button class="btn-hud" onclick="window.hudController.syncMail()" style="font-size:11px; padding:6px 12px;">📡 SYNCHRONIZE</button>
+      <div style="background:#081326; border:1px solid rgba(0,240,255,0.2); border-radius:8px; padding:10px 14px; display:flex; justify-content:space-between; align-items:center; gap:10px;">
+        <div id="mailStatusText" style="font-family:var(--font-data); font-size:12px; color:var(--text-muted); display:flex; align-items:center; gap:8px;">
+          No new messages pending in the DSN queue.
+        </div>
+        <button id="btnSyncMail" class="btn-hud" onclick="window.hudController?.syncMail()" style="font-size:11px; padding:6px 14px; white-space:nowrap;">
+          📡 SYNCHRONIZE
+        </button>
+      </div>
+      <div id="mailInboxList" style="display:flex; flex-direction:column; gap:8px; max-height:260px; overflow-y:auto; padding-right:4px;">
       </div>
     </div>
 </div>
@@ -962,8 +975,7 @@
 </div>
 </div>
 
-    <div id="viewSurgeon" class="view-container viewport-view screen-panel" data-panel="surgeon_dashboard"
-  style="display:none;">
+    <div id="viewSurgeon" class="view-container viewport-view" style="display:none;">
 
   <div class="view-pager"
     style="grid-column:1 / -1; border-bottom:1px solid rgba(168,85,247,0.35); padding-bottom:6px; margin-bottom:10px;">
@@ -1006,8 +1018,8 @@
   <!-- ===================================================================== -->
   <!-- MODE 1: INDIVIDUAL DETAILED RECORD AND ASTRONAUT RESULTS              -->
   <!-- ===================================================================== -->
-  <div id="surgeonSingleContainer"
-    style="grid-column:1 / -1; display:grid; grid-template-columns:1.12fr 1fr; gap:12px; min-height:0; overflow-y:auto;">
+  <div id="surgeonSingleContainer" class="screen-panel" data-panel="surgeon_dashboard"
+    style="grid-column:1 / -1; display:grid; grid-template-columns:1.12fr 1fr; gap:12px; height:100%; min-height:0; overflow-y:auto; padding:0; background:transparent; border:none; box-shadow:none;">
 
     <!-- LEFT COLUMN: VITAL SIGNS AND SPECIALIZED ASSESSMENTS -->
     <div style="display:flex; flex-direction:column; gap:12px; min-width:0;">
@@ -1218,35 +1230,65 @@
         <div id="surgeonAlertsContainer" style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
         </div>
 
+        <!-- Surgeon's interactive DSN mail chat / dispatch -->
         <div
-          style="background:#081326; border:1px solid rgba(168,85,247,0.25); border-radius:8px; padding:10px; margin-top:auto;">
-          <div style="font-family:var(--font-hud); font-size:10.5px; color:#c084fc; margin-bottom:6px;">
-            ✍️ TRANSMIT A MEDICAL ORDER TO THE CABIN:
+          style="background:#081326; border:1px solid rgba(168,85,247,0.3); border-radius:8px; padding:10px 12px; margin-top:auto; display:flex; flex-direction:column; gap:6px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:6px;">
+            <div style="font-family:var(--font-hud); font-size:10.5px; color:#c084fc; display:flex; align-items:center; gap:5px;">
+              <span>✉️</span>
+              <span>DSN MEDICAL COMMUNICATOR (SURGEON &rarr; CABIN MAIL)</span>
+            </div>
+            <div style="display:flex; align-items:center; gap:6px; background:#040914; border:1px solid rgba(0,240,255,0.45); border-radius:4px; padding:3px 8px;">
+              <span style="font-family:var(--font-hud); font-size:9.5px; color:var(--text-muted); text-transform:uppercase;">SEND TO:</span>
+              <select id="surgeonMailRecipientSelect" onchange="window.surgeonController?.onMailRecipientChange(this.value)" style="background:transparent; border:none; color:var(--neon-cyan); font-family:var(--font-hud); font-size:10.5px; font-weight:bold; outline:none; cursor:pointer;">
+                <option value="ASTRO-01" style="background:#060d1d; color:#00f0ff;">👨‍🚀 A01 · Alex Mercer (Commander)</option>
+                <option value="ASTRO-02" style="background:#060d1d; color:#ffaa00;">👩‍🚀 A02 · Elena Rostova (Specialist)</option>
+                <option value="ALL" style="background:#060d1d; color:#c084fc;">🚀 All Crew (Cabin Broadcast)</option>
+              </select>
+            </div>
           </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px;">
-            <button type="button" class="btn-hud"
-              onclick="window.surgeonController?.prescribe('Increase the FIT fluid quota by +300 mL')"
-              style="font-size:10px; padding:6px 8px; text-align:left;">
-              💧 +300 mL Fluid Quota
+
+          <!-- Quick template chips -->
+          <div style="display:flex; flex-wrap:wrap; gap:4px;">
+            <button type="button" class="btn-hud" onclick="window.surgeonController?.insertMailTemplate('+300 mL Quota', 'Increase FIT fluid quota by +300 mL immediately to mitigate microgravity dehydration.')" style="font-size:9px; padding:3px 6px;">
+              💧 +300 mL Quota
             </button>
-            <button type="button" class="btn-hud"
-              onclick="window.surgeonController?.prescribe('Use earplugs and take a silence break (CX-17)')"
-              style="font-size:10px; padding:6px 8px; text-align:left;">
-              🔇 Earplugs / Acoustic Break
+            <button type="button" class="btn-hud" onclick="window.surgeonController?.insertMailTemplate('Earplugs / Break', 'Wear active noise-cancelling earplugs and take a 45-min silence break in crew quarters (CX-17).')" style="font-size:9px; padding:3px 6px;">
+              🔇 Earplugs Break
             </button>
-            <button type="button" class="btn-hud"
-              onclick="window.surgeonController?.prescribe('4-4-6 breathing session and PVT check (CX-19)')"
-              style="font-size:10px; padding:6px 8px; text-align:left;">
-              🧘 4-4-6 Guide + PVT Test
+            <button type="button" class="btn-hud" onclick="window.surgeonController?.insertMailTemplate('4-4-6 Breathing', 'Initiate 4-4-6 guided breathing session and complete the PVT cognitive check (CX-19).')" style="font-size:9px; padding:3px 6px;">
+              🧘 4-4-6 Guide
             </button>
-            <button type="button" class="btn-hud"
-              onclick="window.surgeonController?.prescribe('SANS fundus follow-up within 48 h')"
-              style="font-size:10px; padding:6px 8px; text-align:left;">
-              👁️ SANS Ocular Check
+            <button type="button" class="btn-hud" onclick="window.surgeonController?.insertMailTemplate('SANS Ocular Check', 'Perform SANS fundus photography and visual acuity test within next 48 hours.')" style="font-size:9px; padding:3px 6px;">
+              👁️ SANS Check
             </button>
           </div>
+
+          <!-- Subject and Priority -->
+          <div style="display:flex; gap:6px;">
+            <input id="surgeonMailSubject" type="text" value="BMed Clinical Order: Priority Countermeasure" placeholder="Subject..." style="flex:1; background:#040914; border:1px solid rgba(168,85,247,0.3); border-radius:4px; padding:4px 8px; color:#f8fafc; font-family:var(--font-data); font-size:11px; outline:none;" />
+            <select id="surgeonMailPriority" style="background:#040914; border:1px solid rgba(168,85,247,0.3); border-radius:4px; padding:4px 6px; color:#c084fc; font-family:var(--font-hud); font-size:10px; outline:none;">
+              <option value="URGENT">URGENT</option>
+              <option value="HIGH">HIGH</option>
+              <option value="ROUTINE">ROUTINE</option>
+            </select>
+          </div>
+
+          <!-- Text message body -->
+          <textarea id="surgeonMailBody" rows="2" placeholder="Write medical email or tactical clinical order to crew member..." style="width:100%; background:#040914; border:1px solid rgba(168,85,247,0.3); border-radius:4px; padding:5px 8px; color:#f8fafc; font-family:var(--font-data); font-size:11px; resize:none; outline:none; box-sizing:border-box;"></textarea>
+
+          <!-- Action row -->
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div id="surgeonMailStatus" style="font-size:9.5px; color:#94a3b8; font-family:var(--font-data); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:260px;">
+              DSN Store-and-Forward · Uplink Ready
+            </div>
+            <button type="button" class="btn-hud" onclick="window.surgeonController?.sendMailToCrew()" style="font-size:10px; padding:5px 12px; background:linear-gradient(135deg, rgba(168,85,247,0.25), rgba(0,240,255,0.2)); border-color:#c084fc; color:#ffffff; font-weight:bold;">
+              📡 TRANSMIT DSN MAIL
+            </button>
+          </div>
+
           <div id="surgeonActionFeedback"
-            style="display:none; margin-top:8px; font-size:10.5px; color:var(--c-green-ink); background:rgba(0,255,136,0.08); padding:6px 10px; border-radius:4px; border:1px solid var(--c-green);">
+            style="display:none; margin-top:4px; font-size:10.5px; color:var(--c-green-ink); background:rgba(0,255,136,0.08); padding:6px 10px; border-radius:4px; border:1px solid var(--c-green);">
           </div>
         </div>
       </div>
@@ -1257,7 +1299,7 @@
   <!-- MODE 2: FULL COMPARISON DASHBOARD BETWEEN ASTRONAUTS                  -->
   <!-- ===================================================================== -->
   <div id="surgeonCompareContainer"
-    style="display:none; grid-column:1 / -1; width:100%; min-height:0; overflow-y:auto;">
+    style="display:none; grid-column:1 / -1; width:100%; height:100%; min-height:0; overflow-y:auto;">
     <div class="hud-panel" style="background:#060d1d; border:1px solid rgba(168,85,247,0.35); padding:16px;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
         <div>
@@ -2094,23 +2136,25 @@
   <!-- ========================================================================= -->
   <!-- 6. LOADING THE N-LAYER ARCHITECTURE MODULES IN JAVASCRIPT                 -->
   <!-- ========================================================================= -->
-  <script src="/static/js/state/state_manager.js?v=1794778839"></script>
-  <script src="/static/js/services/auth_service.js?v=1794778839"></script>
-  <script src="/static/js/services/sound_service.js?v=1794778839"></script>
-  <script src="/static/js/services/codebook_service.js?v=1794778839"></script>
-  <script src="/static/js/services/telemetry_service.js?v=1794778839"></script>
-  <script src="/static/js/services/ecg_service.js?v=1794778839"></script>
-  <script src="/static/js/services/habitat_diagram_service.js?v=1794778839"></script>
-  <script src="/static/js/services/hologram_service.js?v=1794778839"></script>
-  <script src="/static/js/services/fit_service.js?v=1794778839"></script>
-  <script src="/static/js/services/ophthalmic_service.js?v=1794778839"></script>
-  <script src="/static/js/services/sonar_service.js?v=1794778839"></script>
-  <script src="/static/js/controllers/wellness_controller.js?v=1794778839"></script>
-  <script src="/static/js/controllers/games_controller.js?v=1794778839"></script>
-  <script src="/static/js/controllers/sleep_controller.js?v=1794778839"></script>
-  <script src="/static/js/controllers/surgeon_controller.js?v=1794778839"></script>
-  <script src="/static/js/controllers/viewport_controller.js?v=1794778839"></script>
-  <script src="/static/js/controllers/hud_controller.js?v=1794778839"></script>
+  <script src="/static/js/state/state_manager.js?v=1794794798"></script>
+  <script src="/static/js/services/auth_service.js?v=1794794798"></script>
+  <script src="/static/js/services/sound_service.js?v=1794794798"></script>
+  <script src="/static/js/services/codebook_service.js?v=1794794798"></script>
+  <script src="/static/js/services/telemetry_service.js?v=1794794798"></script>
+  <script src="/static/js/services/ecg_service.js?v=1794794798"></script>
+  <script src="/static/js/services/habitat_diagram_service.js?v=1794794798"></script>
+  <script src="/static/js/services/hologram_service.js?v=1794794798"></script>
+  <script src="/static/js/services/fit_service.js?v=1794794798"></script>
+  <script src="/static/js/services/mail_service.js?v=1794794798"></script>
+  <script src="/static/js/services/sensor_watchdog_service.js?v=1794794798"></script>
+  <script src="/static/js/services/ophthalmic_service.js?v=1794794798"></script>
+  <script src="/static/js/services/sonar_service.js?v=1794794798"></script>
+  <script src="/static/js/controllers/wellness_controller.js?v=1794794798"></script>
+  <script src="/static/js/controllers/games_controller.js?v=1794794798"></script>
+  <script src="/static/js/controllers/sleep_controller.js?v=1794794798"></script>
+  <script src="/static/js/controllers/surgeon_controller.js?v=1794794798"></script>
+  <script src="/static/js/controllers/viewport_controller.js?v=1794794798"></script>
+  <script src="/static/js/controllers/hud_controller.js?v=1794794798"></script>
 
   <script>
     // Initialization of the modular N-layer HUD ecosystem
@@ -2129,6 +2173,14 @@
 
       if (window.fitService?.initialize) {
         window.fitService.initialize();
+      }
+
+      window.mailService = new MailService(window.soundService, window.authService);
+      window.mailService.updateMailUi();
+      if (window.authService?.subscribe) {
+        window.authService.subscribe(() => {
+          window.mailService?.updateMailUi();
+        });
       }
 
       // 2. Instantiate the wellbeing and routines controller
@@ -2152,6 +2204,8 @@
       window.sleepController.initialize();
       window.surgeonController?.initialize?.();
       window.hudController.initialize();
+      window.sensorWatchdogService = new SensorWatchdogService(window.stateManager, window.soundService);
+      window.sensorWatchdogService.initialize();
     });
   </script>
 </body>

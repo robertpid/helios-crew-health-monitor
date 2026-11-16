@@ -242,7 +242,7 @@ class HudController {
   advanceTask(t) { this._wellness?.advanceTask(t); }
   startOphthalmicExam() { this._wellness?.startOphthalmicExam(); }
   startSonarExam() { this._wellness?.startSonarExam(); }
-  syncMail() { this._wellness?.syncMail(); }
+  syncMail() { window.mailService ? window.mailService.syncMailbox() : this._wellness?.syncMail(); }
   toggleBreathingGuide() { this._wellness?.toggleBreathingGuide(); }
   startPsychologicalProtocol() {
     this._wellness?.startPsychologicalProtocol();
@@ -381,19 +381,16 @@ class HudController {
     this._setTxt("modalSpo2Val", Math.round(phys.spo2_pct));
     this._setTxt("modalCo2Val", env.co2_mmHg.toFixed(1));
     this._setTxt("modalTempVal", phys.body_temperature_c.toFixed(1));
-
     const cm = document.getElementById("modalCountermeasures");
     if (cm && state.telemetry.prioritized_countermeasures) {
       cm.innerHTML = state.telemetry.prioritized_countermeasures.slice(0, 3).map((c, i) => `<div class="countermeasure-item" style="margin-bottom:4px;"><strong>${i + 1}.</strong> ${c}</div>`).join("");
     }
   }
-
   async _loadMatrixCatalog() {
     const rules = await this._telemetry.getMatrixCatalog();
     const extras = window.sonarService?.getAcousticRules?.() || [];
     window.viewportController?.setRules([...(rules || []), ...extras]);
   }
-
   _setTxt(id, val) { const el = document.getElementById(id); if (el) el.innerText = val; }
   _toggleClass(id, cls, cond) { document.getElementById(id)?.classList.toggle(cls, !!cond); }
 }

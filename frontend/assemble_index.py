@@ -170,6 +170,8 @@ class DashboardAssembler:
   <script src="/static/js/services/habitat_diagram_service.js?v={version_tag}"></script>
   <script src="/static/js/services/hologram_service.js?v={version_tag}"></script>
   <script src="/static/js/services/fit_service.js?v={version_tag}"></script>
+  <script src="/static/js/services/mail_service.js?v={version_tag}"></script>
+  <script src="/static/js/services/sensor_watchdog_service.js?v={version_tag}"></script>
   <script src="/static/js/services/ophthalmic_service.js?v={version_tag}"></script>
   <script src="/static/js/services/sonar_service.js?v={version_tag}"></script>
   <script src="/static/js/controllers/wellness_controller.js?v={version_tag}"></script>
@@ -198,6 +200,14 @@ class DashboardAssembler:
         window.fitService.initialize();
       }}
 
+      window.mailService = new MailService(window.soundService, window.authService);
+      window.mailService.updateMailUi();
+      if (window.authService?.subscribe) {{
+        window.authService.subscribe(() => {{
+          window.mailService?.updateMailUi();
+        }});
+      }}
+
       // 2. Instantiate the wellbeing and routines controller
       const wellnessController = new WellnessController(window.soundService);
       window.wellnessController = wellnessController;
@@ -219,6 +229,8 @@ class DashboardAssembler:
       window.sleepController.initialize();
       window.surgeonController?.initialize?.();
       window.hudController.initialize();
+      window.sensorWatchdogService = new SensorWatchdogService(window.stateManager, window.soundService);
+      window.sensorWatchdogService.initialize();
     }});
   </script>
 </body>

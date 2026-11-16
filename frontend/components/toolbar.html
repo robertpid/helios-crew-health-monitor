@@ -10,6 +10,8 @@
     <span id="dsnLatency" class="link-value">14 min · Store-and-Forward · Sol 120</span>
   </div>
   <div class="toolbar-group">
+    <button id="btnWatchdogToolbar" class="btn-hud" onclick="window.sensorWatchdogService?.toggleModal()"
+            title="Hardware Sensor Watchdog &amp; Real-Time WebSocket Bus">🛡️ SENSORS 8/8 · WS LIVE</button>
     <button id="btnAudioToggle" class="btn-hud" onclick="window.hudController.toggleAudio()"
             title="Enable or mute the procedural audio effects">🔊 AUDIO</button>
     <button class="btn-hud" onclick="window.hudController.restoreNominalMode()"

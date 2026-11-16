@@ -99,6 +99,10 @@ class AuthService {
     }
   }
 
+  subscribe(callback) {
+    this.onSessionChange(callback);
+  }
+
   _notifyChange() {
     this._listeners.forEach(cb => {
       try {

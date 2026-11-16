@@ -156,6 +156,7 @@ class SurgeonController {
     if (btnCompare) {
       btnCompare.style.background = "transparent";
     }
+    this._updateRecipientBadge();
     this.render();
   }
 
@@ -311,15 +312,84 @@ class SurgeonController {
       </tr>`).join("");
   }
 
-  prescribe(action) {
-    this._sound?.playNominal?.();
+  _updateRecipientBadge() {
+    const sel = document.getElementById("surgeonMailRecipientSelect");
+    if (sel && sel.value !== "ALL") {
+      sel.value = this._activeCrewMember;
+    }
+  }
+
+  onMailRecipientChange(selectedId) {
+    this._sound?.playClick?.();
+    if (selectedId === "ASTRO-01" || selectedId === "ASTRO-02") {
+      this.changeCrewMember(selectedId);
+    }
+  }
+
+  insertMailTemplate(title, body) {
+    this._sound?.playClick?.();
+    const subInput = document.getElementById("surgeonMailSubject");
+    const bodyInput = document.getElementById("surgeonMailBody");
+    if (subInput) subInput.value = `BMed Clinical Order: ${title}`;
+    if (bodyInput) { bodyInput.value = body; bodyInput.focus(); }
+  }
+
+  sendMailToCrew() {
+    const bodyInput = document.getElementById("surgeonMailBody");
+    const subInput = document.getElementById("surgeonMailSubject");
+    const prioInput = document.getElementById("surgeonMailPriority");
     const fb = document.getElementById("surgeonActionFeedback");
-    const patient = this._patients[this._activeCrewMember] || this._patients["ASTRO-01"];
+    const statusEl = document.getElementById("surgeonMailStatus");
+
+    const bodyText = (bodyInput?.value || "").trim();
+    if (!bodyText) {
+      if (fb) {
+        fb.style.display = "block";
+        fb.style.borderColor = "var(--neon-amber)";
+        fb.style.color = "var(--neon-amber)";
+        fb.innerHTML = "⚠️ Please write clinical instructions before transmitting.";
+        setTimeout(() => { if (fb) fb.style.display = "none"; }, 3500);
+      }
+      return;
+    }
+
+    const sel = document.getElementById("surgeonMailRecipientSelect");
+    const targetId = sel?.value || this._activeCrewMember;
+    let targetName = "All Crew (Broadcast)";
+    if (targetId === "ASTRO-01") targetName = "Alex Mercer";
+    else if (targetId === "ASTRO-02") targetName = "Elena Rostova";
+
+    const subject = (subInput?.value || "BMed Clinical Prescription").trim();
+    const priority = prioInput?.value || "URGENT";
+
+    window.mailService?.sendMedicalOrder?.({
+      recipientId: targetId,
+      recipientName: targetName,
+      subject,
+      body: bodyText,
+      priority,
+      category: "Surgeon Order"
+    });
+
+    this._sound?.playNominal?.();
+    if (bodyInput) bodyInput.value = "";
+
     if (fb) {
       fb.style.display = "block";
-      fb.innerHTML = `🩺 <strong>MEDICAL ORDER TRANSMITTED TO ${patient.name.toUpperCase()}:</strong> "${action}". Logged in the BMed record.`;
-      setTimeout(() => { if (fb) fb.style.display = "none"; }, 5000);
+      fb.style.borderColor = "var(--c-green)";
+      fb.style.color = "var(--c-green-ink)";
+      fb.innerHTML = `📡 <strong>DSN PACKET TRANSMITTED:</strong> Medical order dispatched to <strong>${targetName.toUpperCase()}</strong>. Store-and-forward relay active.`;
+      setTimeout(() => { if (fb) fb.style.display = "none"; }, 6000);
     }
+
+    if (statusEl) {
+      statusEl.innerHTML = `<span style="color:var(--c-green-ink);">Last sent to ${targetName} (${new Date().toISOString().substring(11, 16)} UTC)</span>`;
+    }
+  }
+
+  prescribe(action) {
+    this.insertMailTemplate("Clinical Prescription", action);
+    this.sendMailToCrew();
   }
 }
 
