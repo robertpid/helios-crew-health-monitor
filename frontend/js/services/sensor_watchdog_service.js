@@ -21,6 +21,7 @@ class SensorWatchdogService {
     this._wdtTimer = null;
     this._reconnectTimer = null;
     this._modalOpen = false;
+    this._disconnectedIds = new Set();
     this._snapshot = this._buildDefaultSnapshot();
   }
 
@@ -94,8 +95,12 @@ class SensorWatchdogService {
             const report = window.codebookService.expand(data.compact);
             if (report) this._state.updateFromBackend(report);
           }
-          if (data.watchdog) {
-            this._snapshot = data.watchdog;
+          if (data.watchdog && Array.isArray(data.watchdog.sensors)) {
+            const syncedNodes = data.watchdog.sensors.map((s) => ({
+              ...s,
+              connected: !this._disconnectedIds.has(s.id)
+            }));
+            this._snapshot = this._computeSnapshotFromNodes(syncedNodes);
           }
           this._renderUi();
         } catch (err) {
@@ -137,44 +142,43 @@ class SensorWatchdogService {
   }
 
   async toggleSensor(sensorId) {
-    const target = this._snapshot.sensors.find((s) => s.id === sensorId);
-    const willDisconnect = target ? target.connected : false;
-    if (willDisconnect) {
-      this._sound?.playWarning?.();
-    } else {
+    const isCurrentlyDisconnected = this._disconnectedIds.has(sensorId);
+    if (isCurrentlyDisconnected) {
+      this._disconnectedIds.delete(sensorId);
       this._sound?.playNominal?.();
+    } else {
+      this._disconnectedIds.add(sensorId);
+      this._sound?.playWarning?.();
     }
+
+    const updatedNodes = this._snapshot.sensors.map((s) => ({
+      ...s,
+      connected: !this._disconnectedIds.has(s.id)
+    }));
+    this._snapshot = this._computeSnapshotFromNodes(updatedNodes);
+    this._renderUi();
 
     if (this._ws && this._ws.readyState === WebSocket.OPEN) {
       this._ws.send(JSON.stringify({ action: "toggle_sensor", sensor_id: sensorId }));
-    }
-
-    try {
-      const resp = await fetch(`/api/v1/telemetry/watchdog/toggle/${encodeURIComponent(sensorId)}`, { method: "POST" });
-      if (resp.ok) {
-        this._snapshot = await resp.json();
-        this._renderUi();
-        return;
+    } else {
+      try {
+        await fetch(`/api/v1/telemetry/watchdog/toggle/${encodeURIComponent(sensorId)}`, { method: "POST" });
+      } catch (e) {
+        // Offline local fallback active
       }
-    } catch (e) {
-      // Offline local fallback
     }
-
-    const updatedNodes = this._snapshot.sensors.map((s) =>
-      s.id === sensorId ? { ...s, connected: !s.connected } : s
-    );
-    this._snapshot = this._computeSnapshotFromNodes(updatedNodes);
-    this._renderUi();
   }
 
   async restoreAllSensors() {
+    this._disconnectedIds.clear();
     this._sound?.playNominal?.();
-    if (this._ws && this._ws.readyState === WebSocket.OPEN) {
-      this._ws.send(JSON.stringify({ action: "restore_all" }));
-    }
     const restored = this._snapshot.sensors.map((s) => ({ ...s, connected: true }));
     this._snapshot = this._computeSnapshotFromNodes(restored);
     this._renderUi();
+
+    if (this._ws && this._ws.readyState === WebSocket.OPEN) {
+      this._ws.send(JSON.stringify({ action: "restore_all" }));
+    }
   }
 
   toggleModal() {
