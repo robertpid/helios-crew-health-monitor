@@ -36,7 +36,6 @@ class ViewportController {
 
   _groups(key) {
     const narrow = window.innerWidth < 900;
-    const compact = document.querySelector('.main-viewport').clientHeight < 590;
     const panels = {
       biomedical: ['anatomy', 'vitals', 'ecg'],
       environmental: ['habitat', 'environment', 'synergy', 'actions'],
@@ -45,14 +44,6 @@ class ViewportController {
       surgeon: ['surgeon_dashboard']
     };
     if (narrow) return (key === 'support' ? ['assistant', 'protocol', 'exams', 'mail', 'rules'] : (key === 'surgeon' ? ['surgeon_dashboard'] : panels[key])).map(p => [p]);
-    const compactWellness = key === 'matrix' && (window.innerWidth < 1200 || document.querySelector('.main-viewport').clientHeight < 620);
-    if (compact || compactWellness || (key === 'environmental' && window.innerWidth < 1100)) return {
-      biomedical: [['anatomy', 'vitals'], ['ecg']],
-      environmental: [['habitat', 'environment'], ['synergy', 'actions']],
-      matrix: [['sleep', 'tasks'], ['games', 'hydration']],
-      support: [['assistant'], ['exams', 'mail'], ['rules']],
-      surgeon: [['surgeon_dashboard']]
-    }[key];
     return key === 'support' ? [['assistant', 'exams', 'mail'], ['rules']] : (key === 'surgeon' ? [['surgeon_dashboard']] : [panels[key]]);
   }
 

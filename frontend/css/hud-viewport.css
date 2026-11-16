@@ -11,7 +11,7 @@ header.hud-header { position: relative; padding: 10px 20px; gap: 10px; }
 .brand-sub { display: none; }
 .nav-tab-btn { padding: 8px 10px; }
 .control-toolbar { padding: 6px 20px; gap: 10px; }
-.main-viewport { width: 100%; min-height: 0; padding: 12px 20px; }
+.main-viewport { width: 100%; min-height: 0; padding: 12px 20px; overflow-y: auto; }
 footer.hud-footer { margin-top: 0; padding: 6px 20px; font-size: 10px; gap: 10px; }
 footer.hud-footer > div { min-width: 0; }
 .viewport-view.active-view {
@@ -118,7 +118,7 @@ button:disabled { opacity: .4; cursor: default; box-shadow: none; }
 #psychSuggestionsContainer { gap: 4px !important; margin-top: 6px !important; }
 #psychSuggestionsContainer .btn-hud { white-space: normal; }
 #inputPsychText { min-width: 0; }
-[data-panel="exams"] > div:last-child, [data-panel="mail"] > div:last-child { padding: 10px !important; gap: 8px !important; flex-wrap: wrap; }
+[data-panel="exams"] > div:last-child, [data-panel="mail"] > div:nth-child(2) { padding: 10px !important; gap: 8px !important; flex-wrap: wrap; }
 [data-panel="exams"] .btn-hud { white-space: normal; }
 .rule-navigation { margin-bottom: 12px; }
 .protocol-content { display: flex; flex-direction: column; gap: 20px; }
