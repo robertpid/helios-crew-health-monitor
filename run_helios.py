@@ -1,39 +1,39 @@
 """
-Punto de entrada principal para el simulador de telemetría HELIOS.
+Main entry point for the HELIOS telemetry simulator.
 
-Orquestador de soporte vital para misiones de espacio profundo hacia Marte (Día 120).
-Inyecta un payload JSON cada 2 segundos al servidor Redis local en 'buzon_telemetria_tierra'.
+Life support orchestrator for deep space missions to Mars (Day 120).
+Injects a JSON payload every 2 seconds into the local Redis server on 'earth_telemetry_mailbox'.
 
-Uso:
+Usage:
     python run_helios.py
-    python run_helios.py --redis-host 127.0.0.1 --dia-mision 120 --intervalo 2.0
-    python run_helios.py --simular-demo-crisis
+    python run_helios.py --redis-host 127.0.0.1 --mission-day 120 --interval 2.0
+    python run_helios.py --simulate-crisis-demo
 """
 
 import argparse
 import logging
 import sys
 
-from helios_simulator.config import LimitesNasaConfig, MisionConfig, RedisConfig
+from helios_simulator.config import MissionConfig, NasaLimitsConfig, RedisConfig
 from helios_simulator.infrastructure.redis_publisher import RedisTelemetryPublisher
-from helios_simulator.presentation.orchestrator import TelemetriaOrchestrator
+from helios_simulator.presentation.orchestrator import TelemetryOrchestrator
 
 
-def configurar_subsistema_logging(nivel_verboso: bool = False) -> None:
+def configure_logging_subsystem(verbose_level: bool = False) -> None:
     """
-    Configura el formateador estándar del módulo logging según las directrices de ingeniería.
+    Configures the standard formatter of the logging module per engineering guidelines.
 
     Args:
-        nivel_verboso: Si es True, eleva el nivel a DEBUG.
+        verbose_level: If True, raises the level to DEBUG.
     """
-    formato_aeroespacial = (
+    aerospace_format = (
         "%(asctime)s.%(msecs)03d UTC | %(levelname)-8s | [%(name)s] | %(message)s"
     )
-    nivel = logging.DEBUG if nivel_verboso else logging.INFO
+    level = logging.DEBUG if verbose_level else logging.INFO
 
     logging.basicConfig(
-        level=nivel,
-        format=formato_aeroespacial,
+        level=level,
+        format=aerospace_format,
         datefmt="%Y-%m-%d %H:%M:%S",
         handlers=[
             logging.StreamHandler(sys.stdout),
@@ -41,12 +41,12 @@ def configurar_subsistema_logging(nivel_verboso: bool = False) -> None:
     )
 
 
-def parsear_argumentos_mision() -> argparse.Namespace:
+def parse_mission_arguments() -> argparse.Namespace:
     """
-    Parsea los parámetros operacionales recibidos por línea de comandos.
+    Parses the operational parameters received from the command line.
 
     Returns:
-        Espacio de nombres con las opciones configuradas.
+        Namespace with the configured options.
     """
     parser = argparse.ArgumentParser(
         description="HELIOS Telemetry Simulator - Deep Space Life Support System (NASA-STD-3001)",
@@ -56,47 +56,47 @@ def parsear_argumentos_mision() -> argparse.Namespace:
         "--redis-host",
         type=str,
         default="127.0.0.1",
-        help="Dirección IP o hostname del servidor Redis local.",
+        help="IP address or hostname of the local Redis server.",
     )
     parser.add_argument(
         "--redis-port",
         type=int,
         default=6379,
-        help="Puerto de escucha de Redis.",
+        help="Redis listening port.",
     )
     parser.add_argument(
-        "--redis-canal",
+        "--redis-channel",
         type=str,
-        default="buzon_telemetria_tierra",
-        help="Canal Pub/Sub y nombre de buzón en Redis.",
+        default="earth_telemetry_mailbox",
+        help="Pub/Sub channel and mailbox name in Redis.",
     )
     parser.add_argument(
-        "--dia-mision",
+        "--mission-day",
         type=int,
         default=120,
-        help="Día transcurrido de la misión hacia Marte (por defecto: Día 120).",
+        help="Elapsed day of the mission to Mars (default: Day 120).",
     )
     parser.add_argument(
-        "--intervalo",
+        "--interval",
         type=float,
         default=2.0,
-        help="Frecuencia de inyección de telemetría en segundos.",
+        help="Telemetry injection frequency in seconds.",
     )
     parser.add_argument(
-        "--max-ciclos",
+        "--max-cycles",
         type=int,
         default=None,
-        help="Número máximo de ciclos antes de finalizar (útil para pruebas automatizadas).",
+        help="Maximum number of cycles before finishing (useful for automated tests).",
     )
     parser.add_argument(
-        "--simular-demo-crisis",
+        "--simulate-crisis-demo",
         action="store_true",
-        help="Inyecta una secuencia de contingencia severa: pico de CO2, tormenta solar y estrés.",
+        help="Injects a severe contingency sequence: CO2 peak, solar storm and stress.",
     )
     parser.add_argument(
         "--verbose",
         action="store_true",
-        help="Habilita registros de depuración detallados.",
+        help="Enables detailed debug logging.",
     )
 
     return parser.parse_args()
@@ -104,59 +104,59 @@ def parsear_argumentos_mision() -> argparse.Namespace:
 
 def main() -> None:
     """
-    Punto de entrada seguro del productor de telemetría sintética.
-    Aplica Inversión de Dependencias (DIP) inyectando el publicador al orquestador.
+    Safe entry point of the synthetic telemetry producer.
+    Applies Dependency Inversion (DIP) by injecting the publisher into the orchestrator.
     """
-    argumentos = parsear_argumentos_mision()
-    configurar_subsistema_logging(nivel_verboso=argumentos.verbose)
+    arguments = parse_mission_arguments()
+    configure_logging_subsystem(verbose_level=arguments.verbose)
 
     logger = logging.getLogger("helios_simulator.main")
     logger.info("================================================================================")
     logger.info("  HELIOS DEEP SPACE LIFE SUPPORT TELEMETRY PRODUCER - NASA SPACE APPS 2026")
-    logger.info("  Estándar: NASA-STD-3001 | Marco: RIDGE | Destino: Redis ('%s')", argumentos.redis_canal)
+    logger.info("  Standard: NASA-STD-3001 | Framework: RIDGE | Target: Redis ('%s')", arguments.redis_channel)
     logger.info("================================================================================")
 
-    # 1. Configuración de Capa de Infraestructura
-    config_redis = RedisConfig(
-        host=argumentos.redis_host,
-        port=argumentos.redis_port,
-        canal_publicacion=argumentos.redis_canal,
-        cola_publicacion=f"{argumentos.redis_canal}_queue",
+    # 1. Infrastructure layer configuration
+    redis_config = RedisConfig(
+        host=arguments.redis_host,
+        port=arguments.redis_port,
+        publish_channel=arguments.redis_channel,
+        publish_queue=f"{arguments.redis_channel}_queue",
     )
-    publicador_redis = RedisTelemetryPublisher(config=config_redis)
+    redis_publisher = RedisTelemetryPublisher(config=redis_config)
 
-    # 2. Configuración de Dominio y Misión
-    config_mision = MisionConfig(
-        dia_mision_default=argumentos.dia_mision,
-        intervalo_emision_segundos=argumentos.intervalo,
+    # 2. Domain and mission configuration
+    mission_config = MissionConfig(
+        default_mission_day=arguments.mission_day,
+        emission_interval_seconds=arguments.interval,
     )
-    config_limites = LimitesNasaConfig()
+    limits_config = NasaLimitsConfig()
 
-    # 3. Inversión de Dependencias: Inyección del Publicador al Orquestador
-    orquestador = TelemetriaOrchestrator(
-        publicador=publicador_redis,
-        config_mision=config_mision,
-        config_limites=config_limites,
+    # 3. Dependency Inversion: injecting the Publisher into the Orchestrator
+    orchestrator = TelemetryOrchestrator(
+        publisher=redis_publisher,
+        mission_config=mission_config,
+        limits_config=limits_config,
     )
 
-    # 4. Modo de Demostración de Contingencia (si se solicita)
-    if argumentos.simular_demo_crisis:
-        logger.warning("MODO DEMO DE CONTINGENCIA MULTIVARIADA ACTIVADO.")
-        orquestador.inicializar_enlaces()
-        payload_crisis = orquestador.producir_muestra(
-            forzar_pico_co2=True,
-            forzar_tormenta_solar=True,
-            forzar_deficiencia_sueno=True,
-            forzar_taquicardia=True,
-            forzar_incongruencia=True,
+    # 4. Contingency demonstration mode (if requested)
+    if arguments.simulate_crisis_demo:
+        logger.warning("MULTIVARIATE CONTINGENCY DEMO MODE ACTIVATED.")
+        orchestrator.initialize_links()
+        crisis_payload = orchestrator.produce_sample(
+            force_co2_peak=True,
+            force_solar_storm=True,
+            force_sleep_deficit=True,
+            force_tachycardia=True,
+            force_incongruence=True,
         )
-        publicador_redis.publicar_telemetria(payload_crisis)
-        logger.info("Muestra de contingencia inyectada con éxito. Código de alertas:")
-        for alerta in payload_crisis.evaluaciones_preliminares:
-            logger.warning(" -> [%s] %s: %s", alerta.nivel.value, alerta.codigo, alerta.descripcion)
+        redis_publisher.publish_telemetry(crisis_payload)
+        logger.info("Contingency sample injected successfully. Alert codes:")
+        for alert in crisis_payload.preliminary_assessments:
+            logger.warning(" -> [%s] %s: %s", alert.level.value, alert.code, alert.description)
 
-    # 5. Ejecución del Bucle Continuo (cada 2 segundos)
-    orquestador.ejecutar_bucle(max_ciclos=argumentos.max_ciclos)
+    # 5. Running the continuous loop (every 2 seconds)
+    orchestrator.run_loop(max_cycles=arguments.max_cycles)
 
 
 if __name__ == "__main__":

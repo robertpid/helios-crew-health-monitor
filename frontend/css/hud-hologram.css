@@ -1,6 +1,6 @@
 /* ==========================================================================
    H.E.L.I.O.S. - HOLOGRAM STAGE, CALLOUTS & HOVER SPOTLIGHT
-   Arquitectura Modular: <= 300 líneas por módulo.
+   Modular architecture: <= 300 lines per module.
    ========================================================================== */
 
 .hologram-stage-wrapper {
@@ -18,12 +18,12 @@
 }
 
 /* --------------------------------------------------------------------------
-   MARCO DE COMPOSICIÓN DE RELACIÓN FIJA (680 x 500)
-   El viewBox del SVG y el marco comparten exactamente la misma relación de
-   aspecto, por lo que el escalado es uniforme y sin franjas muertas: una
-   unidad del viewBox equivale siempre a (1/680) del ancho y (1/500) del alto.
-   Gracias a ello las líneas guía SVG y las tarjetas HTML, posicionadas en
-   porcentaje, permanecen alineadas en cualquier resolución de pantalla.
+   FIXED-RATIO COMPOSITION FRAME (680 x 500)
+   The SVG viewBox and the frame share exactly the same aspect ratio, so the
+   scaling is uniform with no dead bands: one viewBox unit always equals
+   (1/680) of the width and (1/500) of the height.
+   Thanks to that, the SVG leader lines and the HTML cards, positioned in
+   percentages, stay aligned at any screen resolution.
    -------------------------------------------------------------------------- */
 .hologram-stage-wrapper.holo-stage--auto {
   min-height: 0;
@@ -55,7 +55,7 @@
   z-index: 4;
 }
 
-/* Tarjetas ancladas por su centro vertical sobre la retícula del marco */
+/* Cards anchored by their vertical center on the frame grid */
 .holo-frame .holo-card {
   position: absolute;
   width: 34.118%; /* 232 / 680 */
@@ -70,10 +70,10 @@
   left: 64.412%; /* 438 / 680 */
 }
 
-/* La tipografía acompaña al marco para que el rótulo nunca desborde su caja.
-   Los suelos del clamp están fijados para tableta: en iPad horizontal el marco
-   mide ~569px y un suelo de 9px dejaba los rótulos ilegibles a distancia de
-   brazo. Ninguno baja de 11px. */
+/* The typography follows the frame so the label never overflows its box.
+   The clamp floors are set for tablets: on a landscape iPad the frame measures
+   ~569px and a 9px floor left the labels illegible at arm's length. None drops
+   below 11px. */
 .holo-frame .holo-card {
   padding: clamp(7px, 1.3cqw, 11px) clamp(9px, 1.9cqw, 15px);
 }
@@ -97,7 +97,7 @@
   color: var(--text-muted);
 }
 
-/* El énfasis conserva el centrado vertical: se compone sobre translateY(-50%) */
+/* The emphasis keeps the vertical centering: it composes over translateY(-50%) */
 .holo-frame .holo-card:hover {
   transform: translateY(-50%) scale(1.03);
 }
@@ -133,11 +133,11 @@
 }
 
 /* --------------------------------------------------------------------------
-   TARJETAS HOLOGRÁFICAS (CALLOUTS)
-   Son la codificación secundaria que legitima el aviso de CVD de la paleta:
-   el nombre del órgano siempre está escrito. El borde izquierdo grueso porta
-   el color; el resto del contorno es una línea fina neutra, de modo que cinco
-   tarjetas simultáneas no compitan entre sí.
+   HOLOGRAPHIC CARDS (CALLOUTS)
+   These are the secondary encoding that legitimizes the palette's CVD warning:
+   the organ name is always written out. The thick left border carries the
+   color; the rest of the outline is a thin neutral line, so five simultaneous
+   cards do not compete with each other.
    -------------------------------------------------------------------------- */
 .hologram-callout {
   --callout-accent: var(--c-cyan);
@@ -181,7 +181,7 @@
   letter-spacing: var(--tr-tight);
 }
 
-/* La cifra va en tinta neutra tabular; el color vive en el borde del rótulo */
+/* The figure uses neutral tabular ink; the color lives on the label border */
 .callout-val {
   font-family: var(--font-data);
   font-weight: 400;
@@ -201,7 +201,7 @@
 .callout-bone      { --callout-accent: var(--c-amber); }
 
 /* ==========================================================================
-   SISTEMA DE ÉNFASIS INTERACTIVO HOLOGRÁFICO (HOVER SPOTLIGHT)
+   HOLOGRAPHIC INTERACTIVE EMPHASIS SYSTEM (HOVER SPOTLIGHT)
    ========================================================================== */
 
 .organ-connector-line,
@@ -209,7 +209,7 @@
   transition: opacity 0.25s ease, filter 0.25s ease;
 }
 
-/* Atenuación del resto de elementos no enfocados */
+/* Dimming of the remaining unfocused elements */
 .hologram-stage-wrapper.has-organ-focus .organ-node:not(.is-focused),
 .hologram-stage-wrapper.has-organ-focus .organ-connector-line:not(.is-focused),
 .hologram-stage-wrapper.has-organ-focus .hologram-callout:not(.is-focused),
@@ -251,36 +251,36 @@
   color: var(--text-primary) !important;
 }
 
-/* Iluminación de Órganos y Módulos Específicos */
+/* Lighting of Specific Organs and Modules */
 .hologram-callout.callout-brain.is-focused,
-.organ-node[data-organ="cerebro"].is-focused,
+.organ-node[data-organ="brain"].is-focused,
 .habitat-module-node[data-habitat-module="press"].is-focused {
   color: var(--neon-cyan);
   filter: drop-shadow(0 0 22px #00f0ff) brightness(1.7) !important;
 }
 
 .hologram-callout.callout-heart.is-focused,
-.organ-node[data-organ="corazon"].is-focused {
+.organ-node[data-organ="heart"].is-focused {
   color: var(--neon-red);
   filter: drop-shadow(0 0 26px #ff2255) brightness(1.7) !important;
 }
 
 .hologram-callout.callout-lungs.is-focused,
-.organ-node[data-organ="pulmones"].is-focused,
+.organ-node[data-organ="lungs"].is-focused,
 .habitat-module-node[data-habitat-module="co2"].is-focused {
   color: var(--neon-green);
   filter: drop-shadow(0 0 22px #00ff88) brightness(1.7) !important;
 }
 
 .hologram-callout.callout-hydration.is-focused,
-.organ-node[data-organ="hidratacion"].is-focused,
+.organ-node[data-organ="hydration"].is-focused,
 .habitat-module-node[data-habitat-module="hum"].is-focused {
   color: var(--neon-blue);
   filter: drop-shadow(0 0 22px #0088ff) brightness(1.7) !important;
 }
 
 .hologram-callout.callout-bone.is-focused,
-.organ-node[data-organ="huesos"].is-focused,
+.organ-node[data-organ="bones"].is-focused,
 .habitat-module-node[data-habitat-module="rad"].is-focused {
   color: var(--neon-amber);
   filter: drop-shadow(0 0 22px #ffaa00) brightness(1.7) !important;

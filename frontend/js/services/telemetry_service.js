@@ -1,7 +1,7 @@
 /**
  * ==============================================================================
- * CAPA DE SERVICIOS (CLIENT SERVICES): TelemetryService
- * Responsable de la comunicación de red desacoplada con el backend FastAPI.
+ * SERVICES LAYER (CLIENT SERVICES): TelemetryService
+ * Responsible for decoupled network communication with the FastAPI backend.
  * ==============================================================================
  */
 
@@ -12,94 +12,94 @@ class TelemetryService {
     this._pollingMs = 2000;
   }
 
-  iniciarPolling() {
+  startPolling() {
     if (this._intervalId) return;
-    // El libro de códigos se descarga una sola vez; a partir de ahí el enlace
-    // transporta únicamente códigos y números.
+    // The codebook is downloaded once; from then on the link carries only
+    // codes and numbers.
     window.codebookService
-      ?.cargar()
-      .catch((err) => console.warn("CodebookService: usando reporte completo.", err))
+      ?.load()
+      .catch((err) => console.warn("CodebookService: falling back to the full report.", err))
       .finally(() => {
-        this._obtenerTelemetria();
+        this._getTelemetry();
         this._intervalId = setInterval(() => {
-          this._obtenerTelemetria();
+          this._getTelemetry();
         }, this._pollingMs);
       });
   }
 
-  detenerPolling() {
+  stopPolling() {
     if (this._intervalId) {
       clearInterval(this._intervalId);
       this._intervalId = null;
     }
   }
 
-  async _obtenerTelemetria() {
+  async _getTelemetry() {
     try {
-      // Ruta nominal: registro compacto + traducción local mediante el codebook.
-      if (window.codebookService?.disponible) {
-        const resp = await fetch("/api/v1/telemetria/compacto");
+      // Nominal path: compact record + local translation through the codebook.
+      if (window.codebookService?.available) {
+        const resp = await fetch("/api/v1/telemetry/compact");
         if (resp.ok) {
-          const registro = await resp.json();
-          const reporte = window.codebookService.expandir(registro);
-          if (reporte) {
-            this._state.actualizarDesdeBackend(reporte);
+          const record = await resp.json();
+          const report = window.codebookService.expand(record);
+          if (report) {
+            this._state.updateFromBackend(report);
             return;
           }
         }
       }
 
-      // Repliegue: reporte completo con texto (depuración o codebook ausente).
-      const resp = await fetch("/api/v1/fusion/resultado");
+      // Fallback: full report with text (debugging or codebook absent).
+      const resp = await fetch("/api/v1/fusion/result");
       if (resp.ok) {
-        const datos = await resp.json();
-        this._state.actualizarDesdeBackend(datos);
+        const data = await resp.json();
+        this._state.updateFromBackend(data);
       }
     } catch (err) {
-      // Enlace resiliente: no bloquear UI si el backend está en reconexión
-      console.debug("TelemetryService: Enlace en espera o modo offline.");
+      // Resilient link: do not block the UI if the backend is reconnecting
+      console.debug("TelemetryService: link waiting or offline mode.");
     }
   }
 
-  async obtenerCatalogoMatriz() {
+  async getMatrixCatalog() {
     try {
-      const resp = await fetch("/api/v1/matriz-decisiones");
+      const resp = await fetch("/api/v1/decision-matrix");
       if (resp.ok) {
         return await resp.json();
       }
     } catch (err) {
-      console.warn("TelemetryService: Fallo al obtener matriz:", err);
+      console.warn("TelemetryService: failed to fetch the matrix:", err);
     }
     return [];
   }
 
-  async obtenerContramedidasActivas() {
+  async getActiveCountermeasures() {
     try {
-      const resp = await fetch("/api/v1/contramedidas/activas");
+      const resp = await fetch("/api/v1/countermeasures/active");
       if (resp.ok) {
         return await resp.json();
       }
     } catch (err) {
-      console.warn("TelemetryService: Fallo al obtener contramedidas:", err);
+      console.warn("TelemetryService: failed to fetch countermeasures:", err);
     }
     return null;
   }
 
-  async obtenerPreguntasPsicologicas() {
+  async getPsychologicalQuestions() {
     try {
-      const resp = await fetch("/api/v1/psicologico/preguntas");
+      const resp = await fetch("/api/v1/psychological/questions");
       if (resp.ok) {
         return await resp.json();
       }
     } catch (err) {
-      console.warn("TelemetryService: Fallo al cargar preguntas BHP:", err);
+      console.warn("TelemetryService: failed to load the BHP questions:", err);
     }
     return null;
   }
 
-  async evaluarRespuestaPsicologica(payload) {
+  async evaluatePsychologicalResponse(payload) {
     try {
-      const resp = await fetch("/api/v1/psicologico/evaluar", {
+      const resp = await fetch("/api/v1/psychological/evaluate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -108,7 +108,7 @@ class TelemetryService {
         return await resp.json();
       }
     } catch (err) {
-      console.warn("TelemetryService: Fallo en evaluación psicológica remota:", err);
+      console.warn("TelemetryService: remote psychological assessment failed:", err);
     }
     return null;
   }

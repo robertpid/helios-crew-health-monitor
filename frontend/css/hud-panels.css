@@ -1,9 +1,9 @@
 /* ==========================================================================
-   H.E.L.I.O.S. - PANELES, TILES DE MÉTRICA, MATRIZ Y MODAL
+   H.E.L.I.O.S. - PANELS, METRIC TILES, MATRIX AND MODAL
 
-   Regla rectora: las cifras van en tinta neutra con cifras tabulares; una
-   barra de acento coloreada al borde del tile porta la identidad. Teñir el
-   número lo engorda visualmente y lo vuelve menos legible sobre fondo oscuro.
+   Governing rule: figures use neutral ink with tabular numerals; a colored
+   accent bar on the tile edge carries the identity. Tinting the number makes
+   it visually heavier and less legible on a dark backdrop.
    ========================================================================== */
 
 .main-viewport {
@@ -29,8 +29,8 @@
   align-items: start;
 }
 
-/* Cada panel conserva la altura de su contenido. El ECG sigue a las métricas
-   con su margen normal, sin absorber el espacio sobrante del holograma. */
+/* Each panel keeps the height of its content. The ECG follows the metrics
+   with its normal margin, without absorbing the hologram's leftover space. */
 #viewBiomedical > .hud-panel {
   display: flex;
   flex-direction: column;
@@ -120,7 +120,7 @@
 }
 
 /* ==========================================================================
-   TILES DE MÉTRICA
+   METRIC TILES
    ========================================================================== */
 .metrics-grid-2x {
   display: grid;
@@ -262,9 +262,9 @@
 }
 
 /* ==========================================================================
-   MODAL DE ALERTA CRÍTICA
+   CRITICAL ALERT MODAL
    ========================================================================== */
-#modalAlerta {
+#modalAlert {
   position: fixed;
   inset: 0;
   width: 100vw;
@@ -279,7 +279,7 @@
   padding: var(--sp-5);
 }
 
-#modalAlerta.open {
+#modalAlert.open {
   display: flex !important;
 }
 

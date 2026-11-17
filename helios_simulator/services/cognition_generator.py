@@ -1,140 +1,140 @@
 """
-Generador de telemetría psicológica y cognitiva (Cerebro 4 - ASTRA).
+Psychological and cognitive telemetry generator (Brain 4 - ASTRA).
 
-Modela la interacción y cruce entre estresores ambientales, sobrecarga biológica
-y manifestaciones conductuales (latencia verbal, ocultamiento de estrés y SANS).
+Models the interaction and crossover between environmental stressors, biological
+overload and behavioral manifestations (verbal latency, stress masking and SANS).
 """
 
 import logging
-from helios_simulator.config import LimitesNasaConfig
-from helios_simulator.domain.models import CognicionModel
+from helios_simulator.config import NasaLimitsConfig
+from helios_simulator.domain.models import CognitionModel
 from helios_simulator.services.math_noise import (
-    evaluar_probabilidad_evento,
-    generar_ruido_gaussiano,
-    redondear_telemetria,
+    evaluate_event_probability,
+    generate_gaussian_noise,
+    round_telemetry,
 )
 
 logger = logging.getLogger(__name__)
 
 
-class GeneradorCognicion:
+class CognitionGenerator:
     """
-    Servicio de evaluación de parámetros cognitivos del subsistema ASTRA.
-    Aplica cruces lógicos multivariados para detectar fatiga y tensión psicológica.
+    Cognitive parameter assessment service for the ASTRA subsystem.
+    Applies multivariate logical crossovers to detect fatigue and psychological strain.
     """
 
-    def __init__(self, config_limites: LimitesNasaConfig | None = None) -> None:
+    def __init__(self, limits_config: NasaLimitsConfig | None = None) -> None:
         """
-        Inicializa el generador cognitivo.
+        Initializes the cognitive generator.
 
         Args:
-            config_limites: Parámetros y umbrales de referencia.
+            limits_config: Reference parameters and thresholds.
         """
-        self._config = config_limites or LimitesNasaConfig()
+        self._config = limits_config or NasaLimitsConfig()
 
-    def generar_lectura(
+    def generate_reading(
         self,
         co2_mmhg: float,
-        horas_sueno: float,
-        ritmo_cardiaco_bpm: float,
-        evento_solar_activo: bool = False,
-        forzar_incongruencia: bool = False,
-    ) -> CognicionModel:
+        sleep_hours: float,
+        heart_rate_bpm: float,
+        solar_event_active: bool = False,
+        force_incongruence: bool = False,
+    ) -> CognitionModel:
         """
-        Calcula las métricas de respuesta psicológica y verbal cruzando con el entorno y biometría.
+        Computes psychological and verbal response metrics by crossing environment and biometrics.
 
-        Reglas de Negocio:
-            1. Latencia de Voz: Base 200ms. CRUCE LÓGICO: Si co2_mmHg > 2.5 o horas_sueno < 6.0,
-               disparar a 600-900ms (refleja letargo y enlentecimiento psicomotor por hipercapnia o insomnio).
-            2. Densidad Léxica: 0.0 a 1.0. INCONGRUENCIA: En ocasiones simula estrés oculto
-               (ritmo_cardiaco > 95 pero densidad_lexica en 0.8 "fingiendo estar bien").
-            3. SANS Síntoma Visión: Booleano, cambia a True bajo estrés alto o elevación de CO2,
-               reflejando el 81% de prevalencia en astronautas de NASA según el programa LSAH.
+        Business Rules:
+            1. Voice Latency: Base 200ms. LOGICAL CROSSOVER: If co2_mmHg > 2.5 or sleep_hours < 6.0,
+               spike to 600-900ms (reflects lethargy and psychomotor slowing from hypercapnia or insomnia).
+            2. Lexical Density: 0.0 to 1.0. INCONGRUENCE: Occasionally simulates hidden stress
+               (heart_rate > 95 but lexical_density at 0.8, "pretending to be fine").
+            3. SANS Vision Symptom: Boolean, flips to True under high stress or CO2 elevation,
+               reflecting the 81% prevalence in NASA astronauts per the LSAH program.
 
         Args:
-            co2_mmhg: Concentración actual de CO2 en cabina.
-            horas_sueno: Horas dormidas en el último ciclo.
-            ritmo_cardiaco_bpm: Frecuencia cardiaca instantánea.
-            evento_solar_activo: Bandera de emergencia radiológica.
-            forzar_incongruencia: Bandera para activar prueba de estrés encubierto.
+            co2_mmhg: Current cabin CO2 concentration.
+            sleep_hours: Hours slept in the last cycle.
+            heart_rate_bpm: Instantaneous heart rate.
+            solar_event_active: Radiological emergency flag.
+            force_incongruence: Flag to activate the covert stress test.
 
         Returns:
-            Instancia validada de CognicionModel.
+            Validated CognitionModel instance.
         """
-        # 1. CRUCE LÓGICO: Latencia de voz
-        cruce_degradacion = (
-            co2_mmhg > self._config.co2_limite_7dias_mmhg
-            or horas_sueno < self._config.umbral_horas_sueno_riesgo
+        # 1. LOGICAL CROSSOVER: Voice latency
+        degradation_crossover = (
+            co2_mmhg > self._config.co2_limit_7day_mmhg
+            or sleep_hours < self._config.sleep_hours_risk_threshold
         )
 
-        if cruce_degradacion:
-            # Latencia disparada entre 600 y 900 ms
-            latencia_val = generar_ruido_gaussiano(
-                valor_medio=750.0,
-                desviacion_estandar=60.0,
-                limite_inferior=self._config.latencia_voz_estres_min_ms,
-                limite_superior=self._config.latencia_voz_estres_max_ms,
+        if degradation_crossover:
+            # Latency spiked between 600 and 900 ms
+            latency_val = generate_gaussian_noise(
+                mean_value=750.0,
+                standard_deviation=60.0,
+                lower_bound=self._config.stress_voice_latency_min_ms,
+                upper_bound=self._config.stress_voice_latency_max_ms,
             )
             logger.info(
-                "Cruce multivariado activado: latencia verbal retardada a %.1f ms (CO2: %.2f mmHg, Sueño: %.1f h)",
-                latencia_val,
+                "Multivariate crossover activated: verbal latency delayed to %.1f ms (CO2: %.2f mmHg, Sleep: %.1f h)",
+                latency_val,
                 co2_mmhg,
-                horas_sueno,
+                sleep_hours,
             )
         else:
-            # Latencia nominal base ~200 ms
-            latencia_val = generar_ruido_gaussiano(
-                valor_medio=self._config.latencia_voz_base_ms,
-                desviacion_estandar=25.0,
-                limite_inferior=140.0,
-                limite_superior=280.0,
+            # Nominal base latency ~200 ms
+            latency_val = generate_gaussian_noise(
+                mean_value=self._config.base_voice_latency_ms,
+                standard_deviation=25.0,
+                lower_bound=140.0,
+                upper_bound=280.0,
             )
 
-        # 2. INCONGRUENCIA: Estrés oculto vs Densidad léxica
-        es_ritmo_estres = ritmo_cardiaco_bpm > self._config.ritmo_cardiaco_umbral_estres_alto_bpm
-        disparar_incongruencia = forzar_incongruencia or (
-            es_ritmo_estres and evaluar_probabilidad_evento(self._config.probabilidad_incongruencia_estres)
+        # 2. INCONGRUENCE: Hidden stress vs lexical density
+        is_stress_rate = heart_rate_bpm > self._config.heart_rate_high_stress_threshold_bpm
+        trigger_incongruence = force_incongruence or (
+            is_stress_rate and evaluate_event_probability(self._config.stress_incongruence_probability)
         )
 
-        if disparar_incongruencia:
-            # Fingiendo compostura: densidad léxica artificialmente alta (0.80) a pesar de taquicardia
-            densidad_val = generar_ruido_gaussiano(0.80, 0.02, 0.75, 0.85)
-            incongruencia_activa = True
+        if trigger_incongruence:
+            # Feigning composure: artificially high lexical density (0.80) despite tachycardia
+            density_val = generate_gaussian_noise(0.80, 0.02, 0.75, 0.85)
+            incongruence_active = True
             logger.warning(
-                "Incongruencia cognitiva detectada: Ritmo cardiaco elevado (%.1f bpm) con densidad léxica fingida (%.2f)",
-                ritmo_cardiaco_bpm,
-                densidad_val,
+                "Cognitive incongruence detected: Elevated heart rate (%.1f bpm) with feigned lexical density (%.2f)",
+                heart_rate_bpm,
+                density_val,
             )
         else:
-            incongruencia_activa = False
-            if es_ritmo_estres or cruce_degradacion:
-                # Bajo estrés evidente, la riqueza léxica suele contraerse (0.35 - 0.55)
-                densidad_val = generar_ruido_gaussiano(0.45, 0.08, 0.20, 0.60)
+            incongruence_active = False
+            if is_stress_rate or degradation_crossover:
+                # Under evident stress, lexical richness usually contracts (0.35 - 0.55)
+                density_val = generate_gaussian_noise(0.45, 0.08, 0.20, 0.60)
             else:
-                # Estado normal balanceado (0.60 - 0.72)
-                densidad_val = generar_ruido_gaussiano(0.65, 0.05, 0.40, 0.85)
+                # Normal balanced state (0.60 - 0.72)
+                density_val = generate_gaussian_noise(0.65, 0.05, 0.40, 0.85)
 
-        # 3. SANS Síntoma de Visión (Spaceflight-Associated Neuro-ocular Syndrome)
-        # 81% de astronautas según programa LSAH bajo condiciones de estrés/hipercapnia/desplazamiento de fluidos
-        condicion_estres_alto = (
-            co2_mmhg >= self._config.co2_umbral_sintomas_mmhg
-            or evento_solar_activo
-            or ritmo_cardiaco_bpm >= self._config.ritmo_cardiaco_umbral_estres_alto_bpm
-            or latencia_val >= 600.0
+        # 3. SANS Vision Symptom (Spaceflight-Associated Neuro-ocular Syndrome)
+        # 81% of astronauts per the LSAH program under stress/hypercapnia/fluid shift conditions
+        high_stress_condition = (
+            co2_mmhg >= self._config.co2_symptom_threshold_mmhg
+            or solar_event_active
+            or heart_rate_bpm >= self._config.heart_rate_high_stress_threshold_bpm
+            or latency_val >= 600.0
         )
 
-        if condicion_estres_alto:
-            # 81% de probabilidad empírica de manifestación sintomática según LSAH
-            sans_activo = evaluar_probabilidad_evento(
-                self._config.prevalencia_sans_historica_lsah_pct / 100.0
+        if high_stress_condition:
+            # 81% empirical probability of symptomatic manifestation per LSAH
+            sans_active = evaluate_event_probability(
+                self._config.historical_sans_prevalence_lsah_pct / 100.0
             )
         else:
-            # En condiciones basales estables, probabilidad muy baja
-            sans_activo = evaluar_probabilidad_evento(0.08)
+            # Under stable baseline conditions, probability is very low
+            sans_active = evaluate_event_probability(0.08)
 
-        return CognicionModel(
-            latencia_voz_ms=redondear_telemetria(latencia_val, 1),
-            densidad_lexica_score=redondear_telemetria(densidad_val, 2),
-            incongruencia_estres_oculto=incongruencia_activa,
-            sans_sintoma_vision=sans_activo,
+        return CognitionModel(
+            voice_latency_ms=round_telemetry(latency_val, 1),
+            lexical_density_score=round_telemetry(density_val, 2),
+            hidden_stress_incongruence=incongruence_active,
+            sans_vision_symptom=sans_active,
         )

@@ -1,9 +1,9 @@
 /**
- * CAPA DE SERVICIOS: FitService
- * Subsistema de Monitoreo de Hidratación y Nutrición en Microgravedad.
- * Basado en la aplicación de vuelo de la NASA: ISS Food Intake Tracker (FIT - iPad).
- * Registra ingesta de bolsas de agua PWD, raciones de vuelo, sodio y electrolitos.
- * Rigurosamente bajo 400 líneas (Clean Code & SRP).
+ * SERVICES LAYER: FitService
+ * Hydration and Nutrition Monitoring Subsystem in Microgravity.
+ * Based on the NASA flight application: ISS Food Intake Tracker (FIT - iPad).
+ * Logs PWD water bag intake, flight rations, sodium and electrolytes.
+ * Strictly under 400 lines (Clean Code & SRP).
  */
 
 class FitService {
@@ -11,132 +11,132 @@ class FitService {
     this._stateManager = stateManager || window.stateManager;
     this._sound = soundService || window.soundService;
 
-    this._volumenMl = 1850;
-    this._metaMl = 2200;
-    this._calorias = 2150;
-    this._sodioMg = 2100;
-    this._ejercicioActivo = false;
+    this._volumeMl = 1850;
+    this._goalMl = 2200;
+    this._calories = 2150;
+    this._sodiumMg = 2100;
+    this._exerciseActive = false;
 
-    this._catalogoRaciones = {
-      agua: { nombre: "Bolsa Agua PWD", ml: 250, kcal: 0, na: 5, icono: "💧" },
-      electrolito: { nombre: "Bebida Sales Orales", ml: 300, kcal: 35, na: 180, icono: "⚡" },
-      cafe: { nombre: "Café/Té Rehidratable", ml: 200, kcal: 20, na: 10, icono: "☕" },
-      liofilizada: { nombre: "Ración Liofilizada", ml: 150, kcal: 450, na: 380, icono: "🍲" },
-      proteina: { nombre: "Pack Proteína & Ca", ml: 50, kcal: 550, na: 250, icono: "🥫" }
+    this._rationCatalog = {
+      water: { name: "PWD Water Bag", ml: 250, kcal: 0, na: 5, icon: "💧" },
+      electrolyte: { name: "Oral Salts Drink", ml: 300, kcal: 35, na: 180, icon: "⚡" },
+      coffee: { name: "Rehydratable Coffee/Tea", ml: 200, kcal: 20, na: 10, icon: "☕" },
+      freezeDried: { name: "Freeze-Dried Ration", ml: 150, kcal: 450, na: 380, icon: "🍲" },
+      protein: { name: "Protein & Ca Pack", ml: 50, kcal: 550, na: 250, icon: "🥫" }
     };
 
     if (this._stateManager?.subscribe) {
-      this._stateManager.subscribe(state => this._sincronizarTelemetria(state?.telemetria));
+      this._stateManager.subscribe(state => this._syncTelemetry(state?.telemetry));
     }
   }
 
-  inicializar() {
-    this.renderizar();
+  initialize() {
+    this.render();
   }
 
-  registrarRacion(tipo) {
-    const item = this._catalogoRaciones[tipo];
+  logServing(type) {
+    const item = this._rationCatalog[type];
     if (!item) return;
 
-    this._sound?.reproducirClick?.();
-    this._volumenMl += item.ml;
-    this._calorias += item.kcal;
-    this._sodioMg += item.na;
+    this._sound?.playClick?.();
+    this._volumeMl += item.ml;
+    this._calories += item.kcal;
+    this._sodiumMg += item.na;
 
-    // Actualizar telemetría de soporte vital en el StateManager
-    const litros = Math.round((this._volumenMl / 1000) * 100) / 100;
-    if (this._stateManager?._state?.telemetria?.fisiologia) {
-      this._stateManager._state.telemetria.fisiologia.liquidos_litros_dia = litros;
-      const elCallout = document.getElementById("calloutFluid");
-      if (elCallout) elCallout.innerText = `${litros.toFixed(1)} L/d`;
+    // Update the life support telemetry in the StateManager
+    const liters = Math.round((this._volumeMl / 1000) * 100) / 100;
+    if (this._stateManager?._state?.telemetry?.physiology) {
+      this._stateManager._state.telemetry.physiology.fluids_liters_per_day = liters;
+      const calloutEl = document.getElementById("calloutFluid");
+      if (calloutEl) calloutEl.innerText = `${liters.toFixed(1)} L/d`;
     }
 
-    // Sumar experiencia gamificada por cumplir protocolo de salud
-    window.wellnessController?.sumarExp?.(15);
+    // Add gamified experience for following the health protocol
+    window.wellnessController?.addXp?.(15);
 
-    // Mensaje de trazabilidad con Houston
+    // Traceability message with Houston
     const logBox = document.getElementById("fitLogMsg");
     if (logBox) {
-      logBox.innerHTML = `📡 <strong>Código escaneado:</strong> ${item.icono} ${item.nombre} (+${item.ml} mL · +${item.kcal} kcal). Transmitido a Houston BMed.`;
+      logBox.innerHTML = `📡 <strong>Code scanned:</strong> ${item.icon} ${item.name} (+${item.ml} mL · +${item.kcal} kcal). Transmitted to Houston BMed.`;
       logBox.style.color = "var(--neon-green)";
       setTimeout(() => { if (logBox) logBox.style.color = "#cbd5e1"; }, 3500);
     }
 
-    this.renderizar();
+    this.render();
   }
 
-  ajustarMetaEjercicio(completado) {
-    this._ejercicioActivo = completado;
-    this._metaMl = completado ? 2700 : 2200;
+  adjustExerciseGoal(completed) {
+    this._exerciseActive = completed;
+    this._goalMl = completed ? 2700 : 2200;
     const logBox = document.getElementById("fitLogMsg");
     if (logBox) {
-      logBox.innerHTML = `🏃 <strong>Ajuste FIT por Ejercicio ARED:</strong> Meta hídrica ampliada a ${this._metaMl} mL (+500 mL de reposición por transpiración).`;
+      logBox.innerHTML = `🏃 <strong>FIT adjustment for ARED exercise:</strong> Fluid goal raised to ${this._goalMl} mL (+500 mL to replace perspiration).`;
     }
-    this.renderizar();
+    this.render();
   }
 
-  _sincronizarTelemetria(telemetria) {
-    if (!telemetria?.fisiologia?.liquidos_litros_dia) return;
-    const l = telemetria.fisiologia.liquidos_litros_dia;
-    // Si la telemetría externa cambia significativamente, actualizar
-    if (Math.abs(this._volumenMl - l * 1000) > 300) {
-      this._volumenMl = Math.round(l * 1000);
-      this.renderizar();
+  _syncTelemetry(telemetry) {
+    if (!telemetry?.physiology?.fluids_liters_per_day) return;
+    const l = telemetry.physiology.fluids_liters_per_day;
+    // If the external telemetry changes significantly, update
+    if (Math.abs(this._volumeMl - l * 1000) > 300) {
+      this._volumeMl = Math.round(l * 1000);
+      this.render();
     }
   }
 
-  renderizar() {
-    const pct = Math.round((this._volumenMl / this._metaMl) * 100);
+  render() {
+    const pct = Math.round((this._volumeMl / this._goalMl) * 100);
     const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
 
-    setTxt("fitVolumeVal", `${this._volumenMl.toLocaleString()} mL`);
-    setTxt("fitQuotaTag", `/ ${this._metaMl.toLocaleString()} mL (${pct}%)`);
-    setTxt("fitNutriSummary", `Kcal: ${this._calorias} · Sodio (Na): ${this._sodioMg} mg · Ca/Vit D: Nominal`);
+    setTxt("fitVolumeVal", `${this._volumeMl.toLocaleString()} mL`);
+    setTxt("fitQuotaTag", `/ ${this._goalMl.toLocaleString()} mL (${pct}%)`);
+    setTxt("fitNutriSummary", `Kcal: ${this._calories} · Sodium (Na): ${this._sodiumMg} mg · Ca/Vit D: Nominal`);
 
-    // Estados del semáforo
-    const semOpt = document.getElementById("semOptimo");
-    const semAvi = document.getElementById("semAviso");
-    const semCri = document.getElementById("semCritico");
-    const lblOpt = document.getElementById("lblOptimo");
-    const lblAvi = document.getElementById("lblAviso");
-    const lblCri = document.getElementById("lblCritico");
+    // Traffic light states
+    const semOpt = document.getElementById("semOptimal");
+    const semWarn = document.getElementById("semWarning");
+    const semCrit = document.getElementById("semCritical");
+    const lblOpt = document.getElementById("lblOptimal");
+    const lblWarn = document.getElementById("lblWarning");
+    const lblCrit = document.getElementById("lblCritical");
     const statusTag = document.getElementById("fitStatusTag");
 
-    let estado = "OPTIMO";
-    if (this._volumenMl < 1200) estado = "CRITICO";
-    else if (this._volumenMl < this._metaMl * 0.85) estado = "AVISO";
+    let state = "OPTIMAL";
+    if (this._volumeMl < 1200) state = "CRITICAL";
+    else if (this._volumeMl < this._goalMl * 0.85) state = "WARNING";
 
-    if (semOpt && semAvi && semCri) {
-      if (estado === "OPTIMO") {
+    if (semOpt && semWarn && semCrit) {
+      if (state === "OPTIMAL") {
         semOpt.style.background = "#00ff88";
         semOpt.style.opacity = "1";
         semOpt.style.boxShadow = "0 0 12px rgba(0, 255, 136, 0.7)";
-        semAvi.style.opacity = "0.2";
-        semCri.style.opacity = "0.2";
+        semWarn.style.opacity = "0.2";
+        semCrit.style.opacity = "0.2";
         if (lblOpt) { lblOpt.style.color = "var(--neon-green)"; lblOpt.style.fontWeight = "bold"; }
-        if (lblAvi) { lblAvi.style.color = "#64748b"; lblAvi.style.fontWeight = "normal"; }
-        if (lblCri) { lblCri.style.color = "#64748b"; lblCri.style.fontWeight = "normal"; }
-        if (statusTag) { statusTag.innerText = "▲ ÓPTIMO"; statusTag.style.color = "var(--neon-green)"; }
-      } else if (estado === "AVISO") {
+        if (lblWarn) { lblWarn.style.color = "#64748b"; lblWarn.style.fontWeight = "normal"; }
+        if (lblCrit) { lblCrit.style.color = "#64748b"; lblCrit.style.fontWeight = "normal"; }
+        if (statusTag) { statusTag.innerText = "▲ OPTIMAL"; statusTag.style.color = "var(--neon-green)"; }
+      } else if (state === "WARNING") {
         semOpt.style.opacity = "0.2";
-        semAvi.style.background = "#f59e0b";
-        semAvi.style.opacity = "1";
-        semAvi.style.boxShadow = "0 0 12px rgba(245, 158, 11, 0.7)";
-        semCri.style.opacity = "0.2";
+        semWarn.style.background = "#f59e0b";
+        semWarn.style.opacity = "1";
+        semWarn.style.boxShadow = "0 0 12px rgba(245, 158, 11, 0.7)";
+        semCrit.style.opacity = "0.2";
         if (lblOpt) { lblOpt.style.color = "#64748b"; lblOpt.style.fontWeight = "normal"; }
-        if (lblAvi) { lblAvi.style.color = "var(--neon-amber)"; lblAvi.style.fontWeight = "bold"; }
-        if (lblCri) { lblCri.style.color = "#64748b"; lblCri.style.fontWeight = "normal"; }
-        if (statusTag) { statusTag.innerText = "● AVISO (HIDRATAR)"; statusTag.style.color = "var(--neon-amber)"; }
+        if (lblWarn) { lblWarn.style.color = "var(--neon-amber)"; lblWarn.style.fontWeight = "bold"; }
+        if (lblCrit) { lblCrit.style.color = "#64748b"; lblCrit.style.fontWeight = "normal"; }
+        if (statusTag) { statusTag.innerText = "● WARNING (HYDRATE)"; statusTag.style.color = "var(--neon-amber)"; }
       } else {
         semOpt.style.opacity = "0.2";
-        semAvi.style.opacity = "0.2";
-        semCri.style.background = "#ff2255";
-        semCri.style.opacity = "1";
-        semCri.style.boxShadow = "0 0 14px rgba(255, 34, 85, 0.8)";
+        semWarn.style.opacity = "0.2";
+        semCrit.style.background = "#ff2255";
+        semCrit.style.opacity = "1";
+        semCrit.style.boxShadow = "0 0 14px rgba(255, 34, 85, 0.8)";
         if (lblOpt) { lblOpt.style.color = "#64748b"; lblOpt.style.fontWeight = "normal"; }
-        if (lblAvi) { lblAvi.style.color = "#64748b"; lblAvi.style.fontWeight = "normal"; }
-        if (lblCri) { lblCri.style.color = "var(--neon-red)"; lblCri.style.fontWeight = "bold"; }
-        if (statusTag) { statusTag.innerText = "▼ CRÍTICO (RIESGO LITIASIS)"; statusTag.style.color = "var(--neon-red)"; }
+        if (lblWarn) { lblWarn.style.color = "#64748b"; lblWarn.style.fontWeight = "normal"; }
+        if (lblCrit) { lblCrit.style.color = "var(--neon-red)"; lblCrit.style.fontWeight = "bold"; }
+        if (statusTag) { statusTag.innerText = "▼ CRITICAL (STONE RISK)"; statusTag.style.color = "var(--neon-red)"; }
       }
     }
   }

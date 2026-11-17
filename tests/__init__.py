@@ -1,3 +1,3 @@
 """
-Paquete de pruebas automatizadas para helios_simulator.
+Automated test package for helios_simulator.
 """

@@ -1,91 +1,91 @@
 """
-Utilidades matemáticas y de modelado estocástico (DRY).
+Mathematical and stochastic modeling utilities (DRY).
 
-Centraliza las rutinas de generación de ruido gaussiano, fluctuaciones fisiológicas
-y modelos de decaimiento conforme a los lineamientos aeroespaciales de simulación.
+Centralizes the routines for Gaussian noise generation, physiological fluctuations
+and decay models in accordance with aerospace simulation guidelines.
 """
 
 import math
 import random
 
 
-def generar_ruido_gaussiano(
-    valor_medio: float,
-    desviacion_estandar: float,
-    limite_inferior: float | None = None,
-    limite_superior: float | None = None,
+def generate_gaussian_noise(
+    mean_value: float,
+    standard_deviation: float,
+    lower_bound: float | None = None,
+    upper_bound: float | None = None,
 ) -> float:
     """
-    Genera un valor con distribución normal acotado opcionalmente entre límites.
+    Generates a normally distributed value, optionally clamped between bounds.
 
     Args:
-        valor_medio: Media de la distribución.
-        desviacion_estandar: Desviación estándar del ruido.
-        limite_inferior: Cota inferior opcional.
-        limite_superior: Cota superior opcional.
+        mean_value: Mean of the distribution.
+        standard_deviation: Standard deviation of the noise.
+        lower_bound: Optional lower bound.
+        upper_bound: Optional upper bound.
 
     Returns:
-        Valor flotante ajustado y acotado.
+        Adjusted and clamped float value.
     """
-    valor = random.gauss(valor_medio, desviacion_estandar)
-    if limite_inferior is not None and valor < limite_inferior:
-        valor = limite_inferior
-    if limite_superior is not None and valor > limite_superior:
-        valor = limite_superior
-    return round(valor, 3)
+    value = random.gauss(mean_value, standard_deviation)
+    if lower_bound is not None and value < lower_bound:
+        value = lower_bound
+    if upper_bound is not None and value > upper_bound:
+        value = upper_bound
+    return round(value, 3)
 
 
-def evaluar_probabilidad_evento(probabilidad: float) -> bool:
+def evaluate_event_probability(probability: float) -> bool:
     """
-    Determina si un evento estocástico ocurre dada su probabilidad uniforme.
+    Determines whether a stochastic event occurs given its uniform probability.
 
     Args:
-        probabilidad: Valor entre 0.0 y 1.0 que define la tasa de ocurrencia.
+        probability: Value between 0.0 and 1.0 defining the occurrence rate.
 
     Returns:
-        True si el evento se activó, False en caso contrario.
+        True if the event triggered, False otherwise.
     """
-    if probabilidad <= 0.0:
+    if probability <= 0.0:
         return False
-    if probabilidad >= 1.0:
+    if probability >= 1.0:
         return True
-    return random.random() < probabilidad
+    return random.random() < probability
 
 
-def calcular_perdida_osea_acumulada(
-    dia_mision: int,
-    tasa_mensual_pct: float = 1.5,
+def compute_cumulative_bone_loss(
+    mission_day: int,
+    monthly_rate_pct: float = 1.5,
 ) -> float:
     """
-    Calcula la estimación de pérdida ósea acumulada según los estudios del
-    Human System Risk Board de la NASA y datos de cosmonautas en Mir (1.0% a 1.5% mensual).
+    Computes the estimated cumulative bone loss per the studies of NASA's
+    Human System Risk Board and Mir cosmonaut data (1.0% to 1.5% monthly).
 
-    Fórmula: (dia_mision / 30) * tasa_mensual_pct
-
-    Args:
-        dia_mision: Días transcurridos en ambiente de microgravedad.
-        tasa_mensual_pct: Porcentaje promedio de pérdida por mes (30 días).
-
-    Returns:
-        Porcentaje estimado de pérdida de masa ósea.
-    """
-    if dia_mision <= 0:
-        return 0.0
-    perdida = (dia_mision / 30.0) * tasa_mensual_pct
-    return round(perdida, 3)
-
-
-def redondear_telemetria(valor: float, decimales: int = 2) -> float:
-    """
-    Normaliza y redondea valores de telemetría para transmisión serializada.
+    Formula: (mission_day / 30) * monthly_rate_pct
 
     Args:
-        valor: Número decimal crudo.
-        decimales: Cantidad de dígitos decimales significativos.
+        mission_day: Days elapsed in a microgravity environment.
+        monthly_rate_pct: Average loss percentage per month (30 days).
 
     Returns:
-        Flotante redondeado.
+        Estimated percentage of bone mass loss.
     """
-    if math.isnan(valor) or math.isinf(valor):
+    if mission_day <= 0:
         return 0.0
-    return round(valor, decimales)
+    loss = (mission_day / 30.0) * monthly_rate_pct
+    return round(loss, 3)
+
+
+def round_telemetry(value: float, decimals: int = 2) -> float:
+    """
+    Normalizes and rounds telemetry values for serialized transmission.
+
+    Args:
+        value: Raw decimal number.
+        decimals: Number of significant decimal digits.
+
+    Returns:
+        Rounded float.
+    """
+    if math.isnan(value) or math.isinf(value):
+        return 0.0
+    return round(value, decimals)

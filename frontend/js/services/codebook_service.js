@@ -1,198 +1,197 @@
 /**
  * ==============================================================================
- * CAPA DE SERVICIOS: CodebookService
+ * SERVICES LAYER: CodebookService
  *
- * Descarga UNA sola vez el libro de códigos de telemetría y reconstruye en el
- * cliente las cadenas descriptivas que antes viajaban en cada ciclo.
+ * Downloads the telemetry codebook ONCE and reconstructs on the client the
+ * descriptive strings that used to travel in every cycle.
  *
- * El enlace transporta sólo códigos estables (CO2_ELEV, CX-03, KR03...) y
- * valores numéricos; el texto se compone aquí. La salida replica exactamente la
- * forma del reporte consolidado, de modo que el resto del HUD no necesita
- * cambio alguno.
+ * The link carries only stable codes (CO2_ELEV, CX-03, KR03...) and numeric
+ * values; the text is composed here. The output replicates exactly the shape of
+ * the consolidated report, so the rest of the HUD needs no changes at all.
  *
- * Esta implementación es el espejo en JavaScript de
- * `helios_inference/services/telemetry_compactor.expandir()`: ambas deben
- * producir cadenas idénticas.
+ * This implementation is the JavaScript mirror of
+ * `helios_inference/services/telemetry_compactor.expand()`: both must produce
+ * identical strings.
  * ==============================================================================
  */
 
 class CodebookService {
   constructor() {
     this._codebook = null;
-    this._cargando = null;
-    this._ESCALADO = { PRECAUCION: "ALERTA", ALERTA: "CRITICA", CRITICA: "CRITICA" };
+    this._loading = null;
+    this._ESCALATED = { CAUTION: "ALERT", ALERT: "CRITICAL", CRITICAL: "CRITICAL" };
   }
 
-  get disponible() {
+  get available() {
     return this._codebook !== null;
   }
 
   /**
-   * Descarga el libro de códigos una única vez (idempotente y a prueba de carreras).
+   * Downloads the codebook exactly once (idempotent and race-safe).
    */
-  async cargar() {
+  async load() {
     if (this._codebook) return this._codebook;
-    if (this._cargando) return this._cargando;
+    if (this._loading) return this._loading;
 
-    this._cargando = (async () => {
-      const resp = await fetch("/api/v1/telemetria/codebook");
+    this._loading = (async () => {
+      const resp = await fetch("/api/v1/telemetry/codebook");
       if (!resp.ok) throw new Error(`Codebook HTTP ${resp.status}`);
       this._codebook = await resp.json();
       return this._codebook;
     })();
 
     try {
-      return await this._cargando;
+      return await this._loading;
     } finally {
-      this._cargando = null;
+      this._loading = null;
     }
   }
 
   /**
-   * Sustituye los marcadores posicionales de una plantilla del libro de códigos.
-   * Soporta `{0}`, `{0:.2f}` y el marcador nominal `{dia}`.
+   * Substitutes the positional markers of a codebook template.
+   * Supports `{0}`, `{0:.2f}` and the named marker `{day}`.
    */
-  _formatear(plantilla, valor, dia) {
-    return plantilla
-      .replace(/\{0(?::\.(\d)f)?\}/g, (_, decimales) =>
-        decimales === undefined ? String(valor) : Number(valor).toFixed(Number(decimales))
+  _format(template, value, day) {
+    return template
+      .replace(/\{0(?::\.(\d)f)?\}/g, (_, decimals) =>
+        decimals === undefined ? String(value) : Number(value).toFixed(Number(decimals))
       )
-      .replace(/\{dia\}/g, String(dia));
+      .replace(/\{day\}/g, String(day));
   }
 
   /**
-   * Reconstruye el reporte consolidado completo a partir del registro compacto.
+   * Reconstructs the full consolidated report from the compact record.
    *
-   * @param {object} r Registro compacto recibido de /api/v1/telemetria/compacto
-   * @returns {object|null} Reporte con la misma forma que /api/v1/fusion/resultado
+   * @param {object} r Compact record received from /api/v1/telemetry/compact
+   * @returns {object|null} Report with the same shape as /api/v1/fusion/result
    */
-  expandir(r) {
+  expand(r) {
     const cb = this._codebook;
     if (!cb || !r) return null;
 
     const met = r.met || [];
-    const etiquetasAmbiental = [];
-    const etiquetasBiometrico = [];
+    const environmentalLabels = [];
+    const biometricLabels = [];
 
-    // --- Cerebro 1: etiquetas ambientales ------------------------------------
-    (r.amb || []).forEach((bandera, i) => {
-      if (!bandera || i >= cb.ambiental.length) return;
-      const e = cb.ambiental[i];
-      if (e.codigo === "RAD_CRIT" && r.sol) {
-        etiquetasAmbiental.push(e.plantilla_evento);
+    // --- Brain 1: environmental labels ---------------------------------------
+    (r.amb || []).forEach((flag, i) => {
+      if (!flag || i >= cb.environmental.length) return;
+      const e = cb.environmental[i];
+      if (e.code === "RAD_CRIT" && r.sol) {
+        environmentalLabels.push(e.event_template);
       } else {
-        etiquetasAmbiental.push(this._formatear(e.plantilla, met[e.metrica] ?? 0, r.dia));
+        environmentalLabels.push(this._format(e.template, met[e.metric] ?? 0, r.day));
       }
     });
 
-    // --- Cerebro 2: etiquetas biométricas ------------------------------------
-    (r.bio || []).forEach((bandera, i) => {
-      if (!bandera || i >= cb.biometrico.length) return;
-      const e = cb.biometrico[i];
-      const valor = e.metrica === null ? 0 : (met[e.metrica] ?? 0);
-      etiquetasBiometrico.push(this._formatear(e.plantilla, valor, r.dia));
+    // --- Brain 2: biometric labels -------------------------------------------
+    (r.bio || []).forEach((flag, i) => {
+      if (!flag || i >= cb.biometric.length) return;
+      const e = cb.biometric[i];
+      const value = e.metric === null ? 0 : (met[e.metric] ?? 0);
+      biometricLabels.push(this._format(e.template, value, r.day));
     });
 
-    // El orden de consolidación replica al del motor: Cerebro 1, luego Cerebro 2.
-    const evaluaciones = [...etiquetasAmbiental, ...etiquetasBiometrico];
+    // The consolidation order mirrors the engine's: Brain 1, then Brain 2.
+    const assessments = [...environmentalLabels, ...biometricLabels];
 
-    // --- Cerebro 3: arista dominante del grafo de Kronecker ------------------
-    let aristaCritica = "ESTADO_NOMINAL_SIN_SINERGIAS_ADVERSAS";
-    let textoFusion = cb.fusion_nominal.texto;
-    if (r.kr >= 0 && cb.aristas_kronecker[r.kr]) {
-      aristaCritica = cb.aristas_kronecker[r.kr].nombre;
-      textoFusion = cb.plantilla_fusion
-        .replace("{arista}", aristaCritica)
-        .replace(/\{severidad(?::\.\df)?\}/, Number(r.krs).toFixed(1));
+    // --- Brain 3: dominant edge of the Kronecker graph ------------------------
+    let criticalEdge = "NOMINAL_STATE_NO_ADVERSE_SYNERGIES";
+    let fusionText = cb.fusion_nominal.text;
+    if (r.kr >= 0 && cb.kronecker_edges[r.kr]) {
+      criticalEdge = cb.kronecker_edges[r.kr].name;
+      fusionText = cb.fusion_template
+        .replace("{edge}", criticalEdge)
+        .replace(/\{severity(?::\.\df)?\}/, Number(r.krs).toFixed(1));
       if (r.krx) {
-        textoFusion += cb.plantilla_fusion_severa;
-        evaluaciones.push(textoFusion);
+        fusionText += cb.severe_fusion_template;
+        assessments.push(fusionText);
       }
     }
 
-    // --- Cerebro 4: ASTRA ----------------------------------------------------
-    const alertaAstra = r.inc ? cb.astra.texto : null;
-    if (alertaAstra) evaluaciones.push(alertaAstra);
+    // --- Brain 4: ASTRA -------------------------------------------------------
+    const astraAlert = r.inc ? cb.astra.text : null;
+    if (astraAlert) assessments.push(astraAlert);
 
-    // --- Matriz de decisiones ------------------------------------------------
-    const mapaReglas = new Map(cb.reglas.map((x) => [x.codigo, x]));
-    const alertas = [];
-    const contramedidas = [];
+    // --- Decision matrix ------------------------------------------------------
+    const ruleMap = new Map(cb.rules.map((x) => [x.code, x]));
+    const alerts = [];
+    const countermeasures = [];
 
-    (r.rg || []).forEach((codigoBruto) => {
-      const escalada = codigoBruto.endsWith("!");
-      const codigo = escalada ? codigoBruto.slice(0, -1) : codigoBruto;
-      const regla = mapaReglas.get(codigo);
-      if (!regla) return;
+    (r.rg || []).forEach((rawCode) => {
+      const escalation = rawCode.endsWith("!");
+      const code = escalation ? rawCode.slice(0, -1) : rawCode;
+      const rule = ruleMap.get(code);
+      if (!rule) return;
 
-      const nivel = escalada ? this._ESCALADO[regla.nivel] : regla.nivel;
-      evaluaciones.push(`[${codigo} - ${nivel}] ${regla.evaluacion_preliminar}`);
-      alertas.push({
-        id_regla: codigo,
-        dominio: regla.dominio,
-        nivel,
-        evaluacion_preliminar: regla.evaluacion_preliminar,
-        contramedidas_sugeridas: regla.contramedidas,
-        destinatarios: regla.destinatarios,
-        estandar_base: regla.estandar_base,
-        ventana_tiempo: regla.ventana_tiempo,
-        escalada,
+      const level = escalation ? this._ESCALATED[rule.level] : rule.level;
+      assessments.push(`[${code} - ${level}] ${rule.preliminary_assessment}`);
+      alerts.push({
+        rule_id: code,
+        domain: rule.domain,
+        level,
+        preliminary_assessment: rule.preliminary_assessment,
+        suggested_countermeasures: rule.countermeasures,
+        recipients: rule.recipients,
+        base_standard: rule.base_standard,
+        time_window: rule.time_window,
+        escalation,
       });
-      regla.contramedidas.forEach((accion) => {
-        if (contramedidas.length < 3 && !contramedidas.includes(accion)) {
-          contramedidas.push(accion);
+      rule.countermeasures.forEach((action) => {
+        if (countermeasures.length < 3 && !countermeasures.includes(action)) {
+          countermeasures.push(action);
         }
       });
     });
 
-    // Reconstrucción con la forma exacta del reporte consolidado
+    // Reconstruction with the exact shape of the consolidated report
     return {
-      timestamp_inferencia: new Date(r.ts * 1000).toISOString(),
-      id_mision: r.mis,
-      dia_mision: r.dia,
-      astronauta_id: r.ast,
-      cerebro_1_ambiental: {
-        vector_ambiental: r.amb,
-        etiquetas_activadas: etiquetasAmbiental,
-        co2_excedido: !!r.amb?.[0],
-        radiacion_critica: !!r.amb?.[1],
-        presion_anomala: !!r.amb?.[2],
+      inference_timestamp: new Date(r.ts * 1000).toISOString(),
+      mission_id: r.mis,
+      mission_day: r.day,
+      astronaut_id: r.ast,
+      brain_1_environmental: {
+        environmental_vector: r.amb,
+        activated_labels: environmentalLabels,
+        co2_exceeded: !!r.amb?.[0],
+        critical_radiation: !!r.amb?.[1],
+        abnormal_pressure: !!r.amb?.[2],
       },
-      cerebro_2_biometrico: {
-        vector_biometrico: r.bio,
-        etiquetas_activadas: etiquetasBiometrico,
-        metricas_fisicas_normales: (r.bio || []).every((x) => !x),
-        cuerpo_en_panico: !!r.bio?.[0],
+      brain_2_biometric: {
+        biometric_vector: r.bio,
+        activated_labels: biometricLabels,
+        normal_physical_metrics: (r.bio || []).every((x) => !x),
+        body_in_panic: !!r.bio?.[0],
       },
-      cerebro_3_grafo_fusion: {
-        vector_kronecker_dimension: 12,
-        arista_sinergica_critica: aristaCritica,
-        indice_argmax: r.kr,
-        puntaje_severidad_maximo: r.krs,
-        estres_fisiologico_severo: !!r.krx,
-        evaluacion_preliminar_fusion: textoFusion,
+      brain_3_fusion_graph: {
+        kronecker_vector_dimension: 12,
+        critical_synergy_edge: criticalEdge,
+        argmax_index: r.kr,
+        max_severity_score: r.krs,
+        severe_physiological_stress: !!r.krx,
+        fusion_preliminary_assessment: fusionText,
       },
-      cerebro_4_astra: {
-        similitud_coseno_linea_base: r.cos,
-        incongruencia_cognitiva_detectada: !!r.inc,
-        alerta_astra: alertaAstra,
+      brain_4_astra: {
+        baseline_cosine_similarity: r.cos,
+        cognitive_incongruence_detected: !!r.inc,
+        astra_alert: astraAlert,
       },
-      evaluaciones_preliminares_activas: evaluaciones,
-      alertas_matriz_decisiones: alertas,
-      contramedidas_priorizadas: contramedidas,
-      tiempo_computo_ms: r.ms,
-      metadatos_edge: cb.metadatos_edge,
-      metricas_crudas: this._mapearMetricas(met),
+      active_preliminary_assessments: assessments,
+      decision_matrix_alerts: alerts,
+      prioritized_countermeasures: countermeasures,
+      compute_time_ms: r.ms,
+      edge_metadata: cb.edge_metadata,
+      raw_metrics: this._mapMetrics(met),
     };
   }
 
-  /** Reconstruye el diccionario de métricas a partir del array posicional. */
-  _mapearMetricas(met) {
-    const salida = {};
-    (this._codebook?.orden_metricas || []).forEach((clave, i) => {
-      salida[clave] = met[i];
+  /** Reconstructs the metrics dictionary from the positional array. */
+  _mapMetrics(met) {
+    const output = {};
+    (this._codebook?.metric_order || []).forEach((key, i) => {
+      output[key] = met[i];
     });
-    return salida;
+    return output;
   }
 }
 

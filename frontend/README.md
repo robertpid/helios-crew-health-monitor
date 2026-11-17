@@ -1,78 +1,80 @@
 # H.E.L.I.O.S. - Frontend Cockpit HUD
 
-## Arquitectura Modular N-Capas
+## Modular N-Layer Architecture
 
-El frontend de **H.E.L.I.O.S.** ha sido completamente modularizado para garantizar un mantenimiento ágil y limpio sin incurrir en sobrecarga de rendimiento, dependencias pesadas de Node.js o consumo innecesario de GPU/RAM.
+The **H.E.L.I.O.S.** frontend has been fully modularized to guarantee agile, clean maintenance without incurring performance overhead, heavy Node.js dependencies or unnecessary GPU/RAM consumption.
 
-### Estructura de Directorios
+### Directory Structure
 
 ```text
 frontend/
-├── assemble_index.py        # Compilador y ensamblador modular en Python puro (PEP 8)
-├── components/              # Módulos y vistas desacopladas (< 250 líneas por archivo)
-│   ├── header.html          # Cabecera de cabina y selector de ventanas
-│   ├── toolbar.html         # Barra de telemetría DSN y control de simulación
-│   ├── view_biomedical.html # Ventana 1: Resumen biomédico e infografía holográfica 3D
-│   ├── view_environmental.html # Ventana 2: Ambiente de cabina y hábitat espacial
-│   ├── view_wellness.html   # Ventana 3: Sueño, rutinas, hidratación y acceso a juegos
-│   ├── modal_games.html     # Catálogo y modal de los ocho juegos
-│   ├── modal_alert.html     # Modal de alerta crítica flotante
-│   └── footer.html          # Pie de página y conformidad reglamentaria NASA
+├── assemble_index.py        # Modular compiler and assembler in pure Python (PEP 8)
+├── components/              # Decoupled modules and views (< 250 lines per file)
+│   ├── header.html          # Cockpit header and view selector
+│   ├── toolbar.html         # DSN telemetry bar and simulation controls
+│   ├── view_biomedical.html # View 1: Biomedical summary and 3D holographic infographic
+│   ├── view_environmental.html # View 2: Cabin environment and space habitat
+│   ├── view_wellness.html   # View 3: Sleep, routines, hydration and game access
+│   ├── modal_games.html     # Catalog and modal for the eight games
+│   ├── modal_alert.html     # Floating critical alert modal
+│   └── footer.html          # Footer and NASA regulatory compliance
 ├── css/
-│   ├── animations.css       # Efectos de escaneo y pulso lumínico
-│   └── hud-theme.css        # Sistema de diseño Cyber-HUD espacial oscuro
+│   ├── animations.css       # Scan and light pulse effects
+│   └── hud-theme.css        # Dark space Cyber-HUD design system
 ├── js/
-│   ├── controllers/         # Controlador HudController (coordinación DOM)
-│   ├── services/            # Servicios de audio procedural, ECG, holograma y telemetría
-│   └── state/               # Gestor de estado reactivo StateManager
-└── index.html               # Archivo consolidado de producción (generado)
+│   ├── controllers/         # HudController (DOM coordination)
+│   ├── services/            # Procedural audio, ECG, hologram and telemetry services
+│   └── state/               # Reactive StateManager state manager
+└── index.html               # Consolidated production file (generated)
 ```
 
-### Funcionalidad de las Ventanas
+### View Functionality
 
-1. **Ventana 1: Biomédica & Holograma**:
-   - Resumen anatómico con escaneo continuo de partículas.
-   - Indicadores en tiempo real: Frecuencia cardíaca, SpO₂, Presión arterial, Temperatura, Cognición ASTRA y Densidad ósea.
-   - Osciloscopio ECG a 60 FPS en derivación II.
+1. **View 1: Biomedical & Hologram**:
+   - Anatomical summary with a continuous particle scan.
+   - Real-time indicators: Heart rate, SpO₂, Blood pressure, Temperature, ASTRA cognition and Bone density.
+   - 60 FPS ECG oscilloscope on lead II.
 
-2. **Ventana 2: Ambiente & Hábitat**:
-   - Corte estructural interactivo de Nave Orion, Base Marciana y Estación Espacial.
-   - Sensores ambientales de cabina en tiempo real: ppCO₂, Radiación, Presión, Temperatura y Humedad.
-   - Grafo tensorial matricial de Kronecker ($\mathbb{R}^{12}$) y contramedidas de cabina.
+2. **View 2: Environment & Habitat**:
+   - User-supplied raster illustrations of the Orion spacecraft, Mars Base and Space Station, with five interactive cabin indicators.
+   - Real-time cabin environmental sensors: ppCO₂, Radiation, Pressure, Temperature and Humidity.
+   - Kronecker tensor matrix graph ($\mathbb{R}^{12}$) and cabin countermeasures.
 
-3. **Ventana 3: Bienestar y rutinas**:
-   - **Descanso y recuperación**: Indicador circular de cumplimiento de la meta de 8 h, horarios, duración, tiempo en cama, fases interactivas e historial de siete ciclos seleccionables. La duración actual procede del estado del simulador; horarios, fases y noches anteriores se identifican como demostración. El porcentaje representa cumplimiento de duración, sin atribuirle una calidad clínica.
-   - **Tareas Diarias Interactivas**: Meditación, estiramiento, ejercicio e hidratación con avance reactivo por clic (+20%).
-   - **Juegos**: Botón de acceso a un modal con Laberinto orbital, Serpiente, Rompebloques, Pong, Tres en raya, Memoria, 2048 y Luces fuera.
-   - **Estado de Hidratación**: Calibrador tricolor de fluidos (Óptimo, Aviso, Crítico).
+3. **View 3: Wellbeing and routines**:
+   - **Rest and recovery**: Circular indicator of attainment against the 8 h goal, schedules, duration, time in bed, interactive phases and a history of seven selectable cycles. The current duration comes from the simulator state; schedules, phases and previous nights are labelled as a demonstration. The percentage represents duration attainment, without attributing clinical quality to it.
+   - **Interactive Daily Tasks**: Meditation, stretching, exercise and hydration with reactive progress per click (+20%).
+   - **Games**: Access button to a modal with Orbital maze, Snake, Breakout, Pong, Tic-tac-toe, Memory, 2048 and Lights out.
+   - **Hydration Status**: Three-color fluid gauge (Optimal, Warning, Critical).
 
-4. **Ventana 4: Soporte y evaluaciones**:
-   - **Exámenes Extra**: Protocolos guiados a bordo para examen oftálmico (SANS) y barrido sonar acústico.
-   - **Correo de Espacio Profundo**: Buzón de enlace DSN con centro de control en Tierra.
-   - **Asistente Psicológico H.E.L.I.O.S.**: Guía interactiva de respiración 4-4-6 (inhala, sostén, exhala), soporte emocional y diálogo empático sin sobrecargar con términos automatizados.
-   - **Inspección Técnica de Martina**: Consulta de las 15 reglas mediante botones anterior/siguiente, con evaluación, contramedidas, destinatarios y evidencia.
+4. **View 4: Support and assessments**:
+   - **Extra Exams**: Guided onboard protocols for the ophthalmic exam (SANS) and the acoustic sonar sweep.
+   - **Deep Space Mail**: DSN link mailbox with the ground control center.
+   - **H.E.L.I.O.S. Psychological Assistant**: Interactive 4-4-6 breathing guide (inhale, hold, exhale), emotional support and empathetic dialogue without overloading the user with automated jargon.
+   - **Martina's Technical Inspection**: Look up the 15 rules with previous/next buttons, including the assessment, countermeasures, recipients and evidence.
 
-### Distribución sin desplazamiento
+### Scroll-free layout
 
-Las cuatro vistas ocupan la altura disponible entre cabecera y pie de página. `css/hud-viewport.css` conserva el tema HUD y adapta diagramas, métricas y paneles. `js/controllers/viewport_controller.js` organiza los paneles según el ancho y la altura: en pantallas pequeñas, los botones **Anterior / Siguiente** permiten consultar el contenido completo sin scroll ni recortes. En móvil, los controles de respiración y la telemetría cognitiva tienen su propio panel dentro de Soporte.
+The four views occupy the available height between the header and the footer. `css/hud-viewport.css` preserves the HUD theme and adapts diagrams, metrics and panels. `js/controllers/viewport_controller.js` organizes the panels by width and height: on small screens, the **Previous / Next** buttons let you review the full content without scrolling or clipping. On mobile, the breathing controls and the cognitive telemetry get their own panel inside Support.
 
-El historial de ASTRA se consulta por mensaje. Las reglas técnicas se consultan por regla y, en móvil, por grupos de campos. Los nodos de los diagramas conservan sus acciones y las tarjetas se distribuyen debajo del diagrama cuando no caben a sus lados. `components/view_support.html` se incluye en el ensamblador junto con las otras tres vistas.
+The ASTRA history is browsed message by message. The technical rules are browsed rule by rule and, on mobile, by groups of fields. The diagram nodes keep their actions and the cards are laid out below the diagram when they do not fit at its sides. `components/view_support.html` is included in the assembler alongside the other three views.
 
-El panel de sueño adapta el patrón de resumen, fases e historial de [SOMA](https://soma.pe/experiencia#sueno) al tema HUD, sin reutilizar sus imágenes. `components/panel_sleep.html` se incorpora a Bienestar durante el ensamblado; `sleep_controller.js` coordina los ciclos, la telemetría y las fases de demostración. En móvil y en vistas compactas, las pestañas Resumen / Fases / 7 ciclos mantienen todos los detalles accesibles sin scroll. Las pruebas del perfil se ejecutan con `node --test tests/frontend_sleep.test.cjs`.
+The sleep panel adapts the summary, phases and history pattern from [SOMA](https://soma.pe/experiencia#sueno) to the HUD theme, without reusing its images. `components/panel_sleep.html` is folded into Wellbeing during assembly; `sleep_controller.js` coordinates the cycles, the telemetry and the demonstration phases. On mobile and in compact views, the Summary / Phases / 7 cycles tabs keep every detail accessible without scrolling. The profile tests run with `node --test tests/frontend_sleep.test.cjs`.
 
-### Compilación y Regeneración
+### Habitat images
 
-### Juegos ligeros
+The user's original PNGs are kept in frontend/assets/habitats/ (orion.png, mars-base.png, iss.png). The interface uses the -transparent.png copies with a real alpha channel and a trimmed margin. The script frontend/prepare_habitat_assets.ps1 extracts only the white background connected to the edge and smooths the contour; it does not regenerate the illustrations. HabitatDiagramService overlays five branches and reference points, with its own anchors for each habitat. On tablet and desktop the indicators surround the image as in the original diagram; on mobile the branches are preserved and the short labels open the selected indicator without scrolling. The anatomical drawing in Biomedical is preserved.
 
-`games_controller.js` gestiona el diálogo nativo, el teclado, los controles táctiles y la carga dinámica de `js/games/arcade.js` al elegir el primer juego. La colección no añade dependencias, imágenes, audio ni servicios de terceros. Solo se crea una partida a la vez; los cuatro juegos arcade comparten un lienzo de resolución fija de 320 × 320 y actualizan a un máximo de unas 29 veces por segundo. Los juegos de tablero solo renderizan cuando se interactúa con ellos.
+### Lightweight games
 
-Cerrar el modal, volver al catálogo o reiniciar destruye la partida anterior y cancela sus temporizadores y eventos. Al ocultar la pestaña o perder el foco se pausa la partida; una alerta crítica cierra el modal para mostrar el monitoreo. Las flechas y WASD permiten jugar con teclado; también hay botones de dirección, gestos y controles directos sobre el tablero. El tamaño y funcionamiento se verificaron en Chrome con dimensiones de tableta y móvil; no representan una certificación de hardware de NASA.
+`games_controller.js` manages the native dialog, the keyboard, the touch controls and the dynamic loading of `js/games/arcade.js` when the first game is chosen. The collection adds no dependencies, images, audio or third-party services. Only one match exists at a time; the four arcade games share a fixed 320 × 320 canvas and refresh at most about 29 times per second. The board games only render when interacted with.
 
-Las reglas de los juegos se verifican con `node --test tests/frontend_games.test.cjs`. `panel_games.html` y `modal_games.html` se integran durante el ensamblado.
+Closing the modal, returning to the catalog or restarting destroys the previous match and cancels its timers and events. Hiding the tab or losing focus pauses the match; a critical alert closes the modal to show the monitoring. Arrows and WASD allow keyboard play; there are also direction buttons, gestures and direct controls on the board. The size and behavior were verified in Chrome at tablet and mobile dimensions; they do not represent a NASA hardware certification.
 
-### Compilación y Regeneración
+The game rules are verified with `node --test tests/frontend_games.test.cjs`. `panel_games.html` and `modal_games.html` are integrated during assembly.
 
-Para compilar y ensamblar nuevamente `frontend/index.html` después de editar cualquier componente en `frontend/components/`:
+### Compilation and Regeneration
+
+To compile and reassemble `frontend/index.html` after editing any component in `frontend/components/`:
 
 ```powershell
 python frontend/assemble_index.py

@@ -1,83 +1,84 @@
 /* ==========================================================================
    H.E.L.I.O.S. - HUD BASE & DESIGN SYSTEM (TOKENS, RESET & CHROME)
 
-   SISTEMA CROMÁTICO
-   -----------------
-   La paleta de órganos está re-escalonada y verificada con el validador de
-   accesibilidad sobre la superficie real (#050811, modo oscuro, todos los pares):
+   COLOR SYSTEM
+   ------------
+   The organ palette is re-stepped and verified with the accessibility
+   validator against the real surface (#050811, dark mode, all pairs):
 
-     [PASS] Banda de luminosidad   los 5 tonos dentro de L 0.48–0.67
-     [PASS] Suelo de croma         los 5 >= 0.1
-     [WARN] Separación CVD         peor par rojo↔verde ΔE 6.5 (deuteranopía)
-     [PASS] Suelo de visión normal peor par ΔE 16.1 (mínimo 15)
-     [PASS] Contraste vs fondo     los 5 >= 3:1
+     [PASS] Lightness band       all 5 hues within L 0.48–0.67
+     [PASS] Chroma floor         all 5 >= 0.1
+     [WARN] CVD separation       worst red<->green pair ΔE 6.5 (deuteranopia)
+     [PASS] Normal vision floor  worst pair ΔE 16.1 (minimum 15)
+     [PASS] Contrast vs backdrop all 5 >= 3:1
 
-   El aviso de CVD cae en la banda 6–8, admisible ÚNICAMENTE con codificación
-   secundaria. Aquí la hay y es permanente: cada órgano lleva rótulo de texto,
-   línea guía y posición anatómica propia. El color nunca porta identidad solo.
+   The CVD warning falls in the 6–8 band, admissible ONLY with secondary
+   encoding. There is such encoding here and it is permanent: every organ
+   carries a text label, a leader line and its own anatomical position. Color
+   never carries identity on its own.
 
-   La paleta anterior fallaba dos puertas: tres tonos por encima de la banda de
-   luminosidad (deslumbraban sobre el fondo) y morado↔azul con ΔE 1.5 en
-   deuteranopía, es decir, indistinguibles.
+   The previous palette failed two gates: three hues above the lightness band
+   (they glared against the backdrop) and purple<->blue at ΔE 1.5 under
+   deuteranopia, i.e. indistinguishable.
 
-   TONO DE MARCA vs TINTA
-   ----------------------
-   Los tonos validados (--c-*) pintan MARCAS: rellenos, trazos, bordes, nodos.
-   El TEXTO viste siempre tinta neutra (--text-*); la identidad la porta una
-   marca de color contigua. Un valor numérico grande nunca se tiñe: gana peso
-   visual y pierde legibilidad. Para los casos donde el texto sí debe ir teñido
-   (titulares de rótulo) existe el escalón --c-*-ink, más claro y con contraste
-   suficiente para tipografía pequeña.
+   MARK HUE vs INK
+   ---------------
+   The validated hues (--c-*) paint MARKS: fills, strokes, borders, nodes.
+   TEXT always wears neutral ink (--text-*); identity is carried by an adjacent
+   color mark. A large numeric value is never tinted: it gains visual weight and
+   loses legibility. For the cases where text must be tinted (callout headings)
+   there is the --c-*-ink step, lighter and with enough contrast for small
+   typography.
    ========================================================================== */
 
 :root {
-  /* ---- Superficies: escalera de elevación sobre el espacio profundo ---- */
-  --surface-0: #050811;   /* plano de página */
+  /* ---- Surfaces: elevation ladder above deep space ---- */
+  --surface-0: #050811;   /* page plane */
   --surface-1: #0a1020;   /* panel */
-  --surface-2: #0e1526;   /* tile dentro de panel */
-  --surface-3: #141d33;   /* elemento elevado / hover */
+  --surface-2: #0e1526;   /* tile inside a panel */
+  --surface-3: #141d33;   /* elevated element / hover */
   --surface-sunken: #03060e;
 
-  /* ---- Marcas: paleta categórica validada (NO usar para texto) ---- */
-  --c-cyan:  #179fb3;   /* cerebro / ASTRA   L 0.665 */
-  --c-green: #107a52;   /* pulmones / SpO2   L 0.521 */
-  --c-amber: #bd850c;   /* hueso / radiación L 0.649 */
-  --c-red:   #c73450;   /* corazón / crítico L 0.553 */
-  --c-blue:  #2f5fc0;   /* hidratación/renal L 0.492 */
+  /* ---- Marks: validated categorical palette (do NOT use for text) ---- */
+  --c-cyan:  #179fb3;   /* brain / ASTRA     L 0.665 */
+  --c-green: #107a52;   /* lungs / SpO2      L 0.521 */
+  --c-amber: #bd850c;   /* bone / radiation  L 0.649 */
+  --c-red:   #c73450;   /* heart / critical  L 0.553 */
+  --c-blue:  #2f5fc0;   /* hydration/renal   L 0.492 */
 
-  /* ---- Tinta de color: escalón claro para texto pequeño teñido ---- */
+  /* ---- Color ink: lighter step for small tinted text ---- */
   --c-cyan-ink:  #5ad6ea;
   --c-green-ink: #3fcf92;
   --c-amber-ink: #f0b63c;
   --c-red-ink:   #ff6b85;
   --c-blue-ink:  #74a4f5;
 
-  /* ---- Halos: la luminosidad vive en el resplandor, no en el color base ---- */
+  /* ---- Halos: the brightness lives in the glow, not in the base color ---- */
   --glow-cyan:  rgba(23, 159, 179, 0.55);
   --glow-green: rgba(16, 122, 82, 0.55);
   --glow-amber: rgba(189, 133, 12, 0.55);
   --glow-red:   rgba(199, 52, 80, 0.60);
   --glow-blue:  rgba(47, 95, 192, 0.55);
 
-  /* ---- Estado: reservada. Nunca se reutiliza como serie.
-         Se acompaña SIEMPRE de icono + rótulo, jamás color solo. ---- */
+  /* ---- Status: reserved. Never reused as a series.
+         ALWAYS accompanied by an icon + label, never color alone. ---- */
   --st-good:     #0ca30c;
   --st-warning:  #fab219;
   --st-serious:  #ec835a;
   --st-critical: #d03b3b;
 
-  /* ---- Tinta ---- */
+  /* ---- Ink ---- */
   --text-primary:   #eaf2f8;
   --text-secondary: #9fb3c8;
   --text-muted:     #64788f;
   --text-inverse:   #03060e;
 
-  /* ---- Líneas: finas y recesivas ---- */
+  /* ---- Lines: thin and recessive ---- */
   --line-subtle:  rgba(125, 190, 215, 0.10);
   --line-default: rgba(125, 190, 215, 0.20);
   --line-strong:  rgba(23, 159, 179, 0.50);
 
-  /* ---- Escala de espaciado (base 4) ---- */
+  /* ---- Spacing scale (base 4) ---- */
   --sp-1: 4px;
   --sp-2: 8px;
   --sp-3: 12px;
@@ -86,7 +87,7 @@
   --sp-6: 32px;
   --sp-7: 48px;
 
-  /* ---- Escala tipográfica ---- */
+  /* ---- Typographic scale ---- */
   --fs-2xs: 10px;
   --fs-xs:  11px;
   --fs-sm:  12px;
@@ -100,13 +101,13 @@
   --lh-snug:   1.35;
   --lh-normal: 1.55;
 
-  /* Orbitron es ancha: el tracking generoso de antes la volvía ilegible
-     por debajo de 13px. Se reduce y se reserva para titulares. */
+  /* Orbitron is wide: the generous tracking it used to have made it illegible
+     below 13px. It is reduced and reserved for headings. */
   --tr-tight: 0.01em;
   --tr-wide:  0.05em;
   --tr-wider: 0.10em;
 
-  /* ---- Radios y elevación ---- */
+  /* ---- Radii and elevation ---- */
   --r-sm: 4px;
   --r-md: 7px;
   --r-lg: 11px;
@@ -114,12 +115,12 @@
   --shadow-2: 0 4px 14px rgba(0, 0, 0, 0.50);
   --shadow-3: 0 12px 34px rgba(0, 0, 0, 0.60);
 
-  /* ---- Tipografías ---- */
-  --font-hud:  'Orbitron', system-ui, sans-serif;   /* sólo titulares */
-  --font-body: 'Rajdhani', system-ui, sans-serif;   /* interfaz y rótulos */
-  --font-data: 'Share Tech Mono', ui-monospace, monospace;  /* cifras */
+  /* ---- Typefaces ---- */
+  --font-hud:  'Orbitron', system-ui, sans-serif;   /* headings only */
+  --font-body: 'Rajdhani', system-ui, sans-serif;   /* interface and labels */
+  --font-data: 'Share Tech Mono', ui-monospace, monospace;  /* figures */
 
-  /* ==== Alias de compatibilidad con las reglas heredadas ==== */
+  /* ==== Compatibility aliases for the legacy rules ==== */
   --bg-deep-space: var(--surface-0);
   --bg-cockpit-panel: rgba(10, 16, 32, 0.88);
   --bg-panel-solid: var(--surface-1);
@@ -143,8 +144,8 @@
   padding: 0;
 }
 
-/* El bloqueo de selección se limita al cromo: las cifras de telemetría deben
-   poder copiarse para un informe o una incidencia. */
+/* The selection lock is limited to the chrome: telemetry figures must stay
+   copyable for a report or an incident. */
 .hud-header,
 .control-toolbar,
 .nav-tabs-wrapper,
@@ -172,8 +173,8 @@ body {
   background-attachment: fixed;
 }
 
-/* Scanlines: a 0.55 de opacidad y 4px de paso velaban el texto pequeño.
-   Se reducen a una insinuación y se retiran si se pide menos movimiento. */
+/* Scanlines: at 0.55 opacity and a 4px step they veiled small text.
+   They are reduced to a hint and removed if reduced motion is requested. */
 body::after {
   content: "";
   position: fixed;
@@ -208,10 +209,10 @@ body::after {
 /* ==========================================================================
    CABECERA
    ========================================================================== */
-/* Rejilla de tres zonas en vez de flex libre: la navegación queda centrada en
-   el viewport y las zonas laterales se encogen antes que desbordar. El
-   min-width:0 es lo que permite que un hijo flex/grid se comprima por debajo
-   de su contenido; sin él, la fila crece y se sale de la pantalla. */
+/* A three-zone grid instead of free flex: the navigation stays centered in
+   the viewport and the side zones shrink before overflowing. The min-width:0
+   is what lets a flex/grid child compress below its content; without it the
+   row grows and runs off the screen. */
 header.hud-header {
   background: var(--bg-cockpit-panel);
   backdrop-filter: blur(14px);
@@ -265,7 +266,7 @@ header.hud-header > * {
   text-overflow: ellipsis;
 }
 
-/* ---- Pestañas de ventana ---- */
+/* ---- View tabs ---- */
 .nav-tabs-wrapper {
   display: flex;
   gap: var(--sp-1);
@@ -339,7 +340,7 @@ header.hud-header > * {
   background: rgba(23, 159, 179, 0.18);
 }
 
-/* Identidad en dos líneas: ocupa menos ancho que en una sola */
+/* Identity on two lines: takes less width than on a single one */
 .astro-names {
   display: flex;
   flex-direction: column;
@@ -368,7 +369,7 @@ header.hud-header > * {
   flex: none;
 }
 
-/* La insignia de estado porta icono + rótulo: nunca color solo. */
+/* The status badge carries an icon + label: never color alone. */
 .badge-status {
   font-family: var(--font-body);
   font-size: var(--fs-xs);
@@ -460,7 +461,7 @@ header.hud-header > * {
   min-width: 0;
 }
 
-/* Índice numérico de pestaña: sustituye al rótulo largo en anchos reducidos */
+/* Numeric tab index: replaces the long label at reduced widths */
 .tab-index {
   font-family: var(--font-data);
   font-size: var(--fs-xs);
@@ -527,7 +528,7 @@ footer.hud-footer {
   margin-top: var(--sp-7);
 }
 
-/* Bloqueo estricto de pantalla pre-autenticación (Zero-Access Gate) */
+/* Strict pre-authentication screen lock (Zero-Access Gate) */
 body.locked .hud-header,
 body.locked .control-toolbar,
 body.locked .main-viewport,

@@ -11,7 +11,7 @@ header.hud-header { position: relative; padding: 10px 20px; gap: 10px; }
 .brand-sub { display: none; }
 .nav-tab-btn { padding: 8px 10px; }
 .control-toolbar { padding: 6px 20px; gap: 10px; }
-.main-viewport { width: 100%; min-height: 0; padding: 12px 20px; }
+.main-viewport { width: 100%; min-height: 0; padding: 12px 20px; overflow-y: auto; }
 footer.hud-footer { margin-top: 0; padding: 6px 20px; font-size: 10px; gap: 10px; }
 footer.hud-footer > div { min-width: 0; }
 .viewport-view.active-view {
@@ -89,6 +89,19 @@ button:disabled { opacity: .4; cursor: default; box-shadow: none; }
 [data-panel="progress"] > div:last-child, [data-panel="hydration"] > div:last-child { padding: 12px !important; }
 [data-panel="progress"] .medals-row { padding-top: 8px !important; font-size: 20px !important; }
 #viewSupport.active-view { grid-template-rows: auto auto; grid-template-columns: 1.35fr 1fr !important; align-content: start; align-items: start !important; }
+#viewSurgeon.active-view {
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  height: 100% !important;
+  min-height: 0 !important;
+}
+#viewSurgeon #surgeonSingleContainer,
+#viewSurgeon #surgeonCompareContainer {
+  grid-column: 1 / -1 !important;
+  grid-row: 2 !important;
+  height: 100% !important;
+  min-height: 0 !important;
+}
 [data-panel="assistant"] { grid-row: 2; }
 .support-side { display: contents; }
 #viewSupport[data-layout="full"] .support-side { grid-column: 2; grid-row: 2; display: flex; flex-direction: column; gap: 12px; }
@@ -105,7 +118,7 @@ button:disabled { opacity: .4; cursor: default; box-shadow: none; }
 #psychSuggestionsContainer { gap: 4px !important; margin-top: 6px !important; }
 #psychSuggestionsContainer .btn-hud { white-space: normal; }
 #inputPsychText { min-width: 0; }
-[data-panel="exams"] > div:last-child, [data-panel="mail"] > div:last-child { padding: 10px !important; gap: 8px !important; flex-wrap: wrap; }
+[data-panel="exams"] > div:last-child, [data-panel="mail"] > div:nth-child(2) { padding: 10px !important; gap: 8px !important; flex-wrap: wrap; }
 [data-panel="exams"] .btn-hud { white-space: normal; }
 .rule-navigation { margin-bottom: 12px; }
 .protocol-content { display: flex; flex-direction: column; gap: 20px; }

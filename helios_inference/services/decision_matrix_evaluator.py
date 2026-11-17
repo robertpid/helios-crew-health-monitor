@@ -1,22 +1,22 @@
 """
-Evaluador de la Matriz de Decisiones de Cruces Críticos (Motor de Reglas Clínico-Aeroespaciales).
+Critical Crossover Decision Matrix evaluator (Clinical-Aerospace Rules Engine).
 
-Aplica la jerarquía de prioridades de la NASA:
-    Seguridad Inmediata (Radiación, O2) -> Alertas de Tareas Críticas -> Salud a Mediano Plazo (Hueso, Riñón) -> Bienestar.
+Applies the NASA priority hierarchy:
+    Immediate Safety (Radiation, O2) -> Critical Task Alerts -> Medium-Term Health (Bone, Kidney) -> Wellbeing.
 
-Garantiza la regla de diseño:
-    Máximo 3 contramedidas priorizadas por alerta para prevenir fatiga y saturación cognitiva.
+Enforces the design rule:
+    At most 3 prioritized countermeasures per alert to prevent fatigue and cognitive saturation.
 """
 
 import logging
 from typing import Any
 
 from helios_inference.domain.decision_rules import (
-    AlertaReglaMatriz,
-    CATALOGO_REGLAS_CRITICAS,
-    DominioRegla,
-    NivelSeveridadRegla,
-    ReglaDefinicion,
+    CRITICAL_RULES_CATALOG,
+    MatrixRuleAlert,
+    RuleDefinition,
+    RuleDomain,
+    RuleSeverityLevel,
 )
 
 logger = logging.getLogger(__name__)
@@ -24,201 +24,201 @@ logger = logging.getLogger(__name__)
 
 class DecisionMatrixEvaluator:
     """
-    Motor evaluador de los 15 cruces multivariados críticos.
-    Implementa el principio de Responsabilidad Única (SRP) y no prescribe fármacos.
+    Evaluation engine for the 15 critical multivariate crossovers.
+    Implements the Single Responsibility Principle (SRP) and does not prescribe drugs.
     """
 
-    def __init__(self, catalogo_reglas: list[ReglaDefinicion] | None = None) -> None:
-        """Inicializa el evaluador con el catálogo de reglas de referencia."""
-        self._catalogo = catalogo_reglas or CATALOGO_REGLAS_CRITICAS
-        self._mapa_reglas = {r.id_regla: r for r in self._catalogo}
+    def __init__(self, rules_catalog: list[RuleDefinition] | None = None) -> None:
+        """Initializes the evaluator with the reference rule catalog."""
+        self._catalog = rules_catalog or CRITICAL_RULES_CATALOG
+        self._rule_map = {r.rule_id: r for r in self._catalog}
 
-    def evaluar_telemetria(
+    def evaluate_telemetry(
         self,
         payload: dict[str, Any],
-        historial_dias_consecutivos: dict[str, int] | None = None,
-    ) -> list[AlertaReglaMatriz]:
+        consecutive_days_history: dict[str, int] | None = None,
+    ) -> list[MatrixRuleAlert]:
         """
-        Evalúa el estado sistémico contra las 15 reglas críticas de cruce.
+        Evaluates the systemic state against the 15 critical crossover rules.
 
         Args:
-            payload: Diccionario de telemetría consolidado (entorno, biometria, cognicion).
-            historial_dias_consecutivos: Diccionario opcional de seguimiento de ventanas de persistencia.
+            payload: Consolidated telemetry dictionary (environment, biometrics, cognition).
+            consecutive_days_history: Optional dictionary tracking persistence windows.
 
         Returns:
-            Lista de alertas activas ordenadas por prioridad jerárquica estricta (1 a 4).
+            List of active alerts ordered by strict hierarchical priority (1 to 4).
         """
-        dia_mision = int(payload.get("dia_mision", 120))
-        entorno = payload.get("entorno", {})
-        biometria = payload.get("biometria", {})
-        cognicion = payload.get("cognicion", {})
+        mission_day = int(payload.get("mission_day", 120))
+        environment = payload.get("environment", {})
+        biometrics = payload.get("biometrics", {})
+        cognition = payload.get("cognition", {})
 
-        # Variables ambientales
-        co2_mmhg = float(entorno.get("co2_mmHg", 1.5))
-        radiacion_msv = float(entorno.get("radiacion_acumulada_mSv", 50.0))
-        evento_solar = bool(entorno.get("evento_solar_activo", False))
-        temperatura_c = float(entorno.get("temperatura_cabina_c", 22.0))
-        humedad_pct = float(entorno.get("humedad_relativa_pct", 45.0))
+        # Environmental variables
+        co2_mmhg = float(environment.get("co2_mmHg", 1.5))
+        radiation_msv = float(environment.get("cumulative_radiation_mSv", 50.0))
+        solar_event = bool(environment.get("solar_event_active", False))
+        temperature_c = float(environment.get("cabin_temperature_c", 22.0))
+        humidity_pct = float(environment.get("relative_humidity_pct", 45.0))
 
-        # Variables biométricas
-        ritmo_cardiaco = float(biometria.get("ritmo_cardiaco_bpm", 65.0))
-        horas_sueno = float(biometria.get("horas_sueno_ultimo_ciclo", 7.0))
-        ciclos_sueno_bajo = int(biometria.get("ciclos_sueno_insuficiente_consecutivos", 0))
-        riesgo_fatiga = bool(biometria.get("alerta_riesgo_fatiga", False))
-        perdida_osea = float(biometria.get("perdida_osea_pct", 0.0))
-        spo2 = float(biometria.get("spo2_pct", 98.0))
-        cefalea_reportada = bool(biometria.get("dolor_cabeza_sintoma", False))
-        actividad_minutos = float(biometria.get("actividad_fisica_minutos", 120.0))
+        # Biometric variables
+        heart_rate = float(biometrics.get("heart_rate_bpm", 65.0))
+        sleep_hours = float(biometrics.get("last_cycle_sleep_hours", 7.0))
+        low_sleep_cycles = int(biometrics.get("consecutive_insufficient_sleep_cycles", 0))
+        fatigue_risk = bool(biometrics.get("fatigue_risk_alert", False))
+        bone_loss = float(biometrics.get("bone_loss_pct", 0.0))
+        spo2 = float(biometrics.get("spo2_pct", 98.0))
+        headache_reported = bool(biometrics.get("headache_symptom", False))
+        activity_minutes = float(biometrics.get("physical_activity_minutes", 120.0))
 
-        # Variables cognitivas (ASTRA)
-        latencia_voz = float(cognicion.get("latencia_voz_ms", 200.0))
-        densidad_lexica = float(cognicion.get("densidad_lexica_score", 1.0))
-        sans_vision = bool(cognicion.get("sans_sintoma_vision", False))
+        # Cognitive variables (ASTRA)
+        voice_latency = float(cognition.get("voice_latency_ms", 200.0))
+        lexical_density = float(cognition.get("lexical_density_score", 1.0))
+        sans_vision = bool(cognition.get("sans_vision_symptom", False))
 
-        alertas_disparadas: list[tuple[int, AlertaReglaMatriz]] = []
+        triggered_alerts: list[tuple[int, MatrixRuleAlert]] = []
 
         # -----------------------------------------------------------------------------
-        # 4.1 SEGURIDAD INMEDIATA (Prioridad 1)
+        # 4.1 IMMEDIATE SAFETY (Priority 1)
         # -----------------------------------------------------------------------------
-        # CX-01: Radiación Aguda / Tormenta Solar
-        if evento_solar or radiacion_msv > 600.0:
-            regla = self._mapa_reglas["CX-01"]
-            alertas_disparadas.append((
-                regla.prioridad_jerarquica,
-                self._crear_alerta(regla, escalada=False)
+        # CX-01: Acute radiation / Solar storm
+        if solar_event or radiation_msv > 600.0:
+            rule = self._rule_map["CX-01"]
+            triggered_alerts.append((
+                rule.hierarchical_priority,
+                self._create_alert(rule, escalation=False)
             ))
 
-        # CX-02: Falla de Soporte Vital Atmosférico
+        # CX-02: Atmospheric life support failure
         if spo2 < 94.0 and co2_mmhg >= 3.8:
-            regla = self._mapa_reglas["CX-02"]
-            alertas_disparadas.append((
-                regla.prioridad_jerarquica,
-                self._crear_alerta(regla, escalada=True)
+            rule = self._rule_map["CX-02"]
+            triggered_alerts.append((
+                rule.hierarchical_priority,
+                self._create_alert(rule, escalation=True)
             ))
 
         # -----------------------------------------------------------------------------
-        # 4.2 ESTADO DE ALERTA Y COGNICIÓN (Prioridad 2)
+        # 4.2 ALERTNESS AND COGNITION (Priority 2)
         # -----------------------------------------------------------------------------
-        # CX-03: Incongruencia cognitiva por fatiga ambiental
-        if (horas_sueno < 6.0 or ciclos_sueno_bajo >= 2) and co2_mmhg > 2.5 and latencia_voz >= 300.0:
-            regla = self._mapa_reglas["CX-03"]
-            alertas_disparadas.append((
-                regla.prioridad_jerarquica,
-                self._crear_alerta(regla, escalada=ciclos_sueno_bajo >= 3)
+        # CX-03: Cognitive incongruence from environmental fatigue
+        if (sleep_hours < 6.0 or low_sleep_cycles >= 2) and co2_mmhg > 2.5 and voice_latency >= 300.0:
+            rule = self._rule_map["CX-03"]
+            triggered_alerts.append((
+                rule.hierarchical_priority,
+                self._create_alert(rule, escalation=low_sleep_cycles >= 3)
             ))
 
-        # CX-04: Deuda de sueño no percibida
-        if (riesgo_fatiga or ciclos_sueno_bajo >= 3) and latencia_voz > 450.0 and densidad_lexica >= 0.8:
-            regla = self._mapa_reglas["CX-04"]
-            alertas_disparadas.append((
-                regla.prioridad_jerarquica,
-                self._crear_alerta(regla, escalada=True)
+        # CX-04: Unperceived sleep debt
+        if (fatigue_risk or low_sleep_cycles >= 3) and voice_latency > 450.0 and lexical_density >= 0.8:
+            rule = self._rule_map["CX-04"]
+            triggered_alerts.append((
+                rule.hierarchical_priority,
+                self._create_alert(rule, escalation=True)
             ))
 
-        # CX-06: Sobrecarga fisiológica por estrés operativo
-        if ritmo_cardiaco > 90.0 and horas_sueno < 6.0 and actividad_minutos > 110.0:
-            regla = self._mapa_reglas["CX-06"]
-            alertas_disparadas.append((
-                regla.prioridad_jerarquica,
-                self._crear_alerta(regla, escalada=False)
-            ))
-
-        # -----------------------------------------------------------------------------
-        # 4.3 AMBIENTE DE CABINA (Prioridad 2 / 4)
-        # -----------------------------------------------------------------------------
-        # CX-07: CO2 elevado con síntomas reportados (excluyendo primeros 7 días)
-        if co2_mmhg >= 3.0 and dia_mision > 7 and cefalea_reportada:
-            regla = self._mapa_reglas["CX-07"]
-            alertas_disparadas.append((
-                regla.prioridad_jerarquica,
-                self._crear_alerta(regla, escalada=False)
-            ))
-
-        # CX-08: Estrés térmico ambiental
-        if (temperatura_c < 18.0 or temperatura_c > 27.0 or humedad_pct < 25.0 or humedad_pct > 75.0) and horas_sueno < 6.0:
-            regla = self._mapa_reglas["CX-08"]
-            alertas_disparadas.append((
-                regla.prioridad_jerarquica,
-                self._crear_alerta(regla, escalada=False)
+        # CX-06: Physiological overload from operational stress
+        if heart_rate > 90.0 and sleep_hours < 6.0 and activity_minutes > 110.0:
+            rule = self._rule_map["CX-06"]
+            triggered_alerts.append((
+                rule.hierarchical_priority,
+                self._create_alert(rule, escalation=False)
             ))
 
         # -----------------------------------------------------------------------------
-        # 4.4 HUESO, RIÑÓN Y NUTRICIÓN (Prioridad 3)
+        # 4.3 CABIN ENVIRONMENT (Priority 2 / 4)
         # -----------------------------------------------------------------------------
-        # CX-09: Pérdida ósea acelerada en ventana crítica (primeros 30 días o carga baja)
-        if (dia_mision <= 30 or perdida_osea > 1.5) and actividad_minutos < 100.0:
-            regla = self._mapa_reglas["CX-09"]
-            alertas_disparadas.append((
-                regla.prioridad_jerarquica,
-                self._crear_alerta(regla, escalada=dia_mision > 30)
+        # CX-07: Elevated CO2 with reported symptoms (excluding the first 7 days)
+        if co2_mmhg >= 3.0 and mission_day > 7 and headache_reported:
+            rule = self._rule_map["CX-07"]
+            triggered_alerts.append((
+                rule.hierarchical_priority,
+                self._create_alert(rule, escalation=False)
             ))
 
-        # CX-10: Riesgo de cálculos renales por pérdida ósea y orina
-        if perdida_osea > 2.0 and actividad_minutos < 90.0:
-            regla = self._mapa_reglas["CX-10"]
-            alertas_disparadas.append((
-                regla.prioridad_jerarquica,
-                self._crear_alerta(regla, escalada=False)
-            ))
-
-        # CX-11: Deficiencia de Vitamina D en misiones prolongadas
-        if dia_mision > 60 and perdida_osea > 1.0:
-            regla = self._mapa_reglas["CX-11"]
-            alertas_disparadas.append((
-                regla.prioridad_jerarquica,
-                self._crear_alerta(regla, escalada=False)
-            ))
-
-        # CX-13: Descarga mecánica en Marte
-        if "MARS" in payload.get("id_mision", "") and actividad_minutos < 60.0:
-            regla = self._mapa_reglas["CX-13"]
-            alertas_disparadas.append((
-                regla.prioridad_jerarquica,
-                self._crear_alerta(regla, escalada=False)
+        # CX-08: Ambient thermal stress
+        if (temperature_c < 18.0 or temperature_c > 27.0 or humidity_pct < 25.0 or humidity_pct > 75.0) and sleep_hours < 6.0:
+            rule = self._rule_map["CX-08"]
+            triggered_alerts.append((
+                rule.hierarchical_priority,
+                self._create_alert(rule, escalation=False)
             ))
 
         # -----------------------------------------------------------------------------
-        # 4.5 CONDUCTA Y BIENESTAR PSICOLÓGICO (Prioridad 4)
+        # 4.4 BONE, KIDNEY AND NUTRITION (Priority 3)
         # -----------------------------------------------------------------------------
-        # CX-14: Retraimiento por aislamiento
-        if latencia_voz > 650.0 and horas_sueno < 5.5 and densidad_lexica < 0.6:
-            regla = self._mapa_reglas["CX-14"]
-            alertas_disparadas.append((
-                regla.prioridad_jerarquica,
-                self._crear_alerta(regla, escalada=False)
+        # CX-09: Accelerated bone loss in the critical window (first 30 days or low load)
+        if (mission_day <= 30 or bone_loss > 1.5) and activity_minutes < 100.0:
+            rule = self._rule_map["CX-09"]
+            triggered_alerts.append((
+                rule.hierarchical_priority,
+                self._create_alert(rule, escalation=mission_day > 30)
             ))
 
-        # CX-15: Disminución de motivación con impacto en autocuidado
-        if latencia_voz > 500.0 and actividad_minutos < 75.0 and densidad_lexica < 0.7:
-            regla = self._mapa_reglas["CX-15"]
-            alertas_disparadas.append((
-                regla.prioridad_jerarquica,
-                self._crear_alerta(regla, escalada=False)
+        # CX-10: Kidney stone risk from bone loss and urine output
+        if bone_loss > 2.0 and activity_minutes < 90.0:
+            rule = self._rule_map["CX-10"]
+            triggered_alerts.append((
+                rule.hierarchical_priority,
+                self._create_alert(rule, escalation=False)
             ))
 
-        # Ordenar estrictamente por prioridad jerárquica de la NASA (1: Seguridad Inmediata -> 4: Bienestar)
-        alertas_disparadas.sort(key=lambda item: item[0])
+        # CX-11: Vitamin D deficiency on prolonged missions
+        if mission_day > 60 and bone_loss > 1.0:
+            rule = self._rule_map["CX-11"]
+            triggered_alerts.append((
+                rule.hierarchical_priority,
+                self._create_alert(rule, escalation=False)
+            ))
 
-        resultado_alertas = [alerta for _, alerta in alertas_disparadas]
-        logger.debug("Evaluador de Matriz activó %d cruces críticos.", len(resultado_alertas))
-        return resultado_alertas
+        # CX-13: Mechanical unloading on Mars
+        if "MARS" in payload.get("mission_id", "") and activity_minutes < 60.0:
+            rule = self._rule_map["CX-13"]
+            triggered_alerts.append((
+                rule.hierarchical_priority,
+                self._create_alert(rule, escalation=False)
+            ))
 
-    def _crear_alerta(self, regla: ReglaDefinicion, escalada: bool = False) -> AlertaReglaMatriz:
-        """Crea una instancia inmutable de AlertaReglaMatriz con máximo 3 contramedidas."""
-        nivel = regla.nivel
-        if escalada and nivel == NivelSeveridadRegla.PRECAUCION:
-            nivel = NivelSeveridadRegla.ALERTA
-        elif escalada and nivel == NivelSeveridadRegla.ALERTA:
-            nivel = NivelSeveridadRegla.CRITICA
+        # -----------------------------------------------------------------------------
+        # 4.5 BEHAVIOR AND PSYCHOLOGICAL WELLBEING (Priority 4)
+        # -----------------------------------------------------------------------------
+        # CX-14: Withdrawal from isolation
+        if voice_latency > 650.0 and sleep_hours < 5.5 and lexical_density < 0.6:
+            rule = self._rule_map["CX-14"]
+            triggered_alerts.append((
+                rule.hierarchical_priority,
+                self._create_alert(rule, escalation=False)
+            ))
 
-        return AlertaReglaMatriz(
-            id_regla=regla.id_regla,
-            dominio=regla.dominio,
-            nivel=nivel,
-            evaluacion_preliminar=regla.evaluacion_preliminar,
-            contramedidas_sugeridas=regla.contramedidas[:3],  # Garantiza máximo 3 acciones
-            destinatarios=regla.destinatarios,
-            estandar_base=regla.base_evidencia,
-            ventana_tiempo=regla.ventana_persistencia,
-            escalada=escalada,
+        # CX-15: Declining motivation with an impact on self-care
+        if voice_latency > 500.0 and activity_minutes < 75.0 and lexical_density < 0.7:
+            rule = self._rule_map["CX-15"]
+            triggered_alerts.append((
+                rule.hierarchical_priority,
+                self._create_alert(rule, escalation=False)
+            ))
+
+        # Sort strictly by NASA hierarchical priority (1: Immediate Safety -> 4: Wellbeing)
+        triggered_alerts.sort(key=lambda item: item[0])
+
+        resulting_alerts = [alert for _, alert in triggered_alerts]
+        logger.debug("The Matrix Evaluator activated %d critical crossovers.", len(resulting_alerts))
+        return resulting_alerts
+
+    def _create_alert(self, rule: RuleDefinition, escalation: bool = False) -> MatrixRuleAlert:
+        """Creates an immutable MatrixRuleAlert instance with at most 3 countermeasures."""
+        level = rule.level
+        if escalation and level == RuleSeverityLevel.CAUTION:
+            level = RuleSeverityLevel.ALERT
+        elif escalation and level == RuleSeverityLevel.ALERT:
+            level = RuleSeverityLevel.CRITICAL
+
+        return MatrixRuleAlert(
+            rule_id=rule.rule_id,
+            domain=rule.domain,
+            level=level,
+            preliminary_assessment=rule.preliminary_assessment,
+            suggested_countermeasures=rule.countermeasures[:3],  # Guarantees at most 3 actions
+            recipients=rule.recipients,
+            base_standard=rule.evidence_base,
+            time_window=rule.persistence_window,
+            escalation=escalation,
         )

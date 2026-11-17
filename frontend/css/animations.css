@@ -3,7 +3,7 @@
    60 FPS Hardware-Accelerated CSS Keyframes
    ========================================================================== */
 
-/* 1. Haz de Escaneo Láser Holográfico */
+/* 1. Holographic Laser Scan Beam */
 @keyframes holoScanSweep {
   0% {
     top: 2%;
@@ -35,7 +35,7 @@
   z-index: 10;
 }
 
-/* 2. Latido Cardíaco Fisiológico Realista */
+/* 2. Realistic Physiological Heartbeat */
 @keyframes cardiacBeat {
   0% {
     transform: scale(1);
@@ -63,9 +63,9 @@
   }
 }
 
-/* La capa animada se referencia a su propia caja de relleno y gira sobre su
-   centro geométrico. Un origen en píxeles se mediría desde la esquina del
-   bounding-box y catapultaría el órgano fuera de su sitio al escalar. */
+/* The animated layer references its own fill box and rotates about its
+   geometric center. A pixel origin would be measured from the corner of the
+   bounding box and would fling the organ out of place when scaling. */
 .pulse-organ-heart,
 .pulse-lungs {
   transform-box: fill-box;
@@ -82,7 +82,7 @@
   animation-duration: 0.45s !important; /* Taquicardia 132 bpm */
 }
 
-/* 3. Onda Expansiva de Nodo Anatómico al Hacer Clic */
+/* 3. Anatomical Node Ripple on Click */
 @keyframes nodeRipple {
   0% {
     r: 6;
@@ -103,7 +103,7 @@
   pointer-events: none;
 }
 
-/* 4. Respiración Pulmonar Suave */
+/* 4. Gentle Lung Breathing */
 @keyframes lungBreathe {
   0%, 100% {
     transform: scale(1);
@@ -120,7 +120,7 @@
   animation: lungBreathe 4.2s infinite ease-in-out;
 }
 
-/* 5. Rotación Orbital del Hábitat Espacial */
+/* 5. Orbital Rotation of the Space Habitat */
 @keyframes orbitSpin {
   from {
     transform: rotate(0deg);
@@ -134,7 +134,7 @@
   animation: orbitSpin 28s infinite linear;
 }
 
-/* 6. Animación Pop-In con Rebote del Modal de Alerta Crítica */
+/* 6. Pop-In Bounce Animation of the Critical Alert Modal */
 @keyframes popModalCritical {
   0% {
     transform: scale(0.8) translateY(-20px);
@@ -154,7 +154,7 @@
   animation: popModalCritical 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
 }
 
-/* 7. Alerta Crítica Intermitente */
+/* 7. Flashing Critical Alert */
 @keyframes alarmFlash {
   0% {
     border-color: rgba(255, 34, 85, 0.4);
@@ -186,7 +186,7 @@
     #050811 !important;
 }
 
-/* 8. Modo Liviano Permanente: Desactivación Total de Lienzos de Partículas */
+/* 8. Permanent Lightweight Mode: Full Deactivation of Particle Canvases */
 #particlesCanvas,
 #particlesHabitatCanvas {
   display: none !important;

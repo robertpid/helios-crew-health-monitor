@@ -1,21 +1,21 @@
 /**
  * ==============================================================================
- * CAPA DE SERVICIOS: HologramRendererService (MODO LIVIANO PERMANENTE)
+ * SERVICES LAYER: HologramRendererService (PERMANENT LIGHTWEIGHT MODE)
  *
- * Optimizado para 0% de sobrecarga de GPU: interactividad SVG nativa con
- * aceleración por hardware, sin lienzo de partículas.
+ * Optimized for 0% GPU overhead: native SVG interactivity with hardware
+ * acceleration, no particle canvas.
  *
- * SOPORTE TÁCTIL
- * --------------
- * El marcado declara el foco de órganos con onmouseenter/onmouseleave, eventos
- * que NO existen en una tableta. Sin esto, el holograma — el elemento central
- * de la interfaz — quedaba inerte bajo el dedo en el iPad, que es el
- * dispositivo de destino.
+ * TOUCH SUPPORT
+ * -------------
+ * The markup declares organ focus with onmouseenter/onmouseleave, events that
+ * do NOT exist on a tablet. Without this, the hologram — the centerpiece of the
+ * interface — stayed inert under the finger on the iPad, which is the target
+ * device.
  *
- * En punteros gruesos (pointer: coarse) el servicio sustituye ese modelo por
- * uno de alternancia: un toque enfoca el órgano, otro toque sobre el mismo lo
- * libera, y un toque fuera del escenario lo deselecciona. El ratón conserva
- * intacto el comportamiento de hover.
+ * On coarse pointers (pointer: coarse) the service replaces that model with a
+ * toggle one: a tap focuses the organ, another tap on the same one releases it,
+ * and a tap outside the stage deselects it. The mouse keeps the hover behavior
+ * untouched.
  * ==============================================================================
  */
 
@@ -23,140 +23,140 @@ class HologramRendererService {
   constructor(canvasId, svgId) {
     this._canvas = document.getElementById(canvasId);
     this._svg = document.getElementById(svgId);
-    this._esTactil = window.matchMedia?.("(pointer: coarse)")?.matches ?? false;
-    this._seleccionado = null;
+    this._isTouch = window.matchMedia?.("(pointer: coarse)")?.matches ?? false;
+    this._selected = null;
   }
 
-  inicializar() {
+  initialize() {
     if (this._canvas) this._canvas.style.display = "none";
     if (!this._svg) return;
-    this._enlazarEventosOrganos();
-    if (this._esTactil) this._habilitarAlternanciaTactil();
+    this._bindOrganEvents();
+    if (this._isTouch) this._enableTouchToggle();
   }
 
-  redimensionar() {}
-  pausar() {}
-  reanudar() {}
+  resize() {}
+  pause() {}
+  resume() {}
 
-  /** Nodos interactivos del escenario, sean órganos o módulos del hábitat. */
-  _nodos() {
+  /** Interactive nodes of the stage, be they organs or habitat modules. */
+  _nodes() {
     return Array.from(
       this._svg.querySelectorAll(".organ-node[data-organ], .habitat-module-node[data-habitat-module]")
     );
   }
 
   /**
-   * Clave y familia del elemento, sea nodo del holograma o tarjeta de rótulo.
-   * Permite que tocar la tarjeta ilumine su órgano, igual que tocar el órgano.
+   * Key and family of the element, be it a hologram node or a callout card.
+   * Lets tapping the card light up its organ, just like tapping the organ.
    */
-  _claveDe(el) {
-    const organo = el.getAttribute("data-organ") || el.getAttribute("data-organ-card");
-    if (organo) return { clave: organo, habitat: false };
-    const modulo = el.getAttribute("data-habitat-module") || el.getAttribute("data-habitat-card");
-    return { clave: modulo, habitat: true };
+  _keyOf(el) {
+    const organ = el.getAttribute("data-organ") || el.getAttribute("data-organ-card");
+    if (organ) return { key: organ, habitat: false };
+    const module = el.getAttribute("data-habitat-module") || el.getAttribute("data-habitat-card");
+    return { key: module, habitat: true };
   }
 
-  _enfocar(nodo) {
-    const { clave, habitat } = this._claveDe(nodo);
+  _focus(node) {
+    const { key, habitat } = this._keyOf(node);
     const c = window.hudController;
-    if (habitat) c?.enfocarModuloHabitat?.(clave);
-    else c?.enfocarOrgano?.(clave);
+    if (habitat) c?.focusHabitatModule?.(key);
+    else c?.focusOrgan?.(key);
   }
 
-  _desenfocar(habitat) {
+  _unfocus(habitat) {
     const c = window.hudController;
-    if (habitat) c?.desenfocarModuloHabitat?.();
-    else c?.desenfocarOrgano?.();
+    if (habitat) c?.unfocusHabitatModule?.();
+    else c?.unfocusOrgan?.();
   }
 
-  _enlazarEventosOrganos() {
-    const nombres = {
-      cerebro: "Cerebro (ASTRA)",
-      corazon: "Corazón (ECG)",
-      pulmones: "Pulmones (SpO2)",
-      hidratacion: "Hidratación & Renal",
-      huesos: "Escudo Óseo",
+  _bindOrganEvents() {
+    const names = {
+      brain: "Brain (ASTRA)",
+      heart: "Heart (ECG)",
+      lungs: "Lungs (SpO2)",
+      hydration: "Hydration & Renal",
+      bones: "Bone Shield",
     };
 
-    this._nodos().forEach((nodo) => {
-      nodo.style.cursor = "pointer";
-      // Accesibilidad: alcanzable por teclado y anunciado por lector de pantalla
-      const { clave, habitat } = this._claveDe(nodo);
-      nodo.setAttribute("tabindex", "0");
-      nodo.setAttribute("role", "button");
-      nodo.setAttribute("aria-label", nombres[clave] || clave || "Nodo del holograma");
+    this._nodes().forEach((node) => {
+      node.style.cursor = "pointer";
+      // Accessibility: keyboard reachable and announced by a screen reader
+      const { key, habitat } = this._keyOf(node);
+      node.setAttribute("tabindex", "0");
+      node.setAttribute("role", "button");
+      node.setAttribute("aria-label", node.getAttribute("aria-label") || names[key] || key || "Hologram node");
 
-      nodo.addEventListener("click", () => {
-        if (!habitat) window.stateManager?.setOrganoSeleccionado(nombres[clave] || clave);
-        window.soundService?.reproducirClick();
+      node.addEventListener("click", () => {
+        if (!habitat) window.stateManager?.setSelectedOrgan(names[key] || key);
+        window.soundService?.playClick();
       });
 
-      // El teclado replica el foco sin depender del puntero
-      nodo.addEventListener("focus", () => this._enfocar(nodo));
-      nodo.addEventListener("blur", () => this._desenfocar(habitat));
-      nodo.addEventListener("keydown", (ev) => {
+      // The keyboard replicates focus without depending on the pointer
+      node.addEventListener("focus", () => this._focus(node));
+      node.addEventListener("blur", () => this._unfocus(habitat));
+      node.addEventListener("keydown", (ev) => {
         if (ev.key === "Enter" || ev.key === " ") {
           ev.preventDefault();
-          nodo.dispatchEvent(new Event("click"));
+          node.dispatchEvent(new Event("click"));
         }
       });
     });
   }
 
   /**
-   * Modelo de alternancia por toque, sólo en punteros gruesos.
-   * Se registra en fase de captura para adelantarse a los onmouseenter que
-   * iOS sintetiza al tocar, evitando que ambos modelos compitan.
+   * Tap toggle model, only on coarse pointers.
+   * It registers in the capture phase to get ahead of the onmouseenter events
+   * iOS synthesizes on tap, preventing both models from competing.
    */
-  _habilitarAlternanciaTactil() {
-    const escenario = this._svg.closest(".hologram-stage-wrapper") || this._svg;
+  _enableTouchToggle() {
+    const stage = this._svg.closest(".hologram-stage-wrapper") || this._svg;
     const SELECTOR =
       ".organ-node[data-organ], .habitat-module-node[data-habitat-module]," +
       ".hologram-callout[data-organ-card], .hologram-callout[data-habitat-card]";
 
-    // iOS sintetiza mouseenter al tocar: si se dejan los manejadores en línea,
-    // vuelven a enfocar justo después de que el toque haya liberado el foco.
-    // Se retiran para que el modelo de alternancia sea el único activo.
-    escenario.querySelectorAll("[onmouseenter], [onmouseleave]").forEach((el) => {
+    // iOS synthesizes mouseenter on tap: if the inline handlers are left in
+    // place, they refocus right after the tap has released the focus.
+    // They are removed so the toggle model is the only active one.
+    stage.querySelectorAll("[onmouseenter], [onmouseleave]").forEach((el) => {
       el.removeAttribute("onmouseenter");
       el.removeAttribute("onmouseleave");
       el.onmouseenter = null;
       el.onmouseleave = null;
     });
 
-    escenario.addEventListener(
+    stage.addEventListener(
       "pointerdown",
       (ev) => {
         if (ev.pointerType === "mouse") return;
 
-        const nodo = ev.target.closest?.(SELECTOR);
+        const node = ev.target.closest?.(SELECTOR);
 
-        if (!nodo) {
-          // Toque en vacío: liberar la selección vigente
-          if (this._seleccionado) {
-            this._desenfocar(this._claveDe(this._seleccionado).habitat);
-            this._seleccionado = null;
+        if (!node) {
+          // Tap on empty space: release the current selection
+          if (this._selected) {
+            this._unfocus(this._keyOf(this._selected).habitat);
+            this._selected = null;
           }
           return;
         }
 
-        if (this._seleccionado === nodo) {
-          this._desenfocar(this._claveDe(nodo).habitat);
-          this._seleccionado = null;
+        if (this._selected === node) {
+          this._unfocus(this._keyOf(node).habitat);
+          this._selected = null;
         } else {
-          this._enfocar(nodo);
-          this._seleccionado = nodo;
+          this._focus(node);
+          this._selected = node;
         }
       },
       true
     );
 
-    // Un toque fuera del escenario también libera el foco
+    // A tap outside the stage also releases the focus
     document.addEventListener("pointerdown", (ev) => {
-      if (ev.pointerType === "mouse" || !this._seleccionado) return;
-      if (!escenario.contains(ev.target)) {
-        this._desenfocar(this._claveDe(this._seleccionado).habitat);
-        this._seleccionado = null;
+      if (ev.pointerType === "mouse" || !this._selected) return;
+      if (!stage.contains(ev.target)) {
+        this._unfocus(this._keyOf(this._selected).habitat);
+        this._selected = null;
       }
     });
   }

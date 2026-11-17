@@ -1,16 +1,16 @@
 /* ==========================================================================
-   H.E.L.I.O.S. - VENTANA 2 (MATRIZ DE KRONECKER / AMBIENTE) Y VENTANA 3
+   H.E.L.I.O.S. - VIEW 2 (KRONECKER MATRIX / ENVIRONMENT) AND VIEW 3
 
-   NOTA SOBRE LA MATRIZ
-   --------------------
-   La rejilla 3x4 NO es un mapa de calor: el enlace sólo transporta la arista
-   dominante (argmax) y su severidad, de modo que una sola celda tiene valor y
-   las once restantes son cero. Se codifica por tanto como ESTADO (activa /
-   inactiva) y no como magnitud secuencial, que es lo que el dato permite
-   afirmar. Cada celda lleva rótulo escrito: el color nunca porta sentido solo.
+   NOTE ON THE MATRIX
+   ------------------
+   The 3x4 grid is NOT a heatmap: the link only carries the dominant edge
+   (argmax) and its severity, so a single cell has a value and the remaining
+   eleven are zero. It is therefore encoded as STATE (active / inactive) and
+   not as a sequential magnitude, which is all the data supports asserting.
+   Every cell carries a written label: color never carries meaning on its own.
 
-   Para convertirla en un mapa de calor real haría falta emitir el vector
-   ponderado completo de 12 componentes, que el Cerebro 3 ya calcula.
+   Turning it into a real heatmap would require emitting the full 12-component
+   weighted vector, which Brain 3 already computes.
    ========================================================================== */
 
 #kroneckerGrid {
@@ -54,7 +54,7 @@
   line-height: 1;
 }
 
-/* Arista dominante: color + galón + rótulo, nunca color solo */
+/* Dominant edge: color + chevron + label, never color alone */
 .matrix-cell.active-danger {
   background: rgba(208, 59, 59, 0.12);
   border-color: rgba(208, 59, 59, 0.65);
@@ -149,7 +149,7 @@
   padding: var(--sp-5);
 }
 
-#inputLoginUsuario:focus,
+#inputLoginUser:focus,
 #inputLoginPin:focus {
   border-color: var(--c-cyan-ink) !important;
   box-shadow: 0 0 0 3px rgba(23, 159, 179, 0.25) !important;
@@ -157,21 +157,21 @@
 }
 
 /* ==========================================================================
-   RESPONSIVE — DISEÑADO PARA TABLETA, NO PARA ESCRITORIO
+   RESPONSIVE — DESIGNED FOR TABLET, NOT FOR DESKTOP
 
-   Objetivo primario: iPad en horizontal (1180x820 CSS px). El escritorio es
-   el caso holgado, no al revés. Puntos de corte elegidos por dispositivo real:
+   Primary target: iPad in landscape (1180x820 CSS px). Desktop is the roomy
+   case, not the other way around. Breakpoints chosen by real device:
 
-     <= 834px   iPad vertical  -> una columna
-     835-1366px iPad horizontal y portátiles pequeños -> dos columnas
-     > 1366px   escritorio -> dos columnas con más aire
+     <= 834px   iPad portrait -> one column
+     835-1366px iPad landscape and small laptops -> two columns
+     > 1366px   desktop -> two columns with more air
 
-   Objetivos táctiles: 44px mínimo (Apple HIG). Se aplican por capacidad del
-   puntero (pointer: coarse), no por ancho: un portátil táctil de 1440px
-   también necesita objetivos grandes, y un monitor de 1024px con ratón no.
+   Touch targets: 44px minimum (Apple HIG). They are applied by pointer
+   capability (pointer: coarse), not by width: a 1440px touch laptop also
+   needs large targets, and a 1024px monitor with a mouse does not.
    ========================================================================== */
 
-/* ---- iPad vertical y menores: una sola columna ---- */
+/* ---- iPad portrait and smaller: a single column ---- */
 @media (max-width: 834px) {
   .main-viewport {
     padding: var(--sp-4) var(--sp-3);
@@ -204,10 +204,10 @@
   .hud-panel { padding: var(--sp-4); }
 }
 
-/* ---- iPad horizontal: el caso de uso principal ----
-   El rótulo de la pestaña NO se oculta aquí. En táctil no hay tooltip, así que
-   un botón sólo con icono queda sin etiqueta: se sacrifica antes el subtítulo
-   de marca y el detalle del enlace, que son decorativos. */
+/* ---- iPad landscape: the main use case ----
+   The tab label is NOT hidden here. On touch there is no tooltip, so an
+   icon-only button ends up unlabeled: the brand subtitle and the link detail,
+   which are decorative, are sacrificed first. */
 @media (max-width: 1366px) {
   .main-viewport { padding: var(--sp-4) var(--sp-4); }
   .hud-panel { padding: var(--sp-4); }
@@ -218,7 +218,7 @@
   .control-toolbar .link-value { display: none; }
 }
 
-/* ---- Objetivos táctiles: por capacidad del puntero, no por ancho ---- */
+/* ---- Touch targets: by pointer capability, not by width ---- */
 @media (pointer: coarse) {
   .nav-tab-btn,
   .btn-hud,
@@ -235,8 +235,8 @@
   .toolbar-group { gap: var(--sp-3); }
   .task-card-item { min-height: 48px; }
 
-  /* El hover no existe en táctil: se anulan los efectos que dependían de él
-     para que no queden "pegados" tras un toque. */
+  /* Hover does not exist on touch: the effects that depended on it are
+     cancelled so they do not stay "stuck" after a tap. */
   .metric-tile:hover,
   .hologram-callout:hover,
   .task-card-item:hover {
@@ -244,9 +244,9 @@
   }
 }
 
-/* ---- Teléfono / ventana muy estrecha ----
-   Último recurso: aquí sí se repliega el rótulo al índice numérico, porque ya
-   no cabe de ninguna forma. El número sigue identificando la ventana. */
+/* ---- Phone / very narrow window ----
+   Last resort: here the label does collapse to the numeric index, because it
+   no longer fits any other way. The number still identifies the view. */
 @media (max-width: 560px) {
   .metrics-grid-2x { grid-template-columns: 1fr; }
   #kroneckerGrid { grid-template-columns: 1fr; }
